@@ -2,17 +2,22 @@
 
 import { useTrip } from "@/lib/trip-context";
 import { cn } from "@/lib/utils";
-import { Map, MessageCircle, Users, Wallet } from "lucide-react";
+import { Map, MessageCircle, Users, User } from "lucide-react";
 
 const navItems = [
   { id: "journey" as const, label: "Journey", icon: Map },
   { id: "guide" as const, label: "Guide", icon: MessageCircle },
   { id: "social" as const, label: "Pod", icon: Users },
-  { id: "wallet" as const, label: "Wallet", icon: Wallet },
+  { id: "menu" as const, label: "Profile", icon: User },
 ];
 
 export function BottomNav() {
-  const { activeTab, setActiveTab } = useTrip();
+  const { activeTab, setActiveTab, setSubPage } = useTrip();
+
+  const handleTabClick = (tabId: typeof navItems[number]["id"]) => {
+    setActiveTab(tabId);
+    setSubPage(null);
+  };
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur-lg border-t border-border safe-area-pb">
@@ -24,7 +29,7 @@ export function BottomNav() {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleTabClick(item.id)}
               className={cn(
                 "flex flex-col items-center justify-center w-16 h-full gap-0.5 transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground"

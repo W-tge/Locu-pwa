@@ -3,28 +3,23 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { demoTrip, type Trip, type Stop, type TransitLeg } from "./trip-data";
 
-export type MenuPage = 
-  | "none"
-  | "menu"
-  | "my-bookings"
-  | "travel-timeline"
-  | "saved-hostels"
-  | "saved-places"
-  | "my-stats"
-  | "trip-history"
-  | "my-preferences"
-  | "safety-toolkit"
-  | "intel-hub";
+// User preferences type
+export interface UserPreferences {
+  dailyBudget: string;
+  currency: string;
+  accommodationTypes: string[];
+  securityPriority: number;
+  sustainabilityFocus: number;
+  sociabilityLevel: number;
+}
 
-export interface UserProfile {
-  name: string;
-  email: string;
-  avatar?: string;
-  karmaPoints: number;
+// User stats/gamification
+export interface UserStats {
   countriesVisited: number;
   daysTraveled: number;
   totalSpent: number;
-  busesRidden: number;
+  journeysTaken: number;
+  karmaPoints: number;
   achievements: Achievement[];
 }
 
@@ -32,157 +27,285 @@ export interface Achievement {
   id: string;
   title: string;
   description: string;
-  icon: string;
   points: number;
-  gradient: string;
-  unlockedAt?: string;
+  icon: string;
+  color: "pink" | "purple" | "mint" | "coral";
+  unlockedAt?: Date;
 }
 
-export interface UserPreferences {
-  dailyBudget: string;
-  currency: string;
-  accommodationTypes: string[];
-  securityPriority: number;
-  sustainabilityFocus: number;
-  socialLevel: number;
-}
-
-export interface SavedPlace {
-  id: string;
-  name: string;
-  location: string;
-  country: string;
-  category: string;
-  rating: number;
-  savedAt: string;
-  image?: string;
-}
-
+// Saved items
 export interface SavedHostel {
   id: string;
   name: string;
   city: string;
   country: string;
-  pricePerNight: number;
+  price: number;
   rating: number;
-  reviewCount: number;
-  amenities: string[];
+  reviews: number;
   distance: string;
-  savedAt: string;
+  amenities: string[];
+  savedAt: Date;
   image?: string;
 }
 
-export interface IntelAlert {
+export interface SavedPlace {
   id: string;
-  type: "urgent" | "trip-assist" | "quest";
+  name: string;
+  city: string;
+  country: string;
+  category: string;
+  rating: number;
+  savedAt: Date;
+  image?: string;
+}
+
+// Bookings
+export interface Booking {
+  id: string;
+  type: "hostel" | "transport" | "activity";
+  name: string;
+  location: string;
+  date: string;
+  price: number;
+  status: "confirmed" | "pending";
+  image?: string;
+}
+
+// Intel Hub types
+export interface Alert {
+  id: string;
+  type: "urgent" | "info" | "assist";
   title: string;
   description: string;
   action?: string;
-  points?: number;
 }
+
+export interface CommunityQuest {
+  id: string;
+  question: string;
+  description: string;
+  points: number;
+}
+
+type TabType = "journey" | "guide" | "social" | "wallet" | "menu";
+type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub";
 
 interface TripContextType {
   trip: Trip;
   selectedStop: Stop | null;
   selectedLeg: TransitLeg | null;
-  activeTab: "journey" | "guide" | "social" | "wallet";
-  menuPage: MenuPage;
-  user: UserProfile;
-  preferences: UserPreferences;
-  savedPlaces: SavedPlace[];
-  savedHostels: SavedHostel[];
-  intelAlerts: IntelAlert[];
+  activeTab: TabType;
+  subPage: SubPageType;
   setSelectedStop: (stop: Stop | null) => void;
   setSelectedLeg: (leg: TransitLeg | null) => void;
-  setActiveTab: (tab: "journey" | "guide" | "social" | "wallet") => void;
-  setMenuPage: (page: MenuPage) => void;
+  setActiveTab: (tab: TabType) => void;
+  setSubPage: (page: SubPageType) => void;
   updateStopBooking: (stopId: string, status: "booked" | "pending" | "not-booked") => void;
   updateLegBooking: (legId: string, status: "booked" | "pending" | "not-booked") => void;
+  // User data
+  userPreferences: UserPreferences;
+  setUserPreferences: (prefs: UserPreferences) => void;
+  userStats: UserStats;
   addKarmaPoints: (points: number) => void;
-  updatePreferences: (prefs: Partial<UserPreferences>) => void;
+  savedHostels: SavedHostel[];
+  savedPlaces: SavedPlace[];
+  bookings: Booking[];
+  alerts: Alert[];
+  communityQuests: CommunityQuest[];
 }
 
-const defaultUser: UserProfile = {
-  name: "Alex Chen",
-  email: "alex@example.com",
-  karmaPoints: 2847,
-  countriesVisited: 12,
-  daysTraveled: 127,
-  totalSpent: 3240,
-  busesRidden: 18,
-  achievements: [
-    {
-      id: "mountain",
-      title: "Mountain Explorer",
-      description: "Visited 5 mountain destinations",
-      icon: "mountain",
-      points: 150,
-      gradient: "from-[#FF9F43] to-[#FC2869]",
-      unlockedAt: "2024-02-15",
-    },
-    {
-      id: "bus-master",
-      title: "Bus Master",
-      description: "Traveled 1000+ km by bus",
-      icon: "bus",
-      points: 200,
-      gradient: "from-[#7C3AED] to-[#FC2869]",
-      unlockedAt: "2024-02-20",
-    },
-    {
-      id: "hostel-hopper",
-      title: "Hostel Hopper",
-      description: "Stayed in 15+ hostels",
-      icon: "building",
-      points: 100,
-      gradient: "from-[#00D4AA] to-[#4ECDC4]",
-      unlockedAt: "2024-03-01",
-    },
-  ],
-};
+const TripContext = createContext<TripContextType | undefined>(undefined);
 
+// Demo data
 const defaultPreferences: UserPreferences = {
   dailyBudget: "$30-50 per day",
   currency: "USD ($)",
   accommodationTypes: ["Hostels", "Shared Rooms"],
   securityPriority: 75,
-  sustainabilityFocus: 50,
-  socialLevel: 85,
+  sustainabilityFocus: 60,
+  sociabilityLevel: 85,
 };
 
-const defaultSavedPlaces: SavedPlace[] = [
-  { id: "1", name: "Machu Picchu", location: "Cusco", country: "Peru", category: "Historical Site", rating: 4.9, savedAt: "2 weeks ago" },
-  { id: "2", name: "Salar de Uyuni", location: "Uyuni", country: "Bolivia", category: "Natural Wonder", rating: 4.8, savedAt: "1 month ago" },
-  { id: "3", name: "Tayrona National Park", location: "Santa Marta", country: "Colombia", category: "Beach & Nature", rating: 4.7, savedAt: "3 weeks ago" },
-];
+const defaultStats: UserStats = {
+  countriesVisited: 4,
+  daysTraveled: 45,
+  totalSpent: 2840,
+  journeysTaken: 12,
+  karmaPoints: 2847,
+  achievements: [
+    {
+      id: "1",
+      title: "Andes Explorer",
+      description: "Visited 3 Andean destinations",
+      points: 150,
+      icon: "mountain",
+      color: "pink",
+      unlockedAt: new Date("2024-03-15"),
+    },
+    {
+      id: "2",
+      title: "Bus Master",
+      description: "Traveled 1000+ km by bus",
+      points: 200,
+      icon: "bus",
+      color: "purple",
+      unlockedAt: new Date("2024-03-20"),
+    },
+    {
+      id: "3",
+      title: "Hostel Hopper",
+      description: "Stayed in 10+ hostels",
+      points: 100,
+      icon: "home",
+      color: "mint",
+      unlockedAt: new Date("2024-03-22"),
+    },
+  ],
+};
 
 const defaultSavedHostels: SavedHostel[] = [
-  { id: "1", name: "Backpackers Inn Quito", city: "Quito", country: "Ecuador", pricePerNight: 18, rating: 4.2, reviewCount: 324, amenities: ["Free WiFi", "Breakfast", "Common Area"], distance: "0.5km from Old Town", savedAt: "2 days ago" },
-  { id: "2", name: "Pariwana Backpackers", city: "Lima", country: "Peru", pricePerNight: 20, rating: 4.5, reviewCount: 1203, amenities: ["Free WiFi", "Bar", "Rooftop", "Breakfast"], distance: "0.1km from Miraflores", savedAt: "1 week ago" },
+  {
+    id: "1",
+    name: "Wild Rover Cusco",
+    city: "Cusco",
+    country: "Peru",
+    price: 18,
+    rating: 4.2,
+    reviews: 324,
+    distance: "0.5km from Plaza de Armas",
+    amenities: ["Free WiFi", "Breakfast", "Bar"],
+    savedAt: new Date("2024-03-10"),
+  },
+  {
+    id: "2",
+    name: "Loki La Paz",
+    city: "La Paz",
+    country: "Bolivia",
+    price: 15,
+    rating: 4.5,
+    reviews: 892,
+    distance: "0.3km from Witches Market",
+    amenities: ["Free WiFi", "Rooftop", "Kitchen"],
+    savedAt: new Date("2024-03-12"),
+  },
 ];
 
-const defaultIntelAlerts: IntelAlert[] = [
-  { id: "1", type: "urgent", title: "Immigration Forms Reminder", description: "Complete your Ecuador immigration forms now to avoid delays. Your border crossing is in 2 days.", action: "Complete Forms Now" },
-  { id: "2", type: "urgent", title: "Weather Alert: Banos", description: "Heavy rain and potential for landslides expected this weekend. Consider adjusting your plans." },
-  { id: "3", type: "trip-assist", title: "Booking Confirmed: Viajero Hostel", description: "Your 5-night stay in Medellin is confirmed. Check-in is March 15th." },
-  { id: "4", type: "trip-assist", title: "New Travel Buddy Match", description: "Maya K. is also traveling from Salento to Quito on March 24th. Want to connect?" },
-  { id: "5", type: "quest", title: "How's the bus from Salento to Quito?", description: "You recently took this route. Help other travelers by sharing if the bus ran on time.", action: "Answer & Earn", points: 25 },
-  { id: "6", type: "quest", title: "Rate Viajero Hostel Medellin", description: "Share your experience to help the community and earn points for your next adventure.", action: "Answer & Earn", points: 15 },
+const defaultSavedPlaces: SavedPlace[] = [
+  {
+    id: "1",
+    name: "Machu Picchu",
+    city: "Cusco",
+    country: "Peru",
+    category: "Historical Site",
+    rating: 4.9,
+    savedAt: new Date("2024-03-05"),
+  },
+  {
+    id: "2",
+    name: "Salar de Uyuni",
+    city: "Uyuni",
+    country: "Bolivia",
+    category: "Natural Wonder",
+    rating: 4.8,
+    savedAt: new Date("2024-03-08"),
+  },
+  {
+    id: "3",
+    name: "Valle de la Luna",
+    city: "San Pedro de Atacama",
+    country: "Chile",
+    category: "Natural Wonder",
+    rating: 4.7,
+    savedAt: new Date("2024-03-14"),
+  },
 ];
 
-const TripContext = createContext<TripContextType | undefined>(undefined);
+const defaultBookings: Booking[] = [
+  {
+    id: "1",
+    type: "hostel",
+    name: "Pariwana Hostel Cusco",
+    location: "Cusco, Peru",
+    date: "Mar 24-28, 2024",
+    price: 72,
+    status: "confirmed",
+  },
+  {
+    id: "2",
+    type: "transport",
+    name: "Cruz del Sur Bus",
+    location: "Cusco to Puno",
+    date: "Mar 28, 2024",
+    price: 35,
+    status: "confirmed",
+  },
+  {
+    id: "3",
+    type: "activity",
+    name: "Salkantay Trek",
+    location: "Cusco, Peru",
+    date: "Apr 1-5, 2024",
+    price: 280,
+    status: "pending",
+  },
+];
+
+const defaultAlerts: Alert[] = [
+  {
+    id: "1",
+    type: "urgent",
+    title: "Immigration Forms Reminder",
+    description: "Complete your Bolivia immigration forms now to avoid delays. Your border crossing is in 2 days.",
+    action: "Complete Forms Now",
+  },
+  {
+    id: "2",
+    type: "urgent",
+    title: "Weather Alert: Uyuni",
+    description: "Heavy rain expected in Uyuni this weekend. Salt flats tours may be affected.",
+  },
+  {
+    id: "3",
+    type: "assist",
+    title: "Booking Confirmed: Pariwana",
+    description: "Your 4-night stay in Cusco is confirmed. Check-in is March 24th.",
+  },
+  {
+    id: "4",
+    type: "info",
+    title: "New Travel Buddy Match",
+    description: "Maya K. is also traveling from Cusco to La Paz on March 28th. Want to connect?",
+  },
+];
+
+const defaultQuests: CommunityQuest[] = [
+  {
+    id: "1",
+    question: "How's the bus from Cusco to Puno?",
+    description: "You recently took this route. Help other travelers by sharing if the bus ran on time.",
+    points: 25,
+  },
+  {
+    id: "2",
+    question: "Rate Pariwana Hostel Cusco",
+    description: "Share your experience to help the community and earn points for your next adventure.",
+    points: 15,
+  },
+];
 
 export function TripProvider({ children }: { children: ReactNode }) {
   const [trip, setTrip] = useState<Trip>(demoTrip);
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [selectedLeg, setSelectedLeg] = useState<TransitLeg | null>(null);
-  const [activeTab, setActiveTab] = useState<"journey" | "guide" | "social" | "wallet">("journey");
-  const [menuPage, setMenuPage] = useState<MenuPage>("none");
-  const [user, setUser] = useState<UserProfile>(defaultUser);
-  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
-  const [savedPlaces] = useState<SavedPlace[]>(defaultSavedPlaces);
+  const [activeTab, setActiveTab] = useState<TabType>("journey");
+  const [subPage, setSubPage] = useState<SubPageType>(null);
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>(defaultPreferences);
+  const [userStats, setUserStats] = useState<UserStats>(defaultStats);
   const [savedHostels] = useState<SavedHostel[]>(defaultSavedHostels);
-  const [intelAlerts] = useState<IntelAlert[]>(defaultIntelAlerts);
+  const [savedPlaces] = useState<SavedPlace[]>(defaultSavedPlaces);
+  const [bookings] = useState<Booking[]>(defaultBookings);
+  const [alerts] = useState<Alert[]>(defaultAlerts);
+  const [communityQuests] = useState<CommunityQuest[]>(defaultQuests);
 
   const updateStopBooking = (stopId: string, status: "booked" | "pending" | "not-booked") => {
     setTrip(prev => ({
@@ -203,11 +326,10 @@ export function TripProvider({ children }: { children: ReactNode }) {
   };
 
   const addKarmaPoints = (points: number) => {
-    setUser(prev => ({ ...prev, karmaPoints: prev.karmaPoints + points }));
-  };
-
-  const updatePreferences = (prefs: Partial<UserPreferences>) => {
-    setPreferences(prev => ({ ...prev, ...prefs }));
+    setUserStats(prev => ({
+      ...prev,
+      karmaPoints: prev.karmaPoints + points,
+    }));
   };
 
   return (
@@ -217,20 +339,22 @@ export function TripProvider({ children }: { children: ReactNode }) {
         selectedStop,
         selectedLeg,
         activeTab,
-        menuPage,
-        user,
-        preferences,
-        savedPlaces,
-        savedHostels,
-        intelAlerts,
+        subPage,
         setSelectedStop,
         setSelectedLeg,
         setActiveTab,
-        setMenuPage,
+        setSubPage,
         updateStopBooking,
         updateLegBooking,
+        userPreferences,
+        setUserPreferences,
+        userStats,
         addKarmaPoints,
-        updatePreferences,
+        savedHostels,
+        savedPlaces,
+        bookings,
+        alerts,
+        communityQuests,
       }}
     >
       {children}
