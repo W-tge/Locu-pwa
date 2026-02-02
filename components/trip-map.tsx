@@ -9,22 +9,23 @@ import {
   ZoomIn,
   ZoomOut,
   Navigation,
+  Lightbulb,
+  MapPin,
 } from "lucide-react";
 
 export function TripMap() {
-  const { trip, selectedStop, setSelectedStop, selectedLeg, setSelectedLeg } = useTrip();
+  const { trip, selectedStop, setSelectedStop, selectedLeg, setSelectedLeg, setMenuPage } = useTrip();
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [clickedLegId, setClickedLegId] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(6);
   const markersRef = useRef<any[]>([]);
   const polylinesRef = useRef<any[]>([]);
   const transitLabelsRef = useRef<Map<string, any>>(new Map());
 
-  // Clear clicked leg when clicking elsewhere
-  const handleMapClick = useCallback(() => {
-    setClickedLegId(null);
-  }, []);
+  // Calculate if legend should be hidden (zoom > 8)
+  const showLegend = zoomLevel <= 8;
 
   useEffect(() => {
     if (!mapRef.current || map) return;
@@ -52,7 +53,7 @@ export function TripMap() {
         attributionControl: false,
       }).fitBounds(bounds, { padding: [50, 50] });
 
-      // Use a dark, clean tile layer for the cyber-backpacker aesthetic
+      // Use a dark, clean tile layer
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
         {
@@ -65,9 +66,15 @@ export function TripMap() {
         setClickedLegId(null);
       });
 
-      setMap(mapInstance);
+      // Track zoom level
+      mapInstance.on('zoomend', () => {
+        setZoomLevel(mapInstance.getZoom());
+      });
 
-      // Custom marker icon with vibrant colors
+      setMap(mapInstance);
+      setZoomLevel(mapInstance.getZoom());
+
+      // Custom marker icon
       const createIcon = (
         color: string,
         isActive: boolean = false,
@@ -122,7 +129,6 @@ export function TripMap() {
 
         const isBooked = leg.bookingStatus === "booked";
         const isPending = leg.bookingStatus === "pending";
-        // Updated colors: mint for booked, coral for pending, neon pink for unbooked
         const color = isBooked ? "#00D4AA" : isPending ? "#FF6B9D" : "#FC2869";
 
         const latlngs = [
@@ -139,7 +145,6 @@ export function TripMap() {
           lineJoin: "round",
         }).addTo(mapInstance);
 
-        // Add hover effect
         polyline.on("mouseover", function() {
           this.setStyle({ weight: 7, opacity: 1 });
         });
@@ -179,7 +184,7 @@ export function TripMap() {
               transition: all 0.2s ease;
               pointer-events: none;
             ">
-              ${leg.type === "ferry" ? "FERRY" : "BUS"} - ${leg.duration}
+              ${leg.type === "ferry" ? "FERRY" : leg.type === "jeep" ? "JEEP" : "BUS"} - ${leg.duration}
             </div>
           `,
           iconSize: [120, 30],
@@ -195,7 +200,6 @@ export function TripMap() {
         const isActive = stop.status === "ACTIVE";
         const isBooked = stop.bookingStatus === "booked";
         const isPending = stop.bookingStatus === "pending";
-        // Updated colors
         const color = isBooked ? "#00D4AA" : isPending ? "#FF6B9D" : "#FC2869";
 
         const marker = L.marker([stop.latitude, stop.longitude], {
@@ -203,7 +207,6 @@ export function TripMap() {
           zIndexOffset: isActive ? 1000 : index,
         }).addTo(mapInstance);
 
-        // Popup content with updated styling
         const popupContent = `
           <div style="padding: 12px; min-width: 200px; font-family: system-ui, -apple-system, sans-serif;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
@@ -269,7 +272,6 @@ export function TripMap() {
     });
   }, [clickedLegId]);
 
-  // Also show label when selectedLeg changes from timeline
   useEffect(() => {
     if (selectedLeg) {
       setClickedLegId(selectedLeg.id);
@@ -319,76 +321,81 @@ export function TripMap() {
       {/* Map container */}
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
-      {/* Current location badge */}
-      <div className="absolute top-4 left-4 z-[1000]">
-        <div className="bg-card/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-xl border border-border/50">
-          <div className="flex items-center gap-2.5">
-            <div className="w-3 h-3 rounded-full bg-primary animate-pulse shadow-lg shadow-primary/50" />
-            <span className="text-sm font-bold text-foreground">
-              {trip.currentLocation}
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Day {trip.currentDay} of your journey
-          </p>
+      {/* Simplified current location badge - just city name */}
+      <div className="absolute top-3 left-3 z-[1000]">
+        <div className="bg-card/90 backdrop-blur-md rounded-full px-3 py-1.5 shadow-lg border border-border/50 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-lg shadow-primary/50" />
+          <span className="text-xs font-semibold text-foreground">
+            {trip.currentLocation}
+          </span>
         </div>
       </div>
 
       {/* Map controls */}
-      <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+      <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1.5">
         <button
           onClick={() => setIsFullscreen(!isFullscreen)}
-          className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card hover:scale-105 transition-all"
+          className="p-2.5 bg-card/90 backdrop-blur-md rounded-xl shadow-lg border border-border/50 hover:bg-card hover:scale-105 transition-all"
           aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
         >
           {isFullscreen ? (
-            <Minimize2 className="w-5 h-5 text-foreground" />
+            <Minimize2 className="w-4 h-4 text-foreground" />
           ) : (
-            <Maximize2 className="w-5 h-5 text-foreground" />
+            <Maximize2 className="w-4 h-4 text-foreground" />
           )}
         </button>
         <button
           onClick={handleRecenter}
-          className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card hover:scale-105 transition-all"
+          className="p-2.5 bg-card/90 backdrop-blur-md rounded-xl shadow-lg border border-border/50 hover:bg-card hover:scale-105 transition-all"
           aria-label="Center on current location"
         >
-          <Navigation className="w-5 h-5 text-primary" />
+          <Navigation className="w-4 h-4 text-primary" />
         </button>
         <button
           onClick={handleZoomIn}
-          className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card hover:scale-105 transition-all"
+          className="p-2.5 bg-card/90 backdrop-blur-md rounded-xl shadow-lg border border-border/50 hover:bg-card hover:scale-105 transition-all"
           aria-label="Zoom in"
         >
-          <ZoomIn className="w-5 h-5 text-foreground" />
+          <ZoomIn className="w-4 h-4 text-foreground" />
         </button>
         <button
           onClick={handleZoomOut}
-          className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card hover:scale-105 transition-all"
+          className="p-2.5 bg-card/90 backdrop-blur-md rounded-xl shadow-lg border border-border/50 hover:bg-card hover:scale-105 transition-all"
           aria-label="Zoom out"
         >
-          <ZoomOut className="w-5 h-5 text-foreground" />
+          <ZoomOut className="w-4 h-4 text-foreground" />
         </button>
       </div>
 
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 z-[1000] bg-card/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-xl border border-border/50">
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Route Status</p>
-        <div className="flex flex-col gap-2 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#00D4AA] shadow-md shadow-[#00D4AA]/40" />
-              <span className="text-foreground font-medium">Booked</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#FF6B9D] shadow-md shadow-[#FF6B9D]/40" />
-              <span className="text-foreground font-medium">Pending</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-primary shadow-md shadow-primary/40" />
-              <span className="text-foreground font-medium">Unbooked</span>
-            </div>
+      {/* Intel Hub / Contribute button */}
+      <button
+        onClick={() => setMenuPage("intel-hub")}
+        className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-gradient-to-r from-primary to-[#FF6B9D] text-white px-3 py-1.5 rounded-full shadow-lg shadow-primary/30 flex items-center gap-1.5 hover:scale-105 transition-transform"
+      >
+        <Lightbulb className="w-3.5 h-3.5" />
+        <span className="text-xs font-semibold">Share Intel</span>
+      </button>
+
+      {/* Legend - smaller and auto-hides when zooming in */}
+      <div 
+        className={cn(
+          "absolute bottom-3 left-3 z-[1000] bg-card/90 backdrop-blur-md rounded-xl px-2.5 py-2 shadow-lg border border-border/50 transition-all duration-300",
+          !showLegend && "opacity-0 pointer-events-none translate-y-2"
+        )}
+      >
+        <div className="flex items-center gap-3 text-[10px]">
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#00D4AA]" />
+            <span className="text-muted-foreground">Booked</span>
           </div>
-          <p className="text-[10px] text-muted-foreground pt-1 border-t border-border/50">Click routes to see transit details</p>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#FF6B9D]" />
+            <span className="text-muted-foreground">Pending</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-primary" />
+            <span className="text-muted-foreground">Unbooked</span>
+          </div>
         </div>
       </div>
 
