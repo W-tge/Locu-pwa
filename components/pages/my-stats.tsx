@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 const achievementColors = {
   pink: "from-primary to-[#FF6B9D]",
   purple: "from-[#7C3AED] to-[#A855F7]",
-  mint: "from-[#00D4AA] to-[#4ECDC4]",
+  mint: "from-[#7C3AED] to-primary",
   coral: "from-[#FF6B9D] to-primary",
 };
 

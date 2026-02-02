@@ -157,7 +157,7 @@ const defaultStats: UserStats = {
       description: "Stayed in 10+ hostels",
       points: 100,
       icon: "home",
-      color: "mint",
+      color: "coral",
       unlockedAt: new Date("2024-03-22"),
     },
   ],

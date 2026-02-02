@@ -4,11 +4,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Locu - Backpacker OS Color System */
-/* Primary: #FC2869 (Neon Pink) - Hero Color */
-/* Secondary: #00D4AA (Electric Mint) - Verified/Booked */
-/* Accent: #FF6B9D (Hot Coral) - Alerts/Pending */
-/* Tertiary: #4ECDC4 (Turquoise) - Success indicators */
-/* Highlight: #7C3AED (Electric Purple) - Special */
+/* Primary: #FC2869 (Neon Pink) - Hero Color, CTAs, Unbooked */
+/* Secondary: #7C3AED (Electric Purple) - Booked, Verified, Premium */
+/* Accent: #FF6B9D (Hot Coral) - Pending, Alerts, Warnings */
+/* Highlight: #FBBF24 (Golden) - Stars, Ratings, Points */
+/* Keep it vibrant, fun, and adventurous for 18-25 demographic */
 
 :root {
   --background: #FAFBFC;
@@ -19,8 +19,8 @@
   --popover-foreground: #0f172a;
   --primary: #FC2869;
   --primary-foreground: #ffffff;
-  --secondary: #00D4AA;
-  --secondary-foreground: #0f172a;
+  --secondary: #7C3AED;
+  --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #FF6B9D;
@@ -35,7 +35,7 @@
   --input: #e2e8f0;
   --ring: #FC2869;
   --chart-1: #FC2869;
-  --chart-2: #00D4AA;
+  --chart-2: #7C3AED;
   --chart-3: #4ECDC4;
   --chart-4: #FF6B9D;
   --chart-5: #7C3AED;
@@ -59,8 +59,8 @@
   --popover-foreground: #f8fafc;
   --primary: #FC2869;
   --primary-foreground: #ffffff;
-  --secondary: #00D4AA;
-  --secondary-foreground: #0f172a;
+  --secondary: #7C3AED;
+  --secondary-foreground: #ffffff;
   --muted: #1e1e2e;
   --muted-foreground: #94a3b8;
   --accent: #FF6B9D;
@@ -75,7 +75,7 @@
   --input: #1e293b;
   --ring: #FC2869;
   --chart-1: #FC2869;
-  --chart-2: #00D4AA;
+  --chart-2: #7C3AED;
   --chart-3: #4ECDC4;
   --chart-4: #FF6B9D;
   --chart-5: #7C3AED;
@@ -155,12 +155,12 @@
     background: linear-gradient(135deg, #FC2869 0%, #FF6B9D 100%);
   }
   
-  .gradient-mint {
-    background: linear-gradient(135deg, #00D4AA 0%, #4ECDC4 100%);
+  .gradient-purple {
+    background: linear-gradient(135deg, #7C3AED 0%, #9F7AEA 100%);
   }
   
-  .gradient-turquoise {
-    background: linear-gradient(135deg, #4ECDC4 0%, #00D4AA 100%);
+  .gradient-coral {
+    background: linear-gradient(135deg, #FF6B9D 0%, #FC2869 100%);
   }
   
   .gradient-vibrant {
