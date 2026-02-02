@@ -1,5 +1,20 @@
 export type BookingStatus = "booked" | "pending" | "not-booked";
-export type TransportType = "bus" | "flight" | "boat" | "train" | "shuttle";
+export type StopStatus = "ACTIVE" | "UPCOMING" | "PLANNED" | "DRAFT" | "FUTURE";
+export type TransportType = "bus" | "boat" | "train" | "shuttle" | "ferry" | "jeep";
+
+export interface FlywheelRequest {
+  type: "flywheel_request";
+  text: string;
+  action: string;
+}
+
+export interface PodAlert {
+  style: "POD_LOGISTICS_CARD" | "CRITICAL_INLINE_CARD";
+  title: string;
+  body: string;
+  action?: string;
+  podAction?: string;
+}
 
 export interface Stop {
   id: string;
@@ -12,11 +27,17 @@ export interface Stop {
   latitude: number;
   longitude: number;
   bookingStatus: BookingStatus;
+  status: StopStatus;
   hostelName?: string;
   hostelPrice?: number;
   currency?: string;
   tags?: string[];
+  highlight?: string;
+  note?: string;
+  activity?: string;
   communityTips?: string[];
+  alerts?: FlywheelRequest[];
+  bookingAlert?: PodAlert;
 }
 
 export interface TransitLeg {
@@ -24,6 +45,8 @@ export interface TransitLeg {
   fromStopId: string;
   toStopId: string;
   type: TransportType;
+  mode?: string;
+  route?: string;
   duration: string;
   departureTime?: string;
   bookingStatus: BookingStatus;
@@ -31,6 +54,10 @@ export interface TransitLeg {
   currency?: string;
   operator?: string;
   communityTip?: string;
+  flywheelData?: string;
+  verifiedCount?: number;
+  alert?: PodAlert;
+  note?: string;
 }
 
 export interface Trip {
@@ -38,262 +65,127 @@ export interface Trip {
   name: string;
   startDate: string;
   endDate: string;
+  userStatus: string;
+  currentLocation: string;
+  currentDay: number;
   stops: Stop[];
   transitLegs: TransitLeg[];
 }
 
-// Demo trip: 3 months through Latin America
+// Demo trip: Andes Overland Circuit (NO FLIGHTS - overland only)
 export const demoTrip: Trip = {
-  id: "latam-adventure-2026",
-  name: "Latin America Adventure",
+  id: "andes-overland-2026",
+  name: "Andes Overland Circuit",
   startDate: "2026-03-01",
-  endDate: "2026-05-31",
+  endDate: "2026-05-15",
+  userStatus: "Travelling with Pod (3 Pax)",
+  currentLocation: "Cusco, Peru",
+  currentDay: 25,
   stops: [
     {
       id: "stop-1",
-      city: "Mexico City",
-      country: "Mexico",
-      countryCode: "MX",
-      startDate: "2026-03-01",
-      endDate: "2026-03-05",
-      nights: 4,
-      latitude: 19.4326,
-      longitude: -99.1332,
+      city: "Cusco",
+      country: "Peru",
+      countryCode: "PE",
+      startDate: "2026-03-20",
+      endDate: "2026-03-25",
+      nights: 5,
+      latitude: -13.5319,
+      longitude: -71.9675,
       bookingStatus: "booked",
-      hostelName: "Casa Pepe Hostel",
-      hostelPrice: 18,
+      status: "ACTIVE",
+      hostelName: "Pariwana Hostel",
+      hostelPrice: 14,
       currency: "USD",
-      tags: ["Rooftop Bar", "Walking Tours", "Social"],
-      communityTips: ["Best tacos at the corner street vendor", "Free walking tour leaves at 10am daily"]
+      highlight: "Machu Picchu Return",
+      tags: ["Sacred Valley", "Inca Trail", "Altitude"],
+      alerts: [
+        {
+          type: "flywheel_request",
+          text: "Did you pay 70 Soles for the taxi from Poroy?",
+          action: "Verify Price",
+        },
+      ],
     },
     {
       id: "stop-2",
-      city: "Oaxaca",
-      country: "Mexico",
-      countryCode: "MX",
-      startDate: "2026-03-06",
-      endDate: "2026-03-10",
-      nights: 4,
-      latitude: 17.0732,
-      longitude: -96.7266,
-      bookingStatus: "booked",
-      hostelName: "Hostal Central Oaxaca",
-      hostelPrice: 15,
-      currency: "USD",
-      tags: ["Cooking Class", "Mezcal Tasting"],
-      communityTips: ["Monte Alban best visited early morning"]
+      city: "Puno",
+      country: "Peru",
+      countryCode: "PE",
+      startDate: "2026-03-26",
+      endDate: "2026-03-27",
+      nights: 1,
+      latitude: -15.8402,
+      longitude: -70.0219,
+      bookingStatus: "pending",
+      status: "UPCOMING",
+      note: "Stopover for Lake Titicaca",
+      tags: ["Lake Titicaca", "Floating Islands"],
     },
     {
       id: "stop-3",
-      city: "San Cristobal",
-      country: "Mexico",
-      countryCode: "MX",
-      startDate: "2026-03-11",
-      endDate: "2026-03-14",
-      nights: 3,
-      latitude: 16.7370,
-      longitude: -92.6376,
-      bookingStatus: "pending",
-      hostelName: "Puerta Vieja Hostel",
-      hostelPrice: 12,
-      currency: "USD",
-      tags: ["Mountains", "Indigenous Culture"],
+      city: "La Paz",
+      country: "Bolivia",
+      countryCode: "BO",
+      startDate: "2026-03-28",
+      endDate: "2026-04-01",
+      nights: 4,
+      latitude: -16.5,
+      longitude: -68.15,
+      bookingStatus: "not-booked",
+      status: "PLANNED",
+      hostelName: "Wild Rover La Paz",
+      tags: ["Death Road", "Witches Market", "Cable Cars"],
+      bookingAlert: {
+        style: "POD_LOGISTICS_CARD",
+        title: "High Demand Alert",
+        body: "For a Pod of 3, you must book 5 days in advance to get a private room. 85% booked.",
+        action: "Book Now for 3 Pax",
+      },
     },
     {
       id: "stop-4",
-      city: "Flores",
-      country: "Guatemala",
-      countryCode: "GT",
-      startDate: "2026-03-15",
-      endDate: "2026-03-18",
+      city: "Uyuni",
+      country: "Bolivia",
+      countryCode: "BO",
+      startDate: "2026-04-02",
+      endDate: "2026-04-05",
       nights: 3,
-      latitude: 16.9304,
-      longitude: -89.8912,
+      latitude: -20.4637,
+      longitude: -66.825,
       bookingStatus: "not-booked",
-      tags: ["Lake Island", "Tikal Gateway"],
-      communityTips: ["Sunrise tour to Tikal is unmissable"]
+      status: "DRAFT",
+      activity: "4x4 Jeep Crossing into Chile",
+      tags: ["Salt Flats", "Stargazing", "Photo Ops"],
     },
     {
       id: "stop-5",
-      city: "Antigua",
-      country: "Guatemala",
-      countryCode: "GT",
-      startDate: "2026-03-19",
-      endDate: "2026-03-24",
-      nights: 5,
-      latitude: 14.5586,
-      longitude: -90.7295,
+      city: "San Pedro de Atacama",
+      country: "Chile",
+      countryCode: "CL",
+      startDate: "2026-04-08",
+      endDate: "2026-04-12",
+      nights: 4,
+      latitude: -22.9087,
+      longitude: -68.1997,
       bookingStatus: "not-booked",
-      tags: ["Spanish School", "Volcanoes", "Colonial"],
+      status: "FUTURE",
+      tags: ["Valle de la Luna", "Geysers", "Desert"],
     },
     {
       id: "stop-6",
-      city: "Lake Atitlan",
-      country: "Guatemala",
-      countryCode: "GT",
-      startDate: "2026-03-25",
-      endDate: "2026-03-30",
-      nights: 5,
-      latitude: 14.6872,
-      longitude: -91.2431,
-      bookingStatus: "not-booked",
-      tags: ["Lake Views", "Yoga Retreats", "Hippie Trail"],
-    },
-    {
-      id: "stop-7",
-      city: "Leon",
-      country: "Nicaragua",
-      countryCode: "NI",
-      startDate: "2026-04-01",
-      endDate: "2026-04-04",
-      nights: 3,
-      latitude: 12.4379,
-      longitude: -86.8780,
-      bookingStatus: "not-booked",
-      tags: ["Volcano Boarding", "Colonial City"],
-    },
-    {
-      id: "stop-8",
-      city: "Granada",
-      country: "Nicaragua",
-      countryCode: "NI",
-      startDate: "2026-04-05",
-      endDate: "2026-04-08",
-      nights: 3,
-      latitude: 11.9344,
-      longitude: -85.9560,
-      bookingStatus: "not-booked",
-      tags: ["Colonial Architecture", "Isletas Tour"],
-    },
-    {
-      id: "stop-9",
-      city: "San Juan del Sur",
-      country: "Nicaragua",
-      countryCode: "NI",
-      startDate: "2026-04-09",
-      endDate: "2026-04-13",
-      nights: 4,
-      latitude: 11.2537,
-      longitude: -85.8700,
-      bookingStatus: "not-booked",
-      tags: ["Surfing", "Beach Party", "Sunday Funday"],
-    },
-    {
-      id: "stop-10",
-      city: "Monteverde",
-      country: "Costa Rica",
-      countryCode: "CR",
-      startDate: "2026-04-15",
+      city: "Salta",
+      country: "Argentina",
+      countryCode: "AR",
+      startDate: "2026-04-14",
       endDate: "2026-04-18",
-      nights: 3,
-      latitude: 10.3027,
-      longitude: -84.8245,
-      bookingStatus: "not-booked",
-      tags: ["Cloud Forest", "Zipline", "Wildlife"],
-    },
-    {
-      id: "stop-11",
-      city: "La Fortuna",
-      country: "Costa Rica",
-      countryCode: "CR",
-      startDate: "2026-04-19",
-      endDate: "2026-04-22",
-      nights: 3,
-      latitude: 10.4679,
-      longitude: -84.6427,
-      bookingStatus: "not-booked",
-      tags: ["Arenal Volcano", "Hot Springs", "Adventure"],
-    },
-    {
-      id: "stop-12",
-      city: "Puerto Viejo",
-      country: "Costa Rica",
-      countryCode: "CR",
-      startDate: "2026-04-23",
-      endDate: "2026-04-28",
-      nights: 5,
-      latitude: 9.6558,
-      longitude: -82.7539,
-      bookingStatus: "not-booked",
-      tags: ["Caribbean Vibes", "Reggae", "Beach"],
-    },
-    {
-      id: "stop-13",
-      city: "Bocas del Toro",
-      country: "Panama",
-      countryCode: "PA",
-      startDate: "2026-04-29",
-      endDate: "2026-05-04",
-      nights: 5,
-      latitude: 9.3404,
-      longitude: -82.2408,
-      bookingStatus: "not-booked",
-      tags: ["Island Hopping", "Snorkeling", "Party"],
-    },
-    {
-      id: "stop-14",
-      city: "Boquete",
-      country: "Panama",
-      countryCode: "PA",
-      startDate: "2026-05-05",
-      endDate: "2026-05-08",
-      nights: 3,
-      latitude: 8.7795,
-      longitude: -82.4411,
-      bookingStatus: "not-booked",
-      tags: ["Coffee Tours", "Hiking", "Cool Climate"],
-    },
-    {
-      id: "stop-15",
-      city: "Panama City",
-      country: "Panama",
-      countryCode: "PA",
-      startDate: "2026-05-09",
-      endDate: "2026-05-12",
-      nights: 3,
-      latitude: 8.9824,
-      longitude: -79.5199,
-      bookingStatus: "not-booked",
-      tags: ["Casco Viejo", "Panama Canal", "City Life"],
-    },
-    {
-      id: "stop-16",
-      city: "Cartagena",
-      country: "Colombia",
-      countryCode: "CO",
-      startDate: "2026-05-13",
-      endDate: "2026-05-18",
-      nights: 5,
-      latitude: 10.3910,
-      longitude: -75.4794,
-      bookingStatus: "not-booked",
-      tags: ["Old Town", "Beaches", "Salsa"],
-    },
-    {
-      id: "stop-17",
-      city: "Medellin",
-      country: "Colombia",
-      countryCode: "CO",
-      startDate: "2026-05-19",
-      endDate: "2026-05-26",
-      nights: 7,
-      latitude: 6.2442,
-      longitude: -75.5812,
-      bookingStatus: "not-booked",
-      tags: ["Digital Nomad Hub", "Co-working", "Nightlife", "Spring Weather"],
-    },
-    {
-      id: "stop-18",
-      city: "Bogota",
-      country: "Colombia",
-      countryCode: "CO",
-      startDate: "2026-05-27",
-      endDate: "2026-05-31",
       nights: 4,
-      latitude: 4.7110,
-      longitude: -74.0721,
+      latitude: -24.7821,
+      longitude: -65.4232,
       bookingStatus: "not-booked",
-      tags: ["Culture", "Museums", "Street Art"],
+      status: "FUTURE",
+      note: "Steak & Wine recovery",
+      tags: ["Wine Region", "Colonial", "Empanadas"],
     },
   ],
   transitLegs: [
@@ -302,184 +194,97 @@ export const demoTrip: Trip = {
       fromStopId: "stop-1",
       toStopId: "stop-2",
       type: "bus",
+      mode: "Bus",
+      route: "Cusco -> Puno",
       duration: "7h",
+      operator: "Transzela",
       bookingStatus: "booked",
-      price: 35,
+      price: 25,
       currency: "USD",
-      operator: "ADO",
+      flywheelData: "WiFi works",
+      verifiedCount: 12,
     },
     {
       id: "leg-2",
       fromStopId: "stop-2",
       toStopId: "stop-3",
-      type: "bus",
-      duration: "10h",
-      bookingStatus: "booked",
-      price: 28,
+      type: "ferry",
+      mode: "Ferry + Bus",
+      route: "Puno -> Copacabana -> La Paz",
+      duration: "4h + 3h",
+      bookingStatus: "pending",
+      price: 15,
       currency: "USD",
-      operator: "OCC",
-      communityTip: "Night bus recommended - arrives early morning"
+      alert: {
+        style: "CRITICAL_INLINE_CARD",
+        title: "Border Crossing: Peru -> Bolivia",
+        body: "This border post does NOT accept cards. You need $30 USD in clean bills per person.",
+        podAction: "Remind Pod to withdraw cash",
+      },
     },
     {
       id: "leg-3",
       fromStopId: "stop-3",
       toStopId: "stop-4",
-      type: "shuttle",
-      duration: "8h",
-      bookingStatus: "pending",
-      price: 45,
+      type: "bus",
+      mode: "Night Bus (Cama)",
+      route: "La Paz -> Uyuni",
+      duration: "9h",
+      operator: "Todo Turismo",
+      bookingStatus: "not-booked",
+      price: 20,
       currency: "USD",
-      communityTip: "Border crossing can take 2+ hours"
+      communityTip: "Heating often broken - bring layers",
+      verifiedCount: 47,
     },
     {
       id: "leg-4",
       fromStopId: "stop-4",
       toStopId: "stop-5",
-      type: "shuttle",
-      duration: "9h",
+      type: "jeep",
+      mode: "Jeep Transfer",
+      route: "Uyuni -> San Pedro de Atacama",
+      duration: "3 Days (Off-road)",
+      note: "Crossing the Andes",
       bookingStatus: "not-booked",
-      price: 40,
+      price: 180,
       currency: "USD",
     },
     {
       id: "leg-5",
       fromStopId: "stop-5",
       toStopId: "stop-6",
-      type: "shuttle",
-      duration: "3h",
-      bookingStatus: "not-booked",
-      price: 15,
-      currency: "USD",
-    },
-    {
-      id: "leg-6",
-      fromStopId: "stop-6",
-      toStopId: "stop-7",
       type: "bus",
-      duration: "14h",
+      mode: "Bus",
+      route: "San Pedro -> Salta",
+      duration: "12h",
       bookingStatus: "not-booked",
-      communityTip: "This is usually 2-3 hours late. Pack snacks!"
-    },
-    {
-      id: "leg-7",
-      fromStopId: "stop-7",
-      toStopId: "stop-8",
-      type: "bus",
-      duration: "2h",
-      bookingStatus: "not-booked",
-      price: 3,
-      currency: "USD",
-    },
-    {
-      id: "leg-8",
-      fromStopId: "stop-8",
-      toStopId: "stop-9",
-      type: "shuttle",
-      duration: "2h",
-      bookingStatus: "not-booked",
-      price: 20,
-      currency: "USD",
-    },
-    {
-      id: "leg-9",
-      fromStopId: "stop-9",
-      toStopId: "stop-10",
-      type: "shuttle",
-      duration: "8h",
-      bookingStatus: "not-booked",
-      communityTip: "Border at Penas Blancas - arrive early"
-    },
-    {
-      id: "leg-10",
-      fromStopId: "stop-10",
-      toStopId: "stop-11",
-      type: "bus",
-      duration: "4h",
-      bookingStatus: "not-booked",
-    },
-    {
-      id: "leg-11",
-      fromStopId: "stop-11",
-      toStopId: "stop-12",
-      type: "bus",
-      duration: "5h",
-      bookingStatus: "not-booked",
-    },
-    {
-      id: "leg-12",
-      fromStopId: "stop-12",
-      toStopId: "stop-13",
-      type: "boat",
-      duration: "3h",
-      bookingStatus: "not-booked",
-      price: 35,
-      currency: "USD",
-      communityTip: "Water taxi from Sixaola border - scenic route!"
-    },
-    {
-      id: "leg-13",
-      fromStopId: "stop-13",
-      toStopId: "stop-14",
-      type: "bus",
-      duration: "5h",
-      bookingStatus: "not-booked",
-    },
-    {
-      id: "leg-14",
-      fromStopId: "stop-14",
-      toStopId: "stop-15",
-      type: "bus",
-      duration: "7h",
-      bookingStatus: "not-booked",
-    },
-    {
-      id: "leg-15",
-      fromStopId: "stop-15",
-      toStopId: "stop-16",
-      type: "flight",
-      duration: "1h 15m",
-      bookingStatus: "not-booked",
-      price: 120,
-      currency: "USD",
-      operator: "Copa Airlines",
-    },
-    {
-      id: "leg-16",
-      fromStopId: "stop-16",
-      toStopId: "stop-17",
-      type: "flight",
-      duration: "1h",
-      bookingStatus: "not-booked",
-      price: 80,
-      currency: "USD",
-    },
-    {
-      id: "leg-17",
-      fromStopId: "stop-17",
-      toStopId: "stop-18",
-      type: "flight",
-      duration: "1h",
-      bookingStatus: "not-booked",
-      price: 60,
-      currency: "USD",
+      communityTip: "Incredible mountain scenery - sit on the left side",
+      verifiedCount: 23,
     },
   ],
 };
 
 export function getStopById(trip: Trip, stopId: string): Stop | undefined {
-  return trip.stops.find(s => s.id === stopId);
+  return trip.stops.find((s) => s.id === stopId);
 }
 
-export function getTransitLeg(trip: Trip, fromId: string, toId: string): TransitLeg | undefined {
-  return trip.transitLegs.find(l => l.fromStopId === fromId && l.toStopId === toId);
+export function getTransitLeg(
+  trip: Trip,
+  fromId: string,
+  toId: string
+): TransitLeg | undefined {
+  return trip.transitLegs.find(
+    (l) => l.fromStopId === fromId && l.toStopId === toId
+  );
 }
 
 export function formatDateRange(start: string, end: string): string {
   const startDate = new Date(start);
   const endDate = new Date(end);
-  const startMonth = startDate.toLocaleDateString('en-US', { month: 'short' });
-  const endMonth = endDate.toLocaleDateString('en-US', { month: 'short' });
-  
+  const startMonth = startDate.toLocaleDateString("en-US", { month: "short" });
+  const endMonth = endDate.toLocaleDateString("en-US", { month: "short" });
+
   if (startMonth === endMonth) {
     return `${startMonth} ${startDate.getDate()} - ${endDate.getDate()}`;
   }
@@ -493,8 +298,12 @@ export function getTripDuration(trip: Trip): number {
 }
 
 export function getBookingStats(trip: Trip) {
-  const booked = trip.stops.filter(s => s.bookingStatus === 'booked').length;
-  const pending = trip.stops.filter(s => s.bookingStatus === 'pending').length;
-  const notBooked = trip.stops.filter(s => s.bookingStatus === 'not-booked').length;
+  const booked = trip.stops.filter((s) => s.bookingStatus === "booked").length;
+  const pending = trip.stops.filter(
+    (s) => s.bookingStatus === "pending"
+  ).length;
+  const notBooked = trip.stops.filter(
+    (s) => s.bookingStatus === "not-booked"
+  ).length;
   return { booked, pending, notBooked, total: trip.stops.length };
 }

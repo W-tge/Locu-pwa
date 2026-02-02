@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useTrip } from "@/lib/trip-context";
 import { cn } from "@/lib/utils";
-import { Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  ZoomIn,
+  ZoomOut,
+  MapPin,
+  Navigation,
+} from "lucide-react";
 
 export function TripMap() {
   const { trip, selectedStop, setSelectedStop, setSelectedLeg } = useTrip();
@@ -16,7 +23,6 @@ export function TripMap() {
   useEffect(() => {
     if (!mapRef.current || map) return;
 
-    // Dynamically load Leaflet
     const loadLeaflet = async () => {
       // Add Leaflet CSS
       if (!document.getElementById("leaflet-css")) {
@@ -27,10 +33,9 @@ export function TripMap() {
         document.head.appendChild(link);
       }
 
-      // Load Leaflet JS
       const L = await import("leaflet");
 
-      // Calculate bounds
+      // Calculate bounds for Andes route
       const bounds = L.latLngBounds(
         trip.stops.map((stop) => [stop.latitude, stop.longitude])
       );
@@ -39,9 +44,9 @@ export function TripMap() {
       const mapInstance = L.map(mapRef.current!, {
         zoomControl: false,
         attributionControl: false,
-      }).fitBounds(bounds, { padding: [50, 50] });
+      }).fitBounds(bounds, { padding: [40, 40] });
 
-      // Add tile layer with a stylish dark theme
+      // Use a clean, modern tile layer
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
         {
@@ -51,26 +56,54 @@ export function TripMap() {
 
       setMap(mapInstance);
 
-      // Custom icon function
-      const createIcon = (color: string, isSelected: boolean = false) => {
-        const size = isSelected ? 20 : 14;
+      // Custom marker icon
+      const createIcon = (
+        color: string,
+        isActive: boolean = false,
+        isSelected: boolean = false
+      ) => {
+        const size = isSelected ? 28 : isActive ? 24 : 18;
+        const pulseRing = isActive
+          ? `<div style="
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: ${size + 12}px;
+            height: ${size + 12}px;
+            border: 2px solid ${color};
+            border-radius: 50%;
+            animation: pulse 2s ease-out infinite;
+            opacity: 0.6;
+          "></div>`
+          : "";
+
         return L.divIcon({
           className: "custom-marker",
-          html: `<div style="
-            width: ${size}px;
-            height: ${size}px;
-            background: ${color};
-            border: 3px solid white;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
-          "></div>`,
+          html: `
+            <div style="position: relative;">
+              ${pulseRing}
+              <div style="
+                width: ${size}px;
+                height: ${size}px;
+                background: ${color};
+                border: 3px solid white;
+                border-radius: 50%;
+                box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">
+                ${isActive ? '<div style="width: 6px; height: 6px; background: white; border-radius: 50%;"></div>' : ""}
+              </div>
+            </div>
+          `,
           iconSize: [size, size],
           iconAnchor: [size / 2, size / 2],
         });
       };
 
-      // Add route polylines
+      // Add route polylines with different styles
       trip.transitLegs.forEach((leg) => {
         const fromStop = trip.stops.find((s) => s.id === leg.fromStopId);
         const toStop = trip.stops.find((s) => s.id === leg.toStopId);
@@ -78,54 +111,93 @@ export function TripMap() {
 
         const isBooked = leg.bookingStatus === "booked";
         const isPending = leg.bookingStatus === "pending";
+        const isJeep = leg.type === "jeep";
         const color = isBooked ? "#4ECDC4" : isPending ? "#FF9F43" : "#FC2869";
 
-        const polyline = L.polyline(
-          [
-            [fromStop.latitude, fromStop.longitude],
-            [toStop.latitude, toStop.longitude],
-          ],
-          {
-            color: color,
-            weight: isBooked ? 4 : 3,
-            opacity: isBooked ? 0.9 : 0.6,
-            dashArray: isBooked ? undefined : "8, 8",
-          }
-        ).addTo(mapInstance);
+        // Create curved path for visual interest
+        const latlngs = [
+          [fromStop.latitude, fromStop.longitude],
+          [toStop.latitude, toStop.longitude],
+        ];
+
+        const polyline = L.polyline(latlngs as [number, number][], {
+          color: color,
+          weight: isBooked ? 5 : 4,
+          opacity: isBooked ? 1 : 0.7,
+          // Jeep/offroad routes are dashed, buses are solid
+          dashArray: isJeep ? "12, 8" : isBooked ? undefined : "6, 6",
+          lineCap: "round",
+          lineJoin: "round",
+        }).addTo(mapInstance);
 
         polyline.on("click", () => {
           setSelectedLeg(leg);
         });
+
+        // Add transport mode label on the line
+        const midLat = (fromStop.latitude + toStop.latitude) / 2;
+        const midLng = (fromStop.longitude + toStop.longitude) / 2;
+
+        const modeIcon = L.divIcon({
+          className: "mode-label",
+          html: `
+            <div style="
+              background: ${color};
+              color: white;
+              padding: 3px 8px;
+              border-radius: 12px;
+              font-size: 10px;
+              font-weight: 600;
+              white-space: nowrap;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+              text-transform: uppercase;
+            ">
+              ${leg.type === "jeep" ? "JEEP" : leg.type === "ferry" ? "FERRY" : "BUS"} ${leg.duration}
+            </div>
+          `,
+          iconSize: [80, 20],
+          iconAnchor: [40, 10],
+        });
+
+        L.marker([midLat, midLng], { icon: modeIcon, interactive: false }).addTo(
+          mapInstance
+        );
 
         polylinesRef.current.push(polyline);
       });
 
       // Add stop markers
       trip.stops.forEach((stop, index) => {
+        const isActive = stop.status === "ACTIVE";
         const isBooked = stop.bookingStatus === "booked";
         const isPending = stop.bookingStatus === "pending";
         const color = isBooked ? "#4ECDC4" : isPending ? "#FF9F43" : "#FC2869";
 
         const marker = L.marker([stop.latitude, stop.longitude], {
-          icon: createIcon(color),
+          icon: createIcon(color, isActive),
+          zIndexOffset: isActive ? 1000 : index,
         }).addTo(mapInstance);
 
-        // Create popup content
+        // Popup content
         const popupContent = `
-          <div style="padding: 8px; min-width: 150px;">
-            <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">${stop.city}</div>
+          <div style="padding: 10px; min-width: 180px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-weight: 700; font-size: 15px;">${stop.city}</span>
+              ${isActive ? '<span style="background: #FC2869; color: white; padding: 2px 6px; border-radius: 8px; font-size: 9px; font-weight: 600;">NOW</span>' : ""}
+            </div>
             <div style="color: #64748b; font-size: 12px; margin-bottom: 8px;">${stop.country}</div>
-            <div style="display: flex; align-items: center; gap: 6px;">
+            ${stop.highlight ? `<div style="color: #FF9F43; font-size: 11px; margin-bottom: 8px;">${stop.highlight}</div>` : ""}
+            <div style="display: flex; align-items: center; gap: 8px;">
               <span style="
                 display: inline-block;
-                padding: 2px 8px;
+                padding: 3px 10px;
                 border-radius: 12px;
                 font-size: 11px;
                 font-weight: 500;
-                background: ${isBooked ? "#4ECDC4" : isPending ? "#FF9F43" : "#FC2869"}20;
-                color: ${isBooked ? "#4ECDC4" : isPending ? "#FF9F43" : "#FC2869"};
+                background: ${color}20;
+                color: ${color};
               ">${isBooked ? "Booked" : isPending ? "Pending" : "Book Now"}</span>
-              <span style="color: #94a3b8; font-size: 11px;">${stop.duration} days</span>
+              <span style="color: #94a3b8; font-size: 11px;">${stop.nights} nights</span>
             </div>
           </div>
         `;
@@ -158,11 +230,12 @@ export function TripMap() {
 
     markersRef.current.forEach(({ marker, stop, createIcon }) => {
       const isSelected = selectedStop?.id === stop.id;
+      const isActive = stop.status === "ACTIVE";
       const isBooked = stop.bookingStatus === "booked";
       const isPending = stop.bookingStatus === "pending";
       const color = isBooked ? "#4ECDC4" : isPending ? "#FF9F43" : "#FC2869";
 
-      marker.setIcon(createIcon(color, isSelected));
+      marker.setIcon(createIcon(color, isActive, isSelected));
 
       if (isSelected) {
         map.setView([stop.latitude, stop.longitude], map.getZoom(), {
@@ -174,31 +247,47 @@ export function TripMap() {
 
   const handleZoomIn = () => map?.zoomIn();
   const handleZoomOut = () => map?.zoomOut();
+  const handleRecenter = () => {
+    if (!map) return;
+    const activeStop = trip.stops.find((s) => s.status === "ACTIVE");
+    if (activeStop) {
+      map.setView([activeStop.latitude, activeStop.longitude], 8, {
+        animate: true,
+      });
+    }
+  };
 
   return (
     <div
       className={cn(
-        "relative h-full w-full rounded-xl overflow-hidden border border-border",
-        isFullscreen && "fixed inset-0 z-50 rounded-none"
+        "relative h-full w-full overflow-hidden",
+        isFullscreen && "fixed inset-0 z-50"
       )}
     >
       {/* Map container */}
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
-      {/* Map overlay - Title */}
-      <div className="absolute top-3 left-3 z-[1000] bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-border">
-        <h2 className="text-sm font-bold text-foreground">{trip.name}</h2>
-        <p className="text-xs text-muted-foreground">
-          {trip.stops.length} stops across{" "}
-          {new Set(trip.stops.map((s) => s.country)).size} countries
-        </p>
+      {/* Current location badge */}
+      <div className="absolute top-3 left-3 z-[1000]">
+        <div className="bg-card/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-border">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium text-foreground">
+              {trip.currentLocation}
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            Day {trip.currentDay} of your journey
+          </p>
+        </div>
       </div>
 
       {/* Map controls */}
-      <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1">
+      <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1.5">
         <button
           onClick={() => setIsFullscreen(!isFullscreen)}
-          className="p-2 bg-card/90 backdrop-blur-sm rounded-lg shadow-lg border border-border hover:bg-card transition-colors"
+          className="p-2.5 bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border hover:bg-card transition-colors"
+          aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
         >
           {isFullscreen ? (
             <Minimize2 className="w-4 h-4 text-foreground" />
@@ -207,39 +296,76 @@ export function TripMap() {
           )}
         </button>
         <button
+          onClick={handleRecenter}
+          className="p-2.5 bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border hover:bg-card transition-colors"
+          aria-label="Center on current location"
+        >
+          <Navigation className="w-4 h-4 text-primary" />
+        </button>
+        <button
           onClick={handleZoomIn}
-          className="p-2 bg-card/90 backdrop-blur-sm rounded-lg shadow-lg border border-border hover:bg-card transition-colors"
+          className="p-2.5 bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border hover:bg-card transition-colors"
+          aria-label="Zoom in"
         >
           <ZoomIn className="w-4 h-4 text-foreground" />
         </button>
         <button
           onClick={handleZoomOut}
-          className="p-2 bg-card/90 backdrop-blur-sm rounded-lg shadow-lg border border-border hover:bg-card transition-colors"
+          className="p-2.5 bg-card/95 backdrop-blur-sm rounded-xl shadow-lg border border-border hover:bg-card transition-colors"
+          aria-label="Zoom out"
         >
           <ZoomOut className="w-4 h-4 text-foreground" />
         </button>
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-3 left-3 z-[1000] bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-border">
-        <div className="flex gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#4ECDC4]" />
-            <span className="text-muted-foreground">Booked</span>
+      <div className="absolute bottom-3 left-3 z-[1000] bg-card/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-border">
+        <div className="flex flex-col gap-1.5 text-[10px]">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-success" />
+              <span className="text-muted-foreground">Booked</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-secondary" />
+              <span className="text-muted-foreground">Pending</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <span className="text-muted-foreground">Unbooked</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#FF9F43]" />
-            <span className="text-muted-foreground">Pending</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#FC2869]" />
-            <span className="text-muted-foreground">Not Booked</span>
+          <div className="flex items-center gap-3 border-t border-border pt-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-6 h-0.5 bg-foreground" />
+              <span className="text-muted-foreground">Bus</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span
+                className="w-6 h-0.5 bg-foreground"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(90deg, currentColor 0, currentColor 4px, transparent 4px, transparent 8px)",
+                }}
+              />
+              <span className="text-muted-foreground">Jeep/Offroad</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Custom styles for Leaflet popups */}
+      {/* Custom styles */}
       <style jsx global>{`
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          100% {
+            transform: scale(1.8);
+            opacity: 0;
+          }
+        }
         .custom-popup .leaflet-popup-content-wrapper {
           background: var(--card);
           border-radius: 12px;
@@ -252,8 +378,10 @@ export function TripMap() {
         }
         .leaflet-container {
           font-family: inherit;
+          background: #f8f9fa;
         }
-        .custom-marker {
+        .custom-marker,
+        .mode-label {
           background: transparent !important;
           border: none !important;
         }

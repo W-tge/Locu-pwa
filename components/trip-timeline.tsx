@@ -1,202 +1,499 @@
 "use client";
 
+import { useState } from "react";
 import { useTrip } from "@/lib/trip-context";
-import { formatDateRange } from "@/lib/trip-data";
+import { formatDateRange, type Stop, type TransitLeg } from "@/lib/trip-data";
 import { cn } from "@/lib/utils";
-import { 
-  MapPin, 
-  Plane, 
-  Bus, 
-  Ship, 
-  Train, 
-  Clock, 
-  AlertTriangle,
+import {
+  Bus,
+  Ship,
+  Train,
+  Clock,
   CheckCircle2,
   Circle,
   ChevronRight,
   Bed,
-  Info
+  Info,
+  AlertTriangle,
+  Users,
+  Truck,
+  Anchor,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 function getTransportIcon(type: string) {
   switch (type) {
-    case "flight": return Plane;
-    case "boat": return Ship;
-    case "train": return Train;
-    case "shuttle": return Bus;
-    default: return Bus;
-  }
-}
-
-function getStatusIcon(status: string) {
-  switch (status) {
-    case "booked": return CheckCircle2;
-    case "pending": return Clock;
-    default: return Circle;
+    case "boat":
+    case "ferry":
+      return Anchor;
+    case "train":
+      return Train;
+    case "jeep":
+      return Truck;
+    case "shuttle":
+    case "bus":
+    default:
+      return Bus;
   }
 }
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "booked": return "text-[#4ECDC4]";
-    case "pending": return "text-[#FF9F43]";
-    default: return "text-[#FC2869]";
+    case "booked":
+      return "text-success";
+    case "pending":
+      return "text-secondary";
+    default:
+      return "text-primary";
   }
 }
 
 function getStatusBg(status: string) {
   switch (status) {
-    case "booked": return "bg-[#4ECDC4]/10 border-[#4ECDC4]/30";
-    case "pending": return "bg-[#FF9F43]/10 border-[#FF9F43]/30";
-    default: return "bg-[#FC2869]/10 border-[#FC2869]/30";
+    case "booked":
+      return "bg-success/10 border-success/30";
+    case "pending":
+      return "bg-secondary/10 border-secondary/30";
+    default:
+      return "bg-primary/10 border-primary/30";
   }
 }
 
-export function TripTimeline() {
-  const { trip, selectedStop, selectedLeg, setSelectedStop, setSelectedLeg } = useTrip();
+// Flywheel Verify Pill Component
+function VerifyPill({
+  text,
+  isVerified,
+  verifiedCount,
+  onVerify,
+}: {
+  text: string;
+  isVerified: boolean;
+  verifiedCount?: number;
+  onVerify: () => void;
+}) {
+  const [showToast, setShowToast] = useState(false);
+
+  const handleClick = () => {
+    if (!isVerified) {
+      onVerify();
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
+    }
+  };
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-hide pb-24">
-      <div className="p-4 space-y-1">
+    <div className="relative">
+      <button
+        onClick={handleClick}
+        className={cn(
+          "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium transition-all",
+          isVerified
+            ? "bg-success/10 text-success border border-success/30"
+            : "bg-muted text-muted-foreground border border-border hover:border-secondary hover:text-secondary"
+        )}
+      >
+        {isVerified ? (
+          <>
+            <CheckCircle2 className="w-3 h-3" />
+            <span>Verified by {verifiedCount} travelers</span>
+          </>
+        ) : (
+          <>
+            <span className="text-muted-foreground">{text}</span>
+            <span className="text-secondary font-semibold">[Confirm]</span>
+          </>
+        )}
+      </button>
+      {/* Karma toast */}
+      {showToast && (
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-success text-success-foreground px-3 py-1 rounded-full text-xs font-bold animate-in fade-in slide-in-from-bottom-2 z-50 whitespace-nowrap">
+          +10 Karma Points
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Pod Alert Inline Card Component
+function PodAlertCard({
+  alert,
+  onAction,
+}: {
+  alert: {
+    style: string;
+    title: string;
+    body: string;
+    action?: string;
+    podAction?: string;
+  };
+  onAction: () => void;
+}) {
+  const isCritical = alert.style === "CRITICAL_INLINE_CARD";
+
+  return (
+    <div
+      className={cn(
+        "mx-4 my-2 rounded-xl p-3 border",
+        isCritical
+          ? "bg-gradient-to-r from-accent/20 to-primary/20 border-accent/30"
+          : "bg-gradient-to-r from-secondary/20 to-primary/20 border-secondary/30"
+      )}
+    >
+      <div className="flex items-start gap-2">
+        <div
+          className={cn(
+            "w-6 h-6 rounded-full flex items-center justify-center shrink-0",
+            isCritical ? "bg-accent/20" : "bg-secondary/20"
+          )}
+        >
+          {isCritical ? (
+            <AlertTriangle className="w-3.5 h-3.5 text-accent" />
+          ) : (
+            <Users className="w-3.5 h-3.5 text-secondary" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-bold text-foreground">{alert.title}</h4>
+          <p className="text-xs text-muted-foreground mt-0.5">{alert.body}</p>
+          {(alert.action || alert.podAction) && (
+            <Button
+              onClick={onAction}
+              size="sm"
+              className={cn(
+                "mt-2 h-7 text-xs",
+                isCritical
+                  ? "bg-accent hover:bg-accent/90"
+                  : "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+              )}
+            >
+              {alert.action || alert.podAction}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Flywheel Request Card (in-stop)
+function FlywheelRequestCard({
+  request,
+  onVerify,
+}: {
+  request: { type: string; text: string; action: string };
+  onVerify: () => void;
+}) {
+  const [verified, setVerified] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const handleVerify = () => {
+    setVerified(true);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+    onVerify();
+  };
+
+  return (
+    <div className="relative mt-2 p-2 rounded-lg bg-muted/50 border border-dashed border-border">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] text-muted-foreground">{request.text}</p>
+        <button
+          onClick={handleVerify}
+          disabled={verified}
+          className={cn(
+            "px-2 py-1 rounded-full text-[10px] font-semibold transition-all",
+            verified
+              ? "bg-success/20 text-success"
+              : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+          )}
+        >
+          {verified ? "Verified" : request.action}
+        </button>
+      </div>
+      {showToast && (
+        <div className="absolute -top-6 right-0 bg-success text-success-foreground px-3 py-1 rounded-full text-xs font-bold animate-in fade-in slide-in-from-bottom-2 z-50 whitespace-nowrap">
+          +10 Karma Points
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function TripTimeline({ compact = false }: { compact?: boolean }) {
+  const { trip, selectedStop, selectedLeg, setSelectedStop, setSelectedLeg } =
+    useTrip();
+  const [verifiedLegs, setVerifiedLegs] = useState<Set<string>>(new Set());
+
+  const handleVerifyLeg = (legId: string) => {
+    setVerifiedLegs((prev) => new Set(prev).add(legId));
+  };
+
+  return (
+    <div
+      className={cn(
+        "h-full overflow-y-auto scrollbar-hide",
+        compact ? "pb-4" : "pb-24"
+      )}
+    >
+      <div className={cn("space-y-1", compact ? "p-2" : "p-4")}>
         {trip.stops.map((stop, index) => {
-          const transitLeg = index < trip.stops.length - 1 
-            ? trip.transitLegs.find(l => l.fromStopId === stop.id)
-            : null;
-          
-          const StatusIcon = getStatusIcon(stop.bookingStatus);
+          const transitLeg =
+            index < trip.stops.length - 1
+              ? trip.transitLegs.find((l) => l.fromStopId === stop.id)
+              : null;
+
           const isSelected = selectedStop?.id === stop.id;
-          
+          const isActive = stop.status === "ACTIVE";
+
           return (
             <div key={stop.id}>
               {/* Stop Card */}
               <button
                 onClick={() => setSelectedStop(stop)}
                 className={cn(
-                  "w-full text-left rounded-xl border p-3 transition-all",
-                  isSelected 
-                    ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
-                    : "border-border bg-card hover:border-primary/50 hover:shadow-md"
+                  "w-full text-left rounded-xl border transition-all",
+                  compact ? "p-2" : "p-3",
+                  isSelected
+                    ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
+                    : isActive
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-border bg-card hover:border-primary/50 hover:shadow-md"
                 )}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2">
                   {/* Timeline indicator */}
                   <div className="flex flex-col items-center">
-                    <div className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
-                      stop.bookingStatus === "booked" 
-                        ? "bg-[#4ECDC4] text-[#1a1a2e]"
-                        : stop.bookingStatus === "pending"
-                        ? "bg-[#FF9F43] text-[#1a1a2e]"
-                        : "bg-[#FC2869] text-white"
-                    )}>
+                    <div
+                      className={cn(
+                        "rounded-full flex items-center justify-center text-xs font-bold relative",
+                        compact ? "w-6 h-6" : "w-8 h-8",
+                        stop.bookingStatus === "booked"
+                          ? "bg-success text-success-foreground"
+                          : stop.bookingStatus === "pending"
+                            ? "bg-secondary text-secondary-foreground"
+                            : "bg-primary text-primary-foreground"
+                      )}
+                    >
                       {index + 1}
+                      {isActive && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full animate-pulse border-2 border-card" />
+                      )}
                     </div>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-bold text-foreground truncate">{stop.city}</h3>
-                      <StatusIcon className={cn("w-4 h-4 shrink-0", getStatusColor(stop.bookingStatus))} />
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className={cn(
+                            "font-bold text-foreground truncate",
+                            compact ? "text-sm" : "text-base"
+                          )}
+                        >
+                          {stop.city}
+                        </h3>
+                        {isActive && (
+                          <Badge className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0">
+                            NOW
+                          </Badge>
+                        )}
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                     </div>
-                    
-                    <p className="text-sm text-muted-foreground">
-                      {stop.country} <span className="opacity-50">|</span> {formatDateRange(stop.startDate, stop.endDate)}
+
+                    <p
+                      className={cn(
+                        "text-muted-foreground",
+                        compact ? "text-[10px]" : "text-xs"
+                      )}
+                    >
+                      {stop.country}{" "}
+                      <span className="opacity-50 mx-1">|</span>
+                      {formatDateRange(stop.startDate, stop.endDate)}
                     </p>
-                    
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="secondary" className="text-xs">
+
+                    {stop.highlight && !compact && (
+                      <p className="text-[11px] text-secondary mt-1 font-medium">
+                        {stop.highlight}
+                      </p>
+                    )}
+
+                    <div
+                      className={cn(
+                        "flex items-center gap-2 flex-wrap",
+                        compact ? "mt-1" : "mt-2"
+                      )}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className={cn("font-normal", compact && "text-[9px]")}
+                      >
                         {stop.nights} nights
                       </Badge>
-                      
+
                       {stop.hostelName ? (
-                        <Badge variant="outline" className={cn("text-xs", getStatusBg(stop.bookingStatus))}>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "font-normal",
+                            getStatusBg(stop.bookingStatus),
+                            compact && "text-[9px]"
+                          )}
+                        >
                           <Bed className="w-3 h-3 mr-1" />
-                          {stop.hostelName}
+                          {compact
+                            ? stop.hostelName.split(" ")[0]
+                            : stop.hostelName}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-xs bg-[#FC2869]/10 border-[#FC2869]/30 text-[#FC2869]">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "font-normal bg-primary/10 border-primary/30 text-primary",
+                            compact && "text-[9px]"
+                          )}
+                        >
                           <Bed className="w-3 h-3 mr-1" />
-                          Book hostel
+                          Book
                         </Badge>
                       )}
                     </div>
-                    
-                    {/* Tags */}
-                    {stop.tags && stop.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {stop.tags.slice(0, 3).map(tag => (
-                          <span 
-                            key={tag} 
-                            className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {stop.tags.length > 3 && (
-                          <span className="text-[10px] px-1.5 py-0.5 text-muted-foreground">
-                            +{stop.tags.length - 3} more
+
+                    {/* Flywheel Request (if present) */}
+                    {stop.alerts &&
+                      stop.alerts.length > 0 &&
+                      !compact &&
+                      stop.alerts.map((alert, i) => (
+                        <FlywheelRequestCard
+                          key={i}
+                          request={alert}
+                          onVerify={() => {}}
+                        />
+                      ))}
+                  </div>
+                </div>
+              </button>
+
+              {/* Pod Booking Alert (interrupts timeline) */}
+              {stop.bookingAlert && !compact && (
+                <PodAlertCard
+                  alert={stop.bookingAlert}
+                  onAction={() => setSelectedStop(stop)}
+                />
+              )}
+
+              {/* Transit Leg */}
+              {transitLeg && (
+                <>
+                  {/* Critical Alert before transit (e.g., border crossing) */}
+                  {transitLeg.alert && !compact && (
+                    <PodAlertCard
+                      alert={transitLeg.alert}
+                      onAction={() => setSelectedLeg(transitLeg)}
+                    />
+                  )}
+
+                  <button
+                    onClick={() => setSelectedLeg(transitLeg)}
+                    className={cn(
+                      "w-full text-left rounded-lg border transition-all flex items-center gap-2",
+                      compact ? "my-0.5 ml-3 p-1.5" : "my-1 ml-4 p-2",
+                      selectedLeg?.id === transitLeg.id
+                        ? "border-secondary bg-secondary/10"
+                        : "border-dashed border-border/50 hover:border-secondary/50 bg-transparent"
+                    )}
+                  >
+                    {/* Transport Icon */}
+                    {(() => {
+                      const Icon = getTransportIcon(transitLeg.type);
+                      return (
+                        <div
+                          className={cn(
+                            "rounded-full flex items-center justify-center",
+                            compact ? "w-5 h-5" : "w-6 h-6",
+                            transitLeg.bookingStatus === "booked"
+                              ? "bg-success/20 text-success"
+                              : transitLeg.bookingStatus === "pending"
+                                ? "bg-secondary/20 text-secondary"
+                                : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          <Icon className={cn(compact ? "w-3 h-3" : "w-3.5 h-3.5")} />
+                        </div>
+                      );
+                    })()}
+
+                    <div className="flex-1 min-w-0">
+                      <div
+                        className={cn(
+                          "flex items-center gap-2",
+                          compact ? "text-[10px]" : "text-xs"
+                        )}
+                      >
+                        <span className="font-medium text-foreground capitalize">
+                          {transitLeg.mode || transitLeg.type}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {transitLeg.duration}
+                        </span>
+                        {transitLeg.price && (
+                          <span className="text-muted-foreground">
+                            ${transitLeg.price}
                           </span>
                         )}
                       </div>
-                    )}
-                  </div>
-                  
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                </div>
-              </button>
-              
-              {/* Transit Leg */}
-              {transitLeg && (
-                <button
-                  onClick={() => setSelectedLeg(transitLeg)}
-                  className={cn(
-                    "w-full my-1 ml-4 mr-0 text-left rounded-lg border p-2 transition-all flex items-center gap-3",
-                    selectedLeg?.id === transitLeg.id
-                      ? "border-[#FF9F43] bg-[#FF9F43]/10"
-                      : "border-dashed border-border/50 hover:border-[#FF9F43]/50 bg-transparent"
-                  )}
-                >
-                  {/* Transport Icon */}
-                  {(() => {
-                    const Icon = getTransportIcon(transitLeg.type);
-                    return (
-                      <div className={cn(
-                        "w-6 h-6 rounded-full flex items-center justify-center",
-                        transitLeg.bookingStatus === "booked"
-                          ? "bg-[#4ECDC4]/20 text-[#4ECDC4]"
-                          : transitLeg.bookingStatus === "pending"
-                          ? "bg-[#FF9F43]/20 text-[#FF9F43]"
-                          : "bg-muted text-muted-foreground"
-                      )}>
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                    );
-                  })()}
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="font-medium text-foreground capitalize">{transitLeg.type}</span>
-                      <span className="text-muted-foreground">{transitLeg.duration}</span>
-                      {transitLeg.price && (
-                        <span className="text-muted-foreground">
-                          ${transitLeg.price}
-                        </span>
+
+                      {/* Flywheel verified data */}
+                      {transitLeg.flywheelData && !compact && (
+                        <div className="mt-1">
+                          <VerifyPill
+                            text={transitLeg.flywheelData}
+                            isVerified={
+                              verifiedLegs.has(transitLeg.id) ||
+                              (transitLeg.verifiedCount ?? 0) > 0
+                            }
+                            verifiedCount={transitLeg.verifiedCount}
+                            onVerify={() => handleVerifyLeg(transitLeg.id)}
+                          />
+                        </div>
+                      )}
+
+                      {/* Community tip */}
+                      {transitLeg.communityTip && !compact && (
+                        <div className="flex items-start gap-1 mt-1">
+                          <Info className="w-3 h-3 text-secondary shrink-0 mt-0.5" />
+                          <span className="text-[10px] text-muted-foreground">
+                            {transitLeg.communityTip}
+                            {transitLeg.verifiedCount && (
+                              <span className="text-success ml-1">
+                                (Verified by {transitLeg.verifiedCount})
+                              </span>
+                            )}
+                          </span>
+                        </div>
                       )}
                     </div>
-                    {transitLeg.communityTip && (
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <Info className="w-3 h-3 text-[#FF9F43]" />
-                        <span className="text-[10px] text-[#FF9F43] truncate">
-                          {transitLeg.communityTip}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <StatusIcon className={cn("w-4 h-4 shrink-0", getStatusColor(transitLeg.bookingStatus))} />
-                </button>
+
+                    {(() => {
+                      const StatusIcon =
+                        transitLeg.bookingStatus === "booked"
+                          ? CheckCircle2
+                          : transitLeg.bookingStatus === "pending"
+                            ? Clock
+                            : Circle;
+                      return (
+                        <StatusIcon
+                          className={cn(
+                            "w-4 h-4 shrink-0",
+                            getStatusColor(transitLeg.bookingStatus)
+                          )}
+                        />
+                      );
+                    })()}
+                  </button>
+                </>
               )}
             </div>
           );
