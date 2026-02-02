@@ -4,83 +4,88 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Locu - Backpacker OS Color System */
-/* Primary: #FC2869 (Vibrant Pink) */
-/* Secondary: #FF9F43 (Sunrise Orange) */
-/* Accent: #FF6B6B (Coral) */
-/* Success/Verified: #4ECDC4 (Turquoise) */
+/* Primary: #FC2869 (Neon Pink) - Hero Color */
+/* Secondary: #00D4AA (Electric Mint) - Verified/Booked */
+/* Accent: #FF6B9D (Hot Coral) - Alerts/Pending */
+/* Tertiary: #4ECDC4 (Turquoise) - Success indicators */
+/* Highlight: #7C3AED (Electric Purple) - Special */
 
 :root {
-  --background: #FFFBF8;
-  --foreground: #1a1a2e;
+  --background: #FAFBFC;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #1a1a2e;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #1a1a2e;
+  --popover-foreground: #0f172a;
   --primary: #FC2869;
   --primary-foreground: #ffffff;
-  --secondary: #FF9F43;
-  --secondary-foreground: #1a1a2e;
-  --muted: #FFF5F0;
+  --secondary: #00D4AA;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #FF6B6B;
+  --accent: #FF6B9D;
   --accent-foreground: #ffffff;
   --success: #4ECDC4;
-  --success-foreground: #1a1a2e;
+  --success-foreground: #0f172a;
+  --warning: #FBBF24;
+  --warning-foreground: #0f172a;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #FFE4D6;
-  --input: #FFE4D6;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
   --ring: #FC2869;
   --chart-1: #FC2869;
-  --chart-2: #FF9F43;
+  --chart-2: #00D4AA;
   --chart-3: #4ECDC4;
-  --chart-4: #FF6B6B;
-  --chart-5: #8B5CF6;
+  --chart-4: #FF6B9D;
+  --chart-5: #7C3AED;
   --radius: 0.75rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1a1a2e;
+  --sidebar-foreground: #0f172a;
   --sidebar-primary: #FC2869;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #FFF5F0;
-  --sidebar-accent-foreground: #1a1a2e;
-  --sidebar-border: #FFE4D6;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
   --sidebar-ring: #FC2869;
 }
 
 .dark {
-  --background: #0f0f1a;
+  --background: #0a0a12;
   --foreground: #f8fafc;
-  --card: #1a1a2e;
+  --card: #12121e;
   --card-foreground: #f8fafc;
-  --popover: #1a1a2e;
+  --popover: #12121e;
   --popover-foreground: #f8fafc;
   --primary: #FC2869;
   --primary-foreground: #ffffff;
-  --secondary: #FF9F43;
-  --secondary-foreground: #1a1a2e;
-  --muted: #2a2a3e;
+  --secondary: #00D4AA;
+  --secondary-foreground: #0f172a;
+  --muted: #1e1e2e;
   --muted-foreground: #94a3b8;
-  --accent: #FF6B6B;
+  --accent: #FF6B9D;
   --accent-foreground: #ffffff;
   --success: #4ECDC4;
-  --success-foreground: #1a1a2e;
+  --success-foreground: #0f172a;
+  --warning: #FBBF24;
+  --warning-foreground: #0f172a;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #2a2a3e;
-  --input: #2a2a3e;
+  --border: #1e293b;
+  --input: #1e293b;
   --ring: #FC2869;
   --chart-1: #FC2869;
-  --chart-2: #FF9F43;
+  --chart-2: #00D4AA;
   --chart-3: #4ECDC4;
-  --chart-4: #FF6B6B;
-  --chart-5: #8B5CF6;
-  --sidebar: #1a1a2e;
+  --chart-4: #FF6B9D;
+  --chart-5: #7C3AED;
+  --sidebar: #12121e;
   --sidebar-foreground: #f8fafc;
   --sidebar-primary: #FC2869;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #2a2a3e;
+  --sidebar-accent: #1e1e2e;
   --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #2a2a3e;
+  --sidebar-border: #1e293b;
   --sidebar-ring: #FC2869;
 }
 
@@ -147,14 +152,18 @@
   }
   
   .gradient-primary {
-    background: linear-gradient(135deg, #FC2869 0%, #FF6B6B 100%);
+    background: linear-gradient(135deg, #FC2869 0%, #FF6B9D 100%);
   }
   
-  .gradient-secondary {
-    background: linear-gradient(135deg, #FF9F43 0%, #FC2869 100%);
+  .gradient-mint {
+    background: linear-gradient(135deg, #00D4AA 0%, #4ECDC4 100%);
   }
   
   .gradient-turquoise {
-    background: linear-gradient(135deg, #4ECDC4 0%, #45B7AA 100%);
+    background: linear-gradient(135deg, #4ECDC4 0%, #00D4AA 100%);
+  }
+  
+  .gradient-vibrant {
+    background: linear-gradient(135deg, #FC2869 0%, #7C3AED 100%);
   }
 }

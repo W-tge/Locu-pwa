@@ -41,9 +41,9 @@ function getTransportIcon(type: string) {
 function getStatusColor(status: string) {
   switch (status) {
     case "booked":
-      return "text-success";
+      return "text-[#00D4AA]";
     case "pending":
-      return "text-secondary";
+      return "text-[#FF6B9D]";
     default:
       return "text-primary";
   }
@@ -52,9 +52,9 @@ function getStatusColor(status: string) {
 function getStatusBg(status: string) {
   switch (status) {
     case "booked":
-      return "bg-success/10 border-success/30";
+      return "bg-[#00D4AA]/10 border-[#00D4AA]/30";
     case "pending":
-      return "bg-secondary/10 border-secondary/30";
+      return "bg-[#FF6B9D]/10 border-[#FF6B9D]/30";
     default:
       return "bg-primary/10 border-primary/30";
   }
@@ -89,8 +89,8 @@ function VerifyPill({
         className={cn(
           "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium transition-all",
           isVerified
-            ? "bg-success/10 text-success border border-success/30"
-            : "bg-muted text-muted-foreground border border-border hover:border-secondary hover:text-secondary"
+            ? "bg-[#00D4AA]/10 text-[#00D4AA] border border-[#00D4AA]/30"
+            : "bg-muted text-muted-foreground border border-border hover:border-primary hover:text-primary"
         )}
       >
         {isVerified ? (
@@ -101,13 +101,13 @@ function VerifyPill({
         ) : (
           <>
             <span className="text-muted-foreground">{text}</span>
-            <span className="text-secondary font-semibold">[Confirm]</span>
+            <span className="text-primary font-semibold">[Confirm]</span>
           </>
         )}
       </button>
       {/* Karma toast */}
       {showToast && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-success text-success-foreground px-3 py-1 rounded-full text-xs font-bold animate-in fade-in slide-in-from-bottom-2 z-50 whitespace-nowrap">
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#00D4AA] text-white px-3 py-1 rounded-full text-xs font-bold animate-in fade-in slide-in-from-bottom-2 z-50 whitespace-nowrap shadow-lg shadow-[#00D4AA]/40">
           +10 Karma Points
         </div>
       )}
@@ -136,21 +136,21 @@ function PodAlertCard({
       className={cn(
         "mx-4 my-2 rounded-xl p-3 border",
         isCritical
-          ? "bg-gradient-to-r from-accent/20 to-primary/20 border-accent/30"
-          : "bg-gradient-to-r from-secondary/20 to-primary/20 border-secondary/30"
+          ? "bg-gradient-to-r from-[#FF6B9D]/15 to-primary/15 border-[#FF6B9D]/30"
+          : "bg-gradient-to-r from-[#7C3AED]/15 to-primary/15 border-[#7C3AED]/30"
       )}
     >
       <div className="flex items-start gap-2">
         <div
           className={cn(
             "w-6 h-6 rounded-full flex items-center justify-center shrink-0",
-            isCritical ? "bg-accent/20" : "bg-secondary/20"
+            isCritical ? "bg-[#FF6B9D]/20" : "bg-[#7C3AED]/20"
           )}
         >
           {isCritical ? (
-            <AlertTriangle className="w-3.5 h-3.5 text-accent" />
+            <AlertTriangle className="w-3.5 h-3.5 text-[#FF6B9D]" />
           ) : (
-            <Users className="w-3.5 h-3.5 text-secondary" />
+            <Users className="w-3.5 h-3.5 text-[#7C3AED]" />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -161,10 +161,10 @@ function PodAlertCard({
               onClick={onAction}
               size="sm"
               className={cn(
-                "mt-2 h-7 text-xs",
+                "mt-2 h-7 text-xs font-semibold",
                 isCritical
-                  ? "bg-accent hover:bg-accent/90"
-                  : "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                  ? "bg-[#FF6B9D] hover:bg-[#FF6B9D]/90 text-white"
+                  : "bg-[#7C3AED] hover:bg-[#7C3AED]/90 text-white"
               )}
             >
               {alert.action || alert.podAction}
@@ -204,15 +204,15 @@ function FlywheelRequestCard({
           className={cn(
             "px-2 py-1 rounded-full text-[10px] font-semibold transition-all",
             verified
-              ? "bg-success/20 text-success"
-              : "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              ? "bg-[#00D4AA]/20 text-[#00D4AA]"
+              : "bg-primary text-white hover:bg-primary/90"
           )}
         >
           {verified ? "Verified" : request.action}
         </button>
       </div>
       {showToast && (
-        <div className="absolute -top-6 right-0 bg-success text-success-foreground px-3 py-1 rounded-full text-xs font-bold animate-in fade-in slide-in-from-bottom-2 z-50 whitespace-nowrap">
+        <div className="absolute -top-6 right-0 bg-[#00D4AA] text-white px-3 py-1 rounded-full text-xs font-bold animate-in fade-in slide-in-from-bottom-2 z-50 whitespace-nowrap shadow-lg shadow-[#00D4AA]/40">
           +10 Karma Points
         </div>
       )}
@@ -266,13 +266,13 @@ export function TripTimeline({ compact = false }: { compact?: boolean }) {
                   <div className="flex flex-col items-center">
                     <div
                       className={cn(
-                        "rounded-full flex items-center justify-center text-xs font-bold relative",
+                        "rounded-full flex items-center justify-center text-xs font-bold relative shadow-lg",
                         compact ? "w-6 h-6" : "w-8 h-8",
                         stop.bookingStatus === "booked"
-                          ? "bg-success text-success-foreground"
+                          ? "bg-[#00D4AA] text-white shadow-[#00D4AA]/40"
                           : stop.bookingStatus === "pending"
-                            ? "bg-secondary text-secondary-foreground"
-                            : "bg-primary text-primary-foreground"
+                            ? "bg-[#FF6B9D] text-white shadow-[#FF6B9D]/40"
+                            : "bg-primary text-white shadow-primary/40"
                       )}
                     >
                       {index + 1}
@@ -315,7 +315,7 @@ export function TripTimeline({ compact = false }: { compact?: boolean }) {
                     </p>
 
                     {stop.highlight && !compact && (
-                      <p className="text-[11px] text-secondary mt-1 font-medium">
+                      <p className="text-[11px] text-[#7C3AED] mt-1 font-medium">
                         {stop.highlight}
                       </p>
                     )}
@@ -414,9 +414,9 @@ export function TripTimeline({ compact = false }: { compact?: boolean }) {
                             "rounded-full flex items-center justify-center",
                             compact ? "w-5 h-5" : "w-6 h-6",
                             transitLeg.bookingStatus === "booked"
-                              ? "bg-success/20 text-success"
+                              ? "bg-[#00D4AA]/20 text-[#00D4AA]"
                               : transitLeg.bookingStatus === "pending"
-                                ? "bg-secondary/20 text-secondary"
+                                ? "bg-[#FF6B9D]/20 text-[#FF6B9D]"
                                 : "bg-muted text-muted-foreground"
                           )}
                         >
@@ -467,7 +467,7 @@ export function TripTimeline({ compact = false }: { compact?: boolean }) {
                           <span className="text-[10px] text-muted-foreground">
                             {transitLeg.communityTip}
                             {transitLeg.verifiedCount && (
-                              <span className="text-success ml-1">
+                              <span className="text-[#00D4AA] ml-1 font-medium">
                                 (Verified by {transitLeg.verifiedCount})
                               </span>
                             )}

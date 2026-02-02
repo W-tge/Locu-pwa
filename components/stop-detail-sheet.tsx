@@ -85,9 +85,9 @@ export function StopDetailSheet() {
               <Badge 
                 variant="outline" 
                 className={cn(
-                  "text-xs",
-                  isBooked && "bg-[#4ECDC4]/10 border-[#4ECDC4] text-[#4ECDC4]",
-                  isPending && "bg-[#FF9F43]/10 border-[#FF9F43] text-[#FF9F43]",
+                  "text-xs font-semibold",
+                  isBooked && "bg-[#00D4AA]/10 border-[#00D4AA] text-[#00D4AA]",
+                  isPending && "bg-[#FF6B9D]/10 border-[#FF6B9D] text-[#FF6B9D]",
                   !isBooked && !isPending && "bg-[#FC2869]/10 border-[#FC2869] text-[#FC2869]"
                 )}
               >
@@ -146,15 +146,15 @@ export function StopDetailSheet() {
           
           {/* Community Tips */}
           {selectedStop.communityTips && selectedStop.communityTips.length > 0 && (
-            <div className="rounded-xl border border-[#FF9F43]/30 bg-[#FF9F43]/5 p-3">
-              <div className="flex items-center gap-2 text-[#FF9F43] font-medium text-sm mb-2">
+            <div className="rounded-xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 p-3">
+              <div className="flex items-center gap-2 text-[#7C3AED] font-medium text-sm mb-2">
                 <Lightbulb className="w-4 h-4" />
                 Traveller Tips
               </div>
               <ul className="space-y-1.5">
                 {selectedStop.communityTips.map((tip, i) => (
                   <li key={i} className="text-sm text-foreground flex items-start gap-2">
-                    <span className="text-[#FF9F43]">-</span>
+                    <span className="text-[#7C3AED]">-</span>
                     {tip}
                   </li>
                 ))}
@@ -164,9 +164,9 @@ export function StopDetailSheet() {
           
           {/* Current Booking */}
           {isBooked && selectedStop.hostelName && (
-            <div className="rounded-xl border border-[#4ECDC4]/30 bg-[#4ECDC4]/5 p-4">
+            <div className="rounded-xl border border-[#00D4AA]/30 bg-[#00D4AA]/5 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-5 h-5 text-[#4ECDC4]" />
+                <CheckCircle2 className="w-5 h-5 text-[#00D4AA]" />
                 <span className="font-semibold text-foreground">Booked</span>
               </div>
               <p className="text-foreground font-medium">{selectedStop.hostelName}</p>
@@ -205,16 +205,16 @@ export function StopDetailSheet() {
                           <p className="font-semibold text-foreground">{hostel.name}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="flex items-center gap-1 text-sm">
-                              <Star className="w-3.5 h-3.5 text-[#FF9F43] fill-[#FF9F43]" />
+                              <Star className="w-3.5 h-3.5 text-[#FBBF24] fill-[#FBBF24]" />
                               {hostel.rating}
                             </span>
                             <Badge 
                               variant="outline" 
                               className={cn(
-                                "text-[10px]",
-                                hostel.availability === "high" && "border-[#4ECDC4] text-[#4ECDC4]",
-                                hostel.availability === "medium" && "border-[#FF9F43] text-[#FF9F43]",
-                                hostel.availability === "low" && "border-[#FC2869] text-[#FC2869]"
+                                "text-[10px] font-semibold",
+                                hostel.availability === "high" && "border-[#00D4AA] text-[#00D4AA]",
+                                hostel.availability === "medium" && "border-[#7C3AED] text-[#7C3AED]",
+                                hostel.availability === "low" && "border-[#FF6B9D] text-[#FF6B9D]"
                               )}
                             >
                               {hostel.availability === "high" ? "Available" : hostel.availability === "medium" ? "Few Left" : "Almost Full"}
