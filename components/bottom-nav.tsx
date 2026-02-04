@@ -12,19 +12,22 @@ const navItems = [
 ];
 
 export function BottomNav() {
-  const { activeTab, setActiveTab, setSubPage } = useTrip();
+  const { activeTab, setActiveTab, setSubPage, subPage } = useTrip();
 
   const handleTabClick = (tabId: typeof navItems[number]["id"]) => {
     setActiveTab(tabId);
-    setSubPage(null);
+    // Always close subpage when switching tabs
+    if (subPage) {
+      setSubPage(null);
+    }
   };
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur-lg border-t border-border safe-area-pb">
+    <nav className="bg-card/95 backdrop-blur-lg border-t border-border safe-area-pb">
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = activeTab === item.id && !subPage;
           
           return (
             <button

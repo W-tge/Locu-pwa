@@ -91,7 +91,7 @@ function DestinationCard({
           {/* Stop number circle */}
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 relative",
-            isBooked ? "bg-[#7C3AED]" : isPending ? "bg-[#FF6B9D]" : "bg-primary"
+            isBooked ? "bg-[#10B981]" : isPending ? "bg-[#FF6B9D]" : "bg-primary"
           )}>
             {stopIndex}
             {isActive && (
@@ -114,7 +114,7 @@ function DestinationCard({
               {/* Status badge */}
               <Badge className={cn(
                 "shrink-0 font-semibold",
-                isBooked ? "bg-[#7C3AED] text-white" :
+                isBooked ? "bg-[#10B981] text-white" :
                 isPending ? "bg-[#FF6B9D] text-white" :
                 "bg-primary/10 text-primary border border-primary/30"
               )}>
@@ -123,7 +123,7 @@ function DestinationCard({
             </div>
 
             {stop.highlight && (
-              <p className="text-sm text-[#7C3AED] font-medium mt-2">{stop.highlight}</p>
+              <p className="text-sm text-[#10B981] font-medium mt-2">{stop.highlight}</p>
             )}
           </div>
         </div>
@@ -141,7 +141,7 @@ function DestinationCard({
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm">{stop.hostelName}</p>
               <p className="text-xs text-muted-foreground">{stop.nights} nights</p>
-              <p className="text-sm font-bold text-[#7C3AED] mt-1">${stop.hostelPrice ? stop.hostelPrice * stop.nights : 0}</p>
+              <p className="text-sm font-bold text-[#10B981] mt-1">${stop.hostelPrice ? stop.hostelPrice * stop.nights : 0}</p>
               <button className="text-xs text-primary hover:underline mt-1">Click to view details</button>
             </div>
             <button className="p-2 rounded-full hover:bg-muted transition-colors">
@@ -197,7 +197,7 @@ function TransitLegCard({
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-            isBooked ? "bg-[#7C3AED]/20 text-[#7C3AED]" :
+            isBooked ? "bg-[#10B981]/20 text-[#10B981]" :
             isPending ? "bg-[#FF6B9D]/20 text-[#FF6B9D]" :
             "bg-primary/10 text-primary"
           )}>
@@ -209,7 +209,7 @@ function TransitLegCard({
               <span className="font-semibold text-sm">{fromCity} → {toCity}</span>
               <Badge className={cn(
                 "text-[10px] font-semibold",
-                isBooked ? "bg-[#7C3AED] text-white" :
+                isBooked ? "bg-[#10B981] text-white" :
                 isPending ? "bg-[#FF6B9D] text-white" :
                 "bg-primary text-white"
               )}>
@@ -290,14 +290,14 @@ function InsightCard({
       "rounded-xl p-4 border ml-5",
       isAlert ? "bg-[#FF6B9D]/5 border-[#FF6B9D]/30" :
       isReminder ? "bg-[#FBBF24]/5 border-[#FBBF24]/30" :
-      "bg-[#7C3AED]/5 border-[#7C3AED]/30"
+      "bg-[#10B981]/5 border-[#10B981]/30"
     )}>
       <div className="flex items-start gap-3">
         <div className={cn(
           "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
           isAlert ? "bg-[#FF6B9D]/20 text-[#FF6B9D]" :
           isReminder ? "bg-[#FBBF24]/20 text-[#FBBF24]" :
-          "bg-[#7C3AED]/20 text-[#7C3AED]"
+          "bg-[#10B981]/20 text-[#10B981]"
         )}>
           <Icon className="w-4 h-4" />
         </div>
@@ -306,7 +306,7 @@ function InsightCard({
             "font-bold text-sm",
             isAlert ? "text-[#FF6B9D]" :
             isReminder ? "text-[#FBBF24]" :
-            "text-[#7C3AED]"
+            "text-[#10B981]"
           )}>{insight.title}</h4>
           <p className="text-sm text-muted-foreground mt-1">{insight.body}</p>
           {insight.action && (
@@ -317,7 +317,7 @@ function InsightCard({
                 "mt-3 h-8 font-semibold",
                 isAlert ? "bg-[#FF6B9D] hover:bg-[#FF6B9D]/90 text-white" :
                 isReminder ? "bg-[#FBBF24] hover:bg-[#FBBF24]/90 text-foreground" :
-                "bg-[#7C3AED] hover:bg-[#7C3AED]/90 text-white"
+                "bg-[#10B981] hover:bg-[#10B981]/90 text-white"
               )}
             >
               {insight.action}
@@ -345,17 +345,17 @@ function CriticalAlertCard({
       "rounded-xl p-4 border ml-5",
       isCritical
         ? "bg-gradient-to-r from-[#FF6B9D]/10 to-primary/10 border-[#FF6B9D]/40"
-        : "bg-gradient-to-r from-[#7C3AED]/10 to-primary/10 border-[#7C3AED]/40"
+        : "bg-gradient-to-r from-[#10B981]/10 to-primary/10 border-[#10B981]/40"
     )}>
       <div className="flex items-start gap-3">
         <div className={cn(
           "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-          isCritical ? "bg-[#FF6B9D]/20" : "bg-[#7C3AED]/20"
+          isCritical ? "bg-[#FF6B9D]/20" : "bg-[#10B981]/20"
         )}>
           {isCritical ? (
             <AlertTriangle className="w-4 h-4 text-[#FF6B9D]" />
           ) : (
-            <Users className="w-4 h-4 text-[#7C3AED]" />
+            <Users className="w-4 h-4 text-[#10B981]" />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -367,7 +367,7 @@ function CriticalAlertCard({
               size="sm"
               className={cn(
                 "mt-3 h-8 font-semibold",
-                isCritical ? "bg-[#FF6B9D] hover:bg-[#FF6B9D]/90" : "bg-[#7C3AED] hover:bg-[#7C3AED]/90"
+                isCritical ? "bg-[#FF6B9D] hover:bg-[#FF6B9D]/90" : "bg-[#10B981] hover:bg-[#10B981]/90"
               )}
             >
               {alert.action || alert.podAction}

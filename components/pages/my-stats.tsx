@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react"
-
+import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 
 const achievementColors = {
   pink: "from-primary to-[#FF6B9D]",
-  purple: "from-[#7C3AED] to-[#A855F7]",
-  mint: "from-[#7C3AED] to-primary",
+  purple: "from-[#10B981] to-[#34D399]",
+  mint: "from-[#10B981] to-primary",
   coral: "from-[#FF6B9D] to-primary",
 };
 
@@ -43,7 +43,7 @@ export function MyStats() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <span className="text-primary font-bold text-sm border border-primary rounded px-1.5">LOCU</span>
+          <Image src="/locu-logo.png" alt="Locu" width={60} height={24} className="h-6 w-auto" />
           <h1 className="text-xl font-bold">My Stats</h1>
         </div>
       </header>

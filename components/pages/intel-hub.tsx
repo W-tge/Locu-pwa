@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTrip } from "@/lib/trip-context";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   ArrowLeft,
   AlertTriangle,
@@ -46,7 +47,7 @@ export function IntelHub() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <span className="text-primary font-bold text-sm border border-primary rounded px-1.5">LOCU</span>
+          <Image src="/locu-logo.png" alt="Locu" width={60} height={24} className="h-6 w-auto" />
           <Lightbulb className="w-5 h-5 text-[#FBBF24]" />
           <h1 className="text-xl font-bold">Intel Hub</h1>
         </div>
@@ -87,7 +88,7 @@ export function IntelHub() {
                 key={alert.id} 
                 className={cn(
                   "bg-card rounded-xl border-l-4 border border-border p-4",
-                  alert.type === "assist" ? "border-l-[#00D4AA]" : "border-l-[#7C3AED]"
+                  alert.type === "assist" ? "border-l-[#00D4AA]" : "border-l-[#10B981]"
                 )}
               >
                 <h3 className="font-bold text-foreground">{alert.title}</h3>

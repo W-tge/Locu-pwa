@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrip } from "@/lib/trip-context";
+import { AppHeader } from "./app-header";
 import { JourneyView } from "./journey-view";
 import { ChatGuide } from "./chat-guide";
 import { SocialPods } from "./social-pods";
@@ -20,6 +21,8 @@ import { IntelHub } from "./pages/intel-hub";
 import { SafetyToolkit } from "./pages/safety-toolkit";
 import { TravelTimeline } from "./pages/travel-timeline";
 import { TripHistory } from "./pages/trip-history";
+import { HostelDetails } from "./pages/hostel-details";
+import { TransportBooking } from "./pages/transport-booking";
 
 export function AppShell() {
   const { activeTab, subPage, selectedStop, selectedLeg } = useTrip();
@@ -45,32 +48,49 @@ export function AppShell() {
         return <TravelTimeline />;
       case "tripHistory":
         return <TripHistory />;
+      case "social":
+        return <SocialPods />;
+      case "hostelDetails":
+        return <HostelDetails />;
+      case "transportBooking":
+        return <TransportBooking />;
       default:
         return null;
     }
   };
 
+  const subPageContent = renderSubPage();
+
   return (
     <div className="h-[100dvh] w-full flex flex-col overflow-hidden bg-background">
-      {/* Main Content */}
-      <main className="flex-1 overflow-hidden pb-16">
-        {subPage ? (
-          renderSubPage()
-        ) : (
-          <>
-            {activeTab === "journey" && <JourneyView />}
-            {activeTab === "guide" && <ChatGuide />}
-            {activeTab === "social" && <SocialPods />}
-            {activeTab === "wallet" && <WalletDocs />}
-            {activeTab === "menu" && <ProfileMenu />}
-          </>
+      {/* Header - Always visible */}
+      <AppHeader />
+
+      {/* Main Content - Always leaves space for bottom nav on mobile */}
+      <main className="flex-1 overflow-hidden pb-16 lg:pb-0 relative">
+        {/* Journey view always renders but may be covered by subpage */}
+        {activeTab === "journey" && <JourneyView />}
+        {activeTab === "guide" && !subPage && <ChatGuide />}
+        {activeTab === "social" && !subPage && <SocialPods />}
+        {activeTab === "wallet" && !subPage && <WalletDocs />}
+        {activeTab === "menu" && !subPage && <ProfileMenu />}
+        
+        {/* Sub-pages render as overlay on top of main content - with proper bottom padding for nav */}
+        {subPageContent && (
+          <div className="absolute inset-0 z-30 bg-background overflow-y-auto">
+            <div className="min-h-full pb-20 lg:pb-0">
+              {subPageContent}
+            </div>
+          </div>
         )}
       </main>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
+      {/* Bottom Navigation - ALWAYS visible on mobile, higher z-index */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-50">
+        <BottomNav />
+      </div>
 
-      {/* Detail Sheets - only show when not in sub-page */}
+      {/* Detail Sheets - only show when no subpage is active */}
       {!subPage && selectedStop && <StopDetailSheet />}
       {!subPage && selectedLeg && !selectedStop && <TransitDetailSheet />}
     </div>

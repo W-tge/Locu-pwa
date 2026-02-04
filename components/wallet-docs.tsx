@@ -90,7 +90,7 @@ function getDocColor(type: string) {
     case "visa": return "bg-[#FC2869]/10 text-[#FC2869]";
     case "ticket": return "bg-[#FF9F43]/10 text-[#FF9F43]";
     case "booking": return "bg-[#4ECDC4]/10 text-[#4ECDC4]";
-    case "insurance": return "bg-purple-500/10 text-purple-500";
+    case "insurance": return "bg-emerald-500/10 text-emerald-500";
     default: return "bg-muted text-muted-foreground";
   }
 }

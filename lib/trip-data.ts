@@ -50,6 +50,7 @@ export interface TransportOption {
   type: string;
   amenities: string[];
   seatsLeft?: number;
+  verifiedCount?: number;
 }
 
 export interface Stop {
@@ -449,6 +450,7 @@ export const demoTrip: Trip = {
       bookingStatus: "not-booked",
       price: 25,
       currency: "USD",
+      verifiedCount: 56,
     },
     {
       id: "leg-4",
@@ -465,6 +467,11 @@ export const demoTrip: Trip = {
       currency: "USD",
       communityTip: "Book Tica Bus for most comfortable option",
       verifiedCount: 18,
+      transportOptions: [
+        { id: "t1", operator: "Tica Bus", departureTime: "5:00 AM", arrivalTime: "9:00 PM", duration: "16h", price: 85, type: "Premium", amenities: ["AC", "WiFi", "Reclining"], verifiedCount: 45 },
+        { id: "t2", operator: "TransNica", departureTime: "6:00 AM", arrivalTime: "10:00 PM", duration: "16h", price: 65, type: "Regular", amenities: ["AC"], verifiedCount: 28 },
+        { id: "t3", operator: "Local Shuttle Combo", departureTime: "7:00 AM", arrivalTime: "11:00 PM", duration: "16h", price: 45, type: "Budget", amenities: [], verifiedCount: 12 },
+      ],
     },
     {
       id: "leg-5",
@@ -497,6 +504,11 @@ export const demoTrip: Trip = {
       currency: "USD",
       note: "No Darien Gap crossing - bus via Panama",
       communityTip: "Break journey in Panama City for a night",
+      transportOptions: [
+        { id: "t1", operator: "Tica Bus Direct", departureTime: "6:00 AM", arrivalTime: "Next day 8PM", duration: "38h", price: 180, type: "Direct Semi-Cama", amenities: ["AC", "WiFi", "Meals"], verifiedCount: 32, seatsLeft: 4 },
+        { id: "t2", operator: "TransNica + Metro", departureTime: "7:00 AM", arrivalTime: "2 days", duration: "2 days", price: 120, type: "Budget Combo", amenities: ["AC"], verifiedCount: 58 },
+        { id: "t3", operator: "Copa Airlines", departureTime: "11:00 AM", arrivalTime: "5:00 PM", duration: "6h", price: 280, type: "Flight via Panama", amenities: ["Quickest"], verifiedCount: 15 },
+      ],
     },
     {
       id: "leg-7",

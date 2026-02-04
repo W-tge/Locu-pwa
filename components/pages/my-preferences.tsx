@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Image from "next/image";
 import {
   ArrowLeft,
   DollarSign,
@@ -63,7 +64,7 @@ export function MyPreferences() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <span className="text-primary font-bold text-sm border border-primary rounded px-1.5">LOCU</span>
+          <Image src="/locu-logo.png" alt="Locu" width={60} height={24} className="h-6 w-auto" />
           <h1 className="text-xl font-bold">My Preferences</h1>
         </div>
       </header>

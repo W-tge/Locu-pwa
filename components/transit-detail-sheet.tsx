@@ -89,7 +89,7 @@ export function TransitDetailSheet() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center",
-                isBooked ? "bg-[#7C3AED]/20 text-[#7C3AED]" : 
+                isBooked ? "bg-[#10B981]/20 text-[#10B981]" : 
                 isPending ? "bg-[#FF6B9D]/20 text-[#FF6B9D]" : 
                 "bg-primary/20 text-primary"
               )}>
@@ -100,7 +100,7 @@ export function TransitDetailSheet() {
                 variant="outline" 
                 className={cn(
                   "text-xs font-semibold",
-                  isBooked && "bg-[#7C3AED]/10 border-[#7C3AED] text-[#7C3AED]",
+                  isBooked && "bg-[#10B981]/10 border-[#10B981] text-[#10B981]",
                   isPending && "bg-[#FF6B9D]/10 border-[#FF6B9D] text-[#FF6B9D]",
                   !isBooked && !isPending && "bg-primary/10 border-primary text-primary"
                 )}
@@ -183,23 +183,23 @@ export function TransitDetailSheet() {
 
           {/* Community Tip */}
           {selectedLeg.communityTip && (
-            <div className="rounded-xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 p-3">
-              <div className="flex items-center gap-2 text-[#7C3AED] font-medium text-sm mb-1">
+            <div className="rounded-xl border border-[#10B981]/30 bg-[#10B981]/5 p-3">
+              <div className="flex items-center gap-2 text-[#10B981] font-medium text-sm mb-1">
                 <Info className="w-4 h-4" />
                 Traveller Tip
               </div>
               <p className="text-sm text-foreground">{selectedLeg.communityTip}</p>
               {selectedLeg.verifiedCount && (
-                <p className="text-xs text-[#7C3AED] mt-1 font-medium">Verified by {selectedLeg.verifiedCount} travelers</p>
+                <p className="text-xs text-[#10B981] mt-1 font-medium">Verified by {selectedLeg.verifiedCount} travelers</p>
               )}
             </div>
           )}
           
           {/* Current Booking */}
           {isBooked && selectedLeg.operator && (
-            <div className="rounded-xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 p-4">
+            <div className="rounded-xl border border-[#10B981]/30 bg-[#10B981]/5 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-5 h-5 text-[#7C3AED]" />
+                <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
                 <span className="font-semibold text-foreground">Transport Booked</span>
               </div>
               <p className="text-foreground font-medium">{selectedLeg.operator}</p>
@@ -208,11 +208,11 @@ export function TransitDetailSheet() {
                 <span>{selectedLeg.duration}</span>
               </div>
               {selectedLeg.price && (
-                <p className="text-lg font-bold text-[#7C3AED] mt-2">${selectedLeg.price}</p>
+                <p className="text-lg font-bold text-[#10B981] mt-2">${selectedLeg.price}</p>
               )}
               <Button 
                 variant="outline" 
-                className="w-full mt-3 border-[#7C3AED] text-[#7C3AED] hover:bg-[#7C3AED]/10 bg-transparent"
+                className="w-full mt-3 border-[#10B981] text-[#10B981] hover:bg-[#10B981]/10 bg-transparent"
                 onClick={() => setSubPage("bookings")}
               >
                 View Booking Details

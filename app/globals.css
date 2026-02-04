@@ -4,9 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Locu - Backpacker OS Color System */
-/* Primary: #FC2869 (Neon Pink) - Hero Color, CTAs, Unbooked */
-/* Secondary: #7C3AED (Electric Purple) - Booked, Verified, Premium */
-/* Accent: #FF6B9D (Hot Coral) - Pending, Alerts, Warnings */
+/* Primary: #FC2869 (Neon Pink) - Hero Color from Logo */
+/* Booked: #10B981 (Emerald Green) - Success, Verified */
+/* Pending: #F59E0B (Amber) - Pending states */
+/* Alert: #EF4444 (Red) - Urgent alerts */
 /* Highlight: #FBBF24 (Golden) - Stars, Ratings, Points */
 /* Keep it vibrant, fun, and adventurous for 18-25 demographic */
 
@@ -19,15 +20,15 @@
   --popover-foreground: #0f172a;
   --primary: #FC2869;
   --primary-foreground: #ffffff;
-  --secondary: #7C3AED;
+  --secondary: #10B981;
   --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #FF6B9D;
   --accent-foreground: #ffffff;
-  --success: #4ECDC4;
-  --success-foreground: #0f172a;
-  --warning: #FBBF24;
+  --success: #10B981;
+  --success-foreground: #ffffff;
+  --warning: #F59E0B;
   --warning-foreground: #0f172a;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -35,10 +36,10 @@
   --input: #e2e8f0;
   --ring: #FC2869;
   --chart-1: #FC2869;
-  --chart-2: #7C3AED;
-  --chart-3: #4ECDC4;
+  --chart-2: #10B981;
+  --chart-3: #F59E0B;
   --chart-4: #FF6B9D;
-  --chart-5: #7C3AED;
+  --chart-5: #3B82F6;
   --radius: 0.75rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #0f172a;
@@ -59,15 +60,15 @@
   --popover-foreground: #f8fafc;
   --primary: #FC2869;
   --primary-foreground: #ffffff;
-  --secondary: #7C3AED;
+  --secondary: #10B981;
   --secondary-foreground: #ffffff;
   --muted: #1e1e2e;
   --muted-foreground: #94a3b8;
   --accent: #FF6B9D;
   --accent-foreground: #ffffff;
-  --success: #4ECDC4;
-  --success-foreground: #0f172a;
-  --warning: #FBBF24;
+  --success: #10B981;
+  --success-foreground: #ffffff;
+  --warning: #F59E0B;
   --warning-foreground: #0f172a;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -75,10 +76,10 @@
   --input: #1e293b;
   --ring: #FC2869;
   --chart-1: #FC2869;
-  --chart-2: #7C3AED;
-  --chart-3: #4ECDC4;
+  --chart-2: #10B981;
+  --chart-3: #F59E0B;
   --chart-4: #FF6B9D;
-  --chart-5: #7C3AED;
+  --chart-5: #3B82F6;
   --sidebar: #12121e;
   --sidebar-foreground: #f8fafc;
   --sidebar-primary: #FC2869;
@@ -90,7 +91,7 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -118,6 +119,8 @@
   --color-chart-5: var(--chart-5);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -141,7 +144,6 @@
   }
 }
 
-/* Custom scrollbar for dark mode dorm usage */
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -155,15 +157,15 @@
     background: linear-gradient(135deg, #FC2869 0%, #FF6B9D 100%);
   }
   
-  .gradient-purple {
-    background: linear-gradient(135deg, #7C3AED 0%, #9F7AEA 100%);
+  .gradient-success {
+    background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
   }
   
-  .gradient-coral {
-    background: linear-gradient(135deg, #FF6B9D 0%, #FC2869 100%);
+  .gradient-warning {
+    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
   }
   
   .gradient-vibrant {
-    background: linear-gradient(135deg, #FC2869 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, #FC2869 0%, #F59E0B 100%);
   }
 }

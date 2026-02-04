@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +37,7 @@ export function TravelTimeline() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <span className="text-primary font-bold text-sm border border-primary rounded px-1.5">LOCU</span>
+          <Image src="/locu-logo.png" alt="Locu" width={60} height={24} className="h-6 w-auto" />
           <h1 className="text-xl font-bold">Travel Timeline</h1>
         </div>
       </header>

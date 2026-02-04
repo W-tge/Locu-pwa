@@ -92,7 +92,7 @@ export function StopDetailSheet() {
             <div className="flex items-center gap-2">
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white",
-                isBooked ? "bg-[#7C3AED]" : isPending ? "bg-[#FF6B9D]" : "bg-primary"
+                isBooked ? "bg-[#10B981]" : isPending ? "bg-[#FF6B9D]" : "bg-primary"
               )}>
                 {stopIndex}
               </div>
@@ -101,7 +101,7 @@ export function StopDetailSheet() {
                 variant="outline" 
                 className={cn(
                   "text-xs font-semibold",
-                  isBooked && "bg-[#7C3AED]/10 border-[#7C3AED] text-[#7C3AED]",
+                  isBooked && "bg-[#10B981]/10 border-[#10B981] text-[#10B981]",
                   isPending && "bg-[#FF6B9D]/10 border-[#FF6B9D] text-[#FF6B9D]",
                   !isBooked && !isPending && "bg-primary/10 border-primary text-primary"
                 )}
@@ -157,8 +157,8 @@ export function StopDetailSheet() {
 
           {/* Highlight */}
           {selectedStop.highlight && (
-            <div className="bg-[#7C3AED]/10 border border-[#7C3AED]/30 rounded-xl p-3">
-              <p className="text-[#7C3AED] font-semibold text-sm">{selectedStop.highlight}</p>
+            <div className="bg-[#10B981]/10 border border-[#10B981]/30 rounded-xl p-3">
+              <p className="text-[#10B981] font-semibold text-sm">{selectedStop.highlight}</p>
             </div>
           )}
           
@@ -175,15 +175,15 @@ export function StopDetailSheet() {
           
           {/* Community Tips */}
           {selectedStop.communityTips && selectedStop.communityTips.length > 0 && (
-            <div className="rounded-xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 p-3">
-              <div className="flex items-center gap-2 text-[#7C3AED] font-medium text-sm mb-2">
+            <div className="rounded-xl border border-[#10B981]/30 bg-[#10B981]/5 p-3">
+              <div className="flex items-center gap-2 text-[#10B981] font-medium text-sm mb-2">
                 <Lightbulb className="w-4 h-4" />
                 Traveller Tips
               </div>
               <ul className="space-y-1.5">
                 {selectedStop.communityTips.map((tip, i) => (
                   <li key={i} className="text-sm text-foreground flex items-start gap-2">
-                    <span className="text-[#7C3AED]">-</span>
+                    <span className="text-[#10B981]">-</span>
                     {tip}
                   </li>
                 ))}
@@ -193,9 +193,9 @@ export function StopDetailSheet() {
           
           {/* Current Booking */}
           {isBooked && selectedStop.hostelName && (
-            <div className="rounded-xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 p-4">
+            <div className="rounded-xl border border-[#10B981]/30 bg-[#10B981]/5 p-4">
               <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="w-5 h-5 text-[#7C3AED]" />
+                <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
                 <span className="font-semibold text-foreground">Hostel Booked</span>
               </div>
               <div className="flex gap-3">
@@ -208,7 +208,7 @@ export function StopDetailSheet() {
                   <p className="text-foreground font-semibold">{selectedStop.hostelName}</p>
                   <p className="text-sm text-muted-foreground">{selectedStop.nights} nights</p>
                   {selectedStop.hostelPrice && (
-                    <p className="text-lg font-bold text-[#7C3AED] mt-1">
+                    <p className="text-lg font-bold text-[#10B981] mt-1">
                       ${selectedStop.hostelPrice * selectedStop.nights}
                     </p>
                   )}
@@ -216,7 +216,7 @@ export function StopDetailSheet() {
               </div>
               <Button 
                 variant="outline" 
-                className="w-full mt-3 border-[#7C3AED] text-[#7C3AED] hover:bg-[#7C3AED]/10 bg-transparent"
+                className="w-full mt-3 border-[#10B981] text-[#10B981] hover:bg-[#10B981]/10 bg-transparent"
                 onClick={() => setSubPage("bookings")}
               >
                 View Booking Details
@@ -252,7 +252,7 @@ export function StopDetailSheet() {
                         <Image src={hostel.image || "/placeholder.svg"} alt={hostel.name} fill className="object-cover" />
                         <Badge className={cn(
                           "absolute top-2 right-2 text-[10px] font-semibold",
-                          hostel.availability === "high" && "bg-[#7C3AED]",
+                          hostel.availability === "high" && "bg-[#10B981]",
                           hostel.availability === "medium" && "bg-[#FF6B9D]",
                           hostel.availability === "low" && "bg-primary"
                         )}>

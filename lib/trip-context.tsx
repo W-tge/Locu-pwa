@@ -29,7 +29,7 @@ export interface Achievement {
   description: string;
   points: number;
   icon: string;
-  color: "pink" | "purple" | "mint" | "coral";
+  color: "pink" | "green" | "mint" | "coral";
   unlockedAt?: Date;
 }
 
@@ -87,8 +87,16 @@ export interface CommunityQuest {
   points: number;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  karmaPoints: number;
+}
+
 type TabType = "journey" | "guide" | "social" | "wallet" | "menu";
-type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub";
+type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking";
 
 interface TripContextType {
   trip: Trip;
@@ -112,6 +120,7 @@ interface TripContextType {
   bookings: Booking[];
   alerts: Alert[];
   communityQuests: CommunityQuest[];
+  user: User;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -148,7 +157,7 @@ const defaultStats: UserStats = {
       description: "Traveled 1000+ km by bus",
       points: 200,
       icon: "bus",
-      color: "purple",
+      color: "green",
       unlockedAt: new Date("2024-03-20"),
     },
     {
@@ -278,6 +287,13 @@ const defaultAlerts: Alert[] = [
   },
 ];
 
+const defaultUser: User = {
+  id: "user-1",
+  name: "Alex Johnson",
+  email: "alex@example.com",
+  karmaPoints: 2847,
+};
+
 const defaultQuests: CommunityQuest[] = [
   {
     id: "1",
@@ -355,6 +371,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         bookings,
         alerts,
         communityQuests,
+        user: { ...defaultUser, karmaPoints: userStats.karmaPoints },
       }}
     >
       {children}
