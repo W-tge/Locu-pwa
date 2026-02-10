@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
+import { useLocuToast } from "@/components/locu-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,6 +14,7 @@ import {
 
 export function SavedPlaces() {
   const { savedPlaces, setSubPage } = useTrip();
+  const { showToast } = useLocuToast();
 
   const formatDate = (date: Date) => {
     const now = new Date();
@@ -79,10 +81,10 @@ export function SavedPlaces() {
                 <p className="text-xs text-muted-foreground mt-2">{formatDate(place.savedAt)}</p>
                 
                 <div className="flex gap-2 mt-3">
-                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-white text-xs h-8">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-white text-xs h-8" onClick={() => showToast("Added to your itinerary!", "success")}>
                     Add to Trip
                   </Button>
-                  <Button size="sm" variant="outline" className="text-xs h-8 bg-transparent">
+                  <Button size="sm" variant="outline" className="text-xs h-8 bg-transparent" onClick={() => showToast("Opening place details...", "info")}>
                     View Details
                   </Button>
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrip } from "@/lib/trip-context";
+import { useLocuToast } from "@/components/locu-toast";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -23,6 +24,7 @@ interface BookingConfirmationProps {
 
 export function BookingConfirmation({ type, bookingId }: BookingConfirmationProps) {
   const { setSubPage, trip } = useTrip();
+  const { showToast } = useLocuToast(); // Declare the showToast variable
 
   // Mock booking data based on type
   const bookingData = type === "hostel" 
@@ -109,11 +111,11 @@ export function BookingConfirmation({ type, bookingId }: BookingConfirmationProp
 
           {/* Actions */}
           <div className="border-t border-border p-4 flex gap-3">
-            <Button variant="outline" className="flex-1 bg-transparent">
+            <Button variant="outline" className="flex-1 bg-transparent" onClick={() => showToast("Booking PDF saved to your wallet", "success")}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
-            <Button variant="outline" className="flex-1 bg-transparent">
+            <Button variant="outline" className="flex-1 bg-transparent" onClick={() => showToast("Share link copied to clipboard!", "success")}>
               <Share2 className="w-4 h-4 mr-2" />
               Share
             </Button>
@@ -142,7 +144,7 @@ export function BookingConfirmation({ type, bookingId }: BookingConfirmationProp
 
       {/* Footer */}
       <div className="p-4 border-t border-border bg-card">
-        <Button onClick={() => setSubPage(null)} className="w-full bg-primary hover:bg-primary/90">
+        <Button onClick={() => setSubPage(null)} className="w-full bg-primary hover:bg-primary/90 text-white">
           <Home className="w-4 h-4 mr-2" />
           Back to Journey
         </Button>

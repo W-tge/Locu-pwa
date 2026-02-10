@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocuToast } from "@/components/locu-toast";
 import { cn } from "@/lib/utils";
 import { 
   Wallet, 
@@ -97,6 +98,7 @@ function getDocColor(type: string) {
 
 export function WalletDocs() {
   const [activeTab, setActiveTab] = useState<"docs" | "budget">("docs");
+  const { showToast } = useLocuToast();
 
   const remaining = budgetSummary.totalBudget - budgetSummary.spent - budgetSummary.upcoming;
   const spentPercent = (budgetSummary.spent / budgetSummary.totalBudget) * 100;
@@ -111,7 +113,7 @@ export function WalletDocs() {
             <h2 className="font-bold text-foreground text-lg">Wallet & Docs</h2>
             <p className="text-xs text-muted-foreground">Your travel documents, offline ready</p>
           </div>
-          <Button size="sm" variant="outline" className="gap-1 bg-transparent">
+          <Button size="sm" variant="outline" className="gap-1 bg-transparent" onClick={() => showToast("Upload a document from your camera or files", "info")}>
             <Plus className="w-4 h-4" />
             Add
           </Button>
@@ -194,11 +196,11 @@ export function WalletDocs() {
             
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2 bg-transparent">
+              <Button variant="outline" className="h-auto py-4 flex-col gap-2 bg-transparent" onClick={() => showToast("QR codes ready for offline scanning", "info")}>
                 <QrCode className="w-5 h-5" />
                 <span className="text-xs">Show QR Codes</span>
               </Button>
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2 bg-transparent">
+              <Button variant="outline" className="h-auto py-4 flex-col gap-2 bg-transparent" onClick={() => showToast("Payment cards stored securely", "info")}>
                 <CreditCard className="w-5 h-5" />
                 <span className="text-xs">Payment Cards</span>
               </Button>

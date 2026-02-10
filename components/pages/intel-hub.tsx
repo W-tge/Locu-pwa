@@ -17,14 +17,15 @@ import { cn } from "@/lib/utils";
 
 export function IntelHub() {
   const { alerts, communityQuests, addKarmaPoints, setSubPage } = useTrip();
+  const { showToast } = useLocuToast();
   const [answeredQuests, setAnsweredQuests] = useState<string[]>([]);
-  const [showToast, setShowToast] = useState<{ points: number } | null>(null);
+  const [karmaToast, setKarmaToast] = useState<{ points: number } | null>(null);
 
   const handleAnswerQuest = (questId: string, points: number) => {
     addKarmaPoints(points);
     setAnsweredQuests(prev => [...prev, questId]);
-    setShowToast({ points });
-    setTimeout(() => setShowToast(null), 2000);
+    setKarmaToast({ points });
+    setTimeout(() => setKarmaToast(null), 2000);
   };
 
   const urgentAlerts = alerts.filter(a => a.type === "urgent");
@@ -33,9 +34,9 @@ export function IntelHub() {
   return (
     <div className="h-full flex flex-col bg-muted/30 relative">
       {/* Karma toast */}
-      {showToast && (
+      {karmaToast && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-[#00D4AA] text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg shadow-[#00D4AA]/40 animate-in fade-in slide-in-from-top-2">
-          +{showToast.points} Karma Points
+          +{karmaToast.points} Karma Points
         </div>
       )}
 
@@ -67,7 +68,7 @@ export function IntelHub() {
                 <h3 className="font-bold text-foreground">{alert.title}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{alert.description}</p>
                 {alert.action && (
-                  <Button size="sm" className="mt-3 bg-primary hover:bg-primary/90 text-white text-xs h-8 gap-1">
+                  <Button size="sm" className="mt-3 bg-primary hover:bg-primary/90 text-white text-xs h-8 gap-1" onClick={() => showToast(`Opening ${alert.action}...`, "info")}>
                     {alert.action}
                     <ExternalLink className="w-3 h-3" />
                   </Button>

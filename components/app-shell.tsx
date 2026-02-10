@@ -69,11 +69,13 @@ export function AppShell() {
         )}
       </main>
 
-      {/* Bottom Navigation - ALWAYS visible, sits below <main> in the flex column.
-          z-[60] ensures it is above all map overlays, popups, and subpages. */}
-      <div className="lg:hidden shrink-0 relative z-[60]">
+      {/* Bottom Navigation - ALWAYS visible, fixed to the bottom with highest z-index.
+          z-[70] ensures it is above all map overlays, popups, sheets, and subpages. */}
+      <div className="lg:hidden fixed inset-x-0 bottom-0 z-[70]">
         <BottomNav />
       </div>
+      {/* Spacer for the fixed bottom nav so main content is not hidden behind it */}
+      <div className="lg:hidden shrink-0 h-16" />
 
       {/* Detail Sheets - only show when no subpage is active */}
       {!subPage && selectedStop && <StopDetailSheet />}

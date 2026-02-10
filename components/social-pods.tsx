@@ -236,7 +236,7 @@ export function SocialPods() {
               <p className="text-sm text-muted-foreground max-w-xs mx-auto">
                 Connect with other backpackers on similar routes to share tips, split transport costs, or grab a drink.
               </p>
-              <Button className="mt-4 gradient-primary text-white">
+              <Button className="mt-4 bg-primary hover:bg-primary/90 text-white" onClick={() => showToast("Location sharing enabled! Nearby travellers will be visible soon.", "success")}>
                 Enable Location Sharing
               </Button>
             </div>
