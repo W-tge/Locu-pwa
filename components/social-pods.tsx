@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTrip } from "@/lib/trip-context";
+import { useLocuToast } from "@/components/locu-toast";
 import { cn } from "@/lib/utils";
 import { 
   Users, 
@@ -61,7 +62,8 @@ const sharedStops = [
 ];
 
 export function SocialPods() {
-  const { trip } = useTrip();
+  const { trip, setSubPage } = useTrip();
+  const { showToast } = useLocuToast();
   const [activeTab, setActiveTab] = useState<"pod" | "nearby">("pod");
 
   return (
@@ -73,7 +75,7 @@ export function SocialPods() {
             <h2 className="font-bold text-foreground text-lg">My Pod</h2>
             <p className="text-xs text-muted-foreground">Travel together, stay connected</p>
           </div>
-          <Button size="sm" variant="outline" className="gap-1 bg-transparent">
+          <Button size="sm" variant="outline" className="gap-1 bg-transparent" onClick={() => showToast("Invite link copied to clipboard!", "success")}>
             <UserPlus className="w-4 h-4" />
             Invite
           </Button>
@@ -153,7 +155,7 @@ export function SocialPods() {
                           {member.currentLocation}
                         </p>
                       </div>
-                      <Button size="icon" variant="ghost" className="shrink-0">
+                      <Button size="icon" variant="ghost" className="shrink-0" onClick={() => showToast(`Opening chat with ${member.name}`, "info")}>
                         <MessageCircle className="w-4 h-4" />
                       </Button>
                     </div>
@@ -164,10 +166,10 @@ export function SocialPods() {
                           Diverges on {member.divergeDate} at {member.divergeLocation}
                         </p>
                         <div className="flex gap-2 mt-2">
-                          <Button size="sm" variant="outline" className="text-xs flex-1 border-[#FF9F43] text-[#FF9F43] bg-transparent">
+                          <Button size="sm" variant="outline" className="text-xs flex-1 border-[#FF9F43] text-[#FF9F43] bg-transparent" onClick={() => showToast("Sync request sent to Chloe", "success")}>
                             Sync Itinerary
                           </Button>
-                          <Button size="sm" variant="ghost" className="text-xs">
+                          <Button size="sm" variant="ghost" className="text-xs" onClick={() => showToast("Opening Chloe's itinerary...", "info")}>
                             View Plan
                           </Button>
                         </div>
@@ -217,7 +219,7 @@ export function SocialPods() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Group dorms fill up fast in Guatemala during March!
                   </p>
-                  <Button size="sm" className="mt-3 gradient-primary text-white">
+                  <Button size="sm" className="mt-3 bg-primary hover:bg-primary/90 text-white" onClick={() => setSubPage("hostelDetails")}>
                     Book Group Dorm
                   </Button>
                 </div>
@@ -234,7 +236,7 @@ export function SocialPods() {
               <p className="text-sm text-muted-foreground max-w-xs mx-auto">
                 Connect with other backpackers on similar routes to share tips, split transport costs, or grab a drink.
               </p>
-              <Button className="mt-4 gradient-primary text-white">
+              <Button className="mt-4 bg-primary hover:bg-primary/90 text-white" onClick={() => showToast("Location sharing enabled! Nearby travellers will be visible soon.", "success")}>
                 Enable Location Sharing
               </Button>
             </div>
