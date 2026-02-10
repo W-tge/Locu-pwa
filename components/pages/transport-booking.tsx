@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
+import { useLocuToast } from "@/components/locu-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -113,6 +114,7 @@ const mockTransportOptions: TransportOption[] = [
 
 export function TransportBooking() {
   const { setSubPage, updateLegBooking, selectedLeg, trip } = useTrip();
+  const { showToast } = useLocuToast();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isBooked, setIsBooked] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
@@ -135,6 +137,7 @@ export function TransportBooking() {
         updateLegBooking(selectedLeg.id, "booked");
         setIsBooked(true);
         setIsBooking(false);
+        showToast("Transport booked successfully!", "success");
       }, 1500);
     }
   };
@@ -163,7 +166,7 @@ export function TransportBooking() {
               <p className="text-lg font-bold text-[#10B981] mt-2">${bookedOption.price}</p>
             </div>
           )}
-          <Button onClick={() => setSubPage(null)} className="mt-6 bg-primary hover:bg-primary/90">
+          <Button onClick={() => setSubPage(null)} className="mt-6 bg-primary hover:bg-primary/90 text-white">
             Back to Journey
           </Button>
         </div>
@@ -306,10 +309,19 @@ export function TransportBooking() {
           );
         })}
 
+        {/* Safety context */}
+        <div className="p-3 rounded-xl bg-[#10B981]/10 border border-[#10B981]/30 text-sm">
+          <p className="text-muted-foreground flex items-start gap-2">
+            <Shield className="w-4 h-4 text-[#10B981] shrink-0 mt-0.5" />
+            <span><span className="font-semibold text-[#10B981]">Route safety:</span> This is a well-travelled backpacker route. 89% of Locu users rated it as safe. Day services recommended for first-timers.</span>
+          </p>
+        </div>
+
         {/* Pro tip */}
         <div className="p-3 rounded-xl bg-[#FBBF24]/10 border border-[#FBBF24]/30 text-sm">
-          <p className="text-muted-foreground">
-            <span className="font-semibold text-[#FBBF24]">Pro tip:</span> Night buses save accommodation costs!
+          <p className="text-muted-foreground flex items-start gap-2">
+            <Star className="w-4 h-4 text-[#FBBF24] shrink-0 mt-0.5" />
+            <span><span className="font-semibold text-[#FBBF24]">Pro tip:</span> Night buses save accommodation costs! Cruz del Sur offers lie-flat seats on the overnight service.</span>
           </p>
         </div>
       </div>
@@ -319,7 +331,7 @@ export function TransportBooking() {
         <Button
           onClick={handleBook}
           disabled={!selectedOption || isBooking}
-          className="w-full h-12 bg-primary hover:bg-primary/90 text-lg font-semibold"
+          className="w-full h-12 bg-primary hover:bg-primary/90 text-lg font-semibold text-white"
         >
           {isBooking ? (
             <span className="flex items-center gap-2">

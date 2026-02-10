@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTrip } from "@/lib/trip-context";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useLocuToast } from "@/components/locu-toast";
 import {
   ArrowLeft,
   AlertTriangle,

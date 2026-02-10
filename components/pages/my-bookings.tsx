@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrip } from "@/lib/trip-context";
+import { useLocuToast } from "@/components/locu-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
@@ -38,6 +39,7 @@ function getBookingImage(location: string): string {
 
 export function MyBookings() {
   const { bookings, trip, setSubPage, setSelectedStop } = useTrip();
+  const { showToast } = useLocuToast();
 
   // Get pending stops (need booking)
   const pendingStops = trip.stops.filter(s => s.bookingStatus !== "booked");
@@ -104,10 +106,10 @@ export function MyBookings() {
                     </div>
                     
                     <div className="flex gap-2 mt-3">
-                      <Button size="sm" className="bg-primary hover:bg-primary/90 text-white text-xs h-8">
+                      <Button size="sm" className="bg-primary hover:bg-primary/90 text-white text-xs h-8" onClick={() => setSubPage("hostelDetails")}>
                         View Details
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs h-8 bg-transparent">
+                      <Button size="sm" variant="outline" className="text-xs h-8 bg-transparent" onClick={() => showToast("Modification request sent to provider", "info")}>
                         Modify
                       </Button>
                     </div>

@@ -23,12 +23,12 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="bg-card/95 backdrop-blur-lg border-t border-border safe-area-pb">
+    <nav className="bg-card border-t border-border" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id && !subPage;
-          
+
           return (
             <button
               key={item.id}

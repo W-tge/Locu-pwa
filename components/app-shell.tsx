@@ -27,35 +27,21 @@ import { TransportBooking } from "./pages/transport-booking";
 export function AppShell() {
   const { activeTab, subPage, selectedStop, selectedLeg } = useTrip();
 
-  // Render sub-pages if active
   const renderSubPage = () => {
     switch (subPage) {
-      case "stats":
-        return <MyStats />;
-      case "preferences":
-        return <MyPreferences />;
-      case "bookings":
-        return <MyBookings />;
-      case "savedPlaces":
-        return <SavedPlaces />;
-      case "savedHostels":
-        return <SavedHostels />;
-      case "intelHub":
-        return <IntelHub />;
-      case "safety":
-        return <SafetyToolkit />;
-      case "timeline":
-        return <TravelTimeline />;
-      case "tripHistory":
-        return <TripHistory />;
-      case "social":
-        return <SocialPods />;
-      case "hostelDetails":
-        return <HostelDetails />;
-      case "transportBooking":
-        return <TransportBooking />;
-      default:
-        return null;
+      case "stats": return <MyStats />;
+      case "preferences": return <MyPreferences />;
+      case "bookings": return <MyBookings />;
+      case "savedPlaces": return <SavedPlaces />;
+      case "savedHostels": return <SavedHostels />;
+      case "intelHub": return <IntelHub />;
+      case "safety": return <SafetyToolkit />;
+      case "timeline": return <TravelTimeline />;
+      case "tripHistory": return <TripHistory />;
+      case "social": return <SocialPods />;
+      case "hostelDetails": return <HostelDetails />;
+      case "transportBooking": return <TransportBooking />;
+      default: return null;
     }
   };
 
@@ -63,30 +49,29 @@ export function AppShell() {
 
   return (
     <div className="h-[100dvh] w-full flex flex-col overflow-hidden bg-background">
-      {/* Header - Always visible */}
+      {/* Header - always visible */}
       <AppHeader />
 
-      {/* Main Content - Always leaves space for bottom nav on mobile */}
-      <main className="flex-1 overflow-hidden pb-16 lg:pb-0 relative">
-        {/* Journey view always renders but may be covered by subpage */}
+      {/* Main Content Area - shrinks to fit between header and bottom nav */}
+      <main className="flex-1 overflow-hidden relative">
+        {/* Primary tab content */}
         {activeTab === "journey" && <JourneyView />}
         {activeTab === "guide" && !subPage && <ChatGuide />}
         {activeTab === "social" && !subPage && <SocialPods />}
         {activeTab === "wallet" && !subPage && <WalletDocs />}
         {activeTab === "menu" && !subPage && <ProfileMenu />}
-        
-        {/* Sub-pages render as overlay on top of main content - with proper bottom padding for nav */}
+
+        {/* Sub-pages slide in on top as overlay WITHIN main (between header and bottom nav) */}
         {subPageContent && (
-          <div className="absolute inset-0 z-30 bg-background overflow-y-auto">
-            <div className="min-h-full pb-20 lg:pb-0">
-              {subPageContent}
-            </div>
+          <div className="absolute inset-0 z-30 bg-background overflow-y-auto animate-in slide-in-from-right-8 duration-200">
+            {subPageContent}
           </div>
         )}
       </main>
 
-      {/* Bottom Navigation - ALWAYS visible on mobile, higher z-index */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-50">
+      {/* Bottom Navigation - ALWAYS visible, sits below <main> in the flex column.
+          z-[60] ensures it is above all map overlays, popups, and subpages. */}
+      <div className="lg:hidden shrink-0 relative z-[60]">
         <BottomNav />
       </div>
 
