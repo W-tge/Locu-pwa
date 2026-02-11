@@ -33,8 +33,8 @@ export function JourneyView() {
         {/* Itinerary overlay - slides up from bottom when active */}
         <div
           className={cn(
-            "absolute inset-x-0 bottom-0 z-30 transition-transform duration-300 ease-in-out",
-            mobileView === "itinerary" ? "translate-y-0" : "translate-y-[calc(100%-56px)]"
+            "absolute inset-x-0 bottom-0 transition-transform duration-300 ease-in-out",
+            mobileView === "itinerary" ? "z-30 translate-y-0" : "z-10 translate-y-[calc(100%-56px)]"
           )}
           style={{ height: "85%" }}
         >
