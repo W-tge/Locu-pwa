@@ -65,8 +65,8 @@ export function HostelCheckout() {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "paypal" | "pay-at-hostel">("card");
   const [cardInfo, setCardInfo] = useState({ number: "**** **** **** 4242", expiry: "09/28", cvc: "***" });
   const [isProcessing, setIsProcessing] = useState(false);
-  const [podBooking, setPodBooking] = useState(false);
-  const [podCount, setPodCount] = useState(1);
+  const [podBooking, setPodBooking] = useState(pendingBooking?.podDefault === true);
+  const [podCount, setPodCount] = useState(pendingBooking?.podDefault ? 3 : 1);
 
   // Derive from pending booking data
   const hostel = pendingBooking;
@@ -188,8 +188,7 @@ export function HostelCheckout() {
       </div>
 
       {/* Pod booking option */}
-      {hostel.podRooms && (
-        <div className="rounded-xl border-2 border-[#0D9488]/20 bg-[#0D9488]/5 p-4">
+      <div className="rounded-xl border-2 border-[#0D9488]/20 bg-[#0D9488]/5 p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-[#0D9488]" />
@@ -231,7 +230,6 @@ export function HostelCheckout() {
             </div>
           )}
         </div>
-      )}
     </div>
   );
 
