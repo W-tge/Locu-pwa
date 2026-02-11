@@ -25,6 +25,9 @@ import { HostelDetails } from "./pages/hostel-details";
 import { TransportBooking } from "./pages/transport-booking";
 import { BookingDetails } from "./pages/booking-details";
 import { TransitBookingDetails } from "./pages/transit-booking-details";
+import { ModifyBooking } from "./pages/modify-booking";
+import { HostelCheckout } from "./pages/hostel-checkout";
+import { TransitCheckout } from "./pages/transit-checkout";
 
 export function AppShell() {
   const { activeTab, subPage, selectedStop, selectedLeg } = useTrip();
@@ -45,6 +48,9 @@ export function AppShell() {
       case "transportBooking": return <TransportBooking />;
       case "bookingDetails": return <BookingDetails />;
       case "transitBookingDetails": return <TransitBookingDetails />;
+      case "modifyBooking": return <ModifyBooking />;
+      case "hostelCheckout": return <HostelCheckout />;
+      case "transitCheckout": return <TransitCheckout />;
       default: return null;
     }
   };

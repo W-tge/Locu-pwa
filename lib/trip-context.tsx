@@ -96,7 +96,7 @@ export interface User {
 }
 
 type TabType = "journey" | "guide" | "social" | "wallet" | "menu";
-type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking" | "bookingDetails" | "transitBookingDetails";
+type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking" | "bookingDetails" | "transitBookingDetails" | "modifyBooking" | "hostelCheckout" | "transitCheckout";
 
 interface TripContextType {
   trip: Trip;
@@ -111,6 +111,8 @@ interface TripContextType {
   updateStopBooking: (stopId: string, status: "booked" | "not-booked") => void;
   updateLegBooking: (legId: string, status: "booked" | "not-booked") => void;
   updateStopDates: (stopId: string, startDate: string, endDate: string) => void;
+  pendingBooking: any;
+  setPendingBooking: (data: any) => void;
   // User data
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
@@ -325,6 +327,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [selectedLeg, setSelectedLeg] = useState<TransitLeg | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("journey");
   const [subPage, setSubPage] = useState<SubPageType>(null);
+  const [pendingBooking, setPendingBooking] = useState<any>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>(defaultPreferences);
   const [userStats, setUserStats] = useState<UserStats>(defaultStats);
   const [savedHostels] = useState<SavedHostel[]>(defaultSavedHostels);
@@ -385,6 +388,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
         updateStopBooking,
         updateLegBooking,
         updateStopDates,
+        pendingBooking,
+        setPendingBooking,
         userPreferences,
         setUserPreferences,
         userStats,

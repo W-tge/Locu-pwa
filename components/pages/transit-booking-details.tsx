@@ -209,10 +209,7 @@ export function TransitBookingDetails() {
       {/* Footer Actions */}
       <div className="shrink-0 p-4 border-t border-border space-y-2">
         <Button
-          onClick={() => {
-            showToast("Opening modification options...", "info");
-            setSubPage("transportBooking");
-          }}
+          onClick={() => setSubPage("modifyBooking")}
           className="w-full gradient-vibrant text-white font-semibold shadow-lg"
         >
           <Edit3 className="w-4 h-4 mr-2" />

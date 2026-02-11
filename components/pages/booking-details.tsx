@@ -50,8 +50,7 @@ export function BookingDetails() {
   };
 
   const handleModifyBooking = () => {
-    showToast("Opening modification options...", "info");
-    setSubPage("hostelDetails");
+    setSubPage("modifyBooking");
   };
 
   const handleExploreOthers = () => {

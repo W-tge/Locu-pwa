@@ -128,10 +128,9 @@ const mockTransportOptions: TransportOption[] = [
 ];
 
 export function TransportBooking() {
-  const { setSubPage, updateLegBooking, selectedLeg, trip } = useTrip();
+  const { setSubPage, updateLegBooking, selectedLeg, trip, setPendingBooking } = useTrip();
   const { showToast } = useLocuToast();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [isBooked, setIsBooked] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [detailOption, setDetailOption] = useState<TransportOption | null>(null);
 
@@ -149,71 +148,14 @@ export function TransportBooking() {
   const handleBook = () => {
     if (selectedOption && selectedLeg) {
       setIsBooking(true);
+      const option = mockTransportOptions.find(o => o.id === selectedOption);
       setTimeout(() => {
-        updateLegBooking(selectedLeg.id, "booked");
-        setIsBooked(true);
+        setPendingBooking(option);
+        setSubPage("transitCheckout");
         setIsBooking(false);
-        showToast("Transport booked successfully!", "success");
-      }, 1500);
+      }, 800);
     }
   };
-
-  /* --- Booked confirmation (ticket stub) --- */
-  if (isBooked) {
-    const bookedOption = mockTransportOptions.find(o => o.id === selectedOption);
-    return (
-      <div className="h-full flex flex-col bg-background paper-texture">
-        <header className="glass-panel border-b border-black/5 px-4 py-4 flex items-center gap-4">
-          <button onClick={() => setSubPage(null)} className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="text-lg font-bold">Booking Confirmed</h1>
-        </header>
-
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#1B6B4A]/15 flex items-center justify-center mb-4 animate-in zoom-in duration-300">
-            <CheckCircle2 className="w-10 h-10 text-[#1B6B4A]" />
-          </div>
-          <h2 className="text-2xl font-serif text-foreground">Transport Booked</h2>
-          <p className="text-muted-foreground font-mono text-sm mt-2">{fromStop?.city} &rarr; {toStop?.city}</p>
-          {bookedOption && (
-            <div className="mt-6 bg-card rounded-xl paper-shadow overflow-hidden w-full max-w-xs">
-              {/* Ticket stub */}
-              <div className="p-4 border-b border-dashed border-border">
-                <p className="font-bold text-lg">{bookedOption.operator}</p>
-                <p className="micro-label mt-1">ROUTE {bookedOption.routeCode}</p>
-              </div>
-              <div className="p-4 grid grid-cols-3 gap-3 text-center">
-                <div>
-                  <p className="micro-label">DEP. TIME</p>
-                  <p className="font-mono font-semibold text-lg">{bookedOption.departure}</p>
-                </div>
-                <div>
-                  <p className="micro-label">PLATFORM</p>
-                  <p className="font-mono font-semibold text-lg">{bookedOption.platform}</p>
-                </div>
-                <div>
-                  <p className="micro-label">SEAT</p>
-                  <p className="font-mono font-semibold text-lg">{bookedOption.seat}</p>
-                </div>
-              </div>
-              <div className="px-4 pb-4 flex justify-center">
-                {/* Dummy barcode */}
-                <div className="flex items-end gap-[2px] h-10 opacity-40">
-                  {Array.from({ length: 32 }).map((_, i) => (
-                    <div key={i} className="bg-foreground rounded-sm" style={{ width: i % 3 === 0 ? 3 : 1.5, height: `${40 + Math.sin(i) * 20}%` }} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          <Button onClick={() => setSubPage(null)} className="mt-6 bg-primary hover:bg-primary/90 text-white">
-            Back to Journey
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   /* --- Main booking page --- */
   return (
