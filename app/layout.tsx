@@ -1,12 +1,13 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
-import { Inter, DM_Serif_Display, IBM_Plex_Mono } from 'next/font/google'
+import { Inter, DM_Serif_Display, IBM_Plex_Mono, Caveat } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const dmSerif = DM_Serif_Display({ weight: "400", subsets: ["latin"], variable: "--font-dm-serif" });
 const ibmPlexMono = IBM_Plex_Mono({ weight: ["400", "500", "600"], subsets: ["latin"], variable: "--font-ibm-mono" });
+const caveat = Caveat({ subsets: ["latin"], variable: "--font-caveat" });
 
 export const metadata: Metadata = {
   title: 'Locu - Your Backpacker OS',
@@ -52,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${dmSerif.variable} ${ibmPlexMono.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${dmSerif.variable} ${ibmPlexMono.variable} ${caveat.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
