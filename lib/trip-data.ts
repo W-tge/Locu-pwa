@@ -707,6 +707,15 @@ export const demoTrip: Trip = {
       body: "Nicaragua is the cheapest country in Central America. Stock up on souvenirs here!",
       relatedStopId: "stop-5",
     },
+    {
+      id: "insight-5",
+      type: "tip",
+      icon: "dollar",
+      title: "Bike Taxis: The Cheap Local Alternative",
+      body: "Travellers report local bike taxis (mototaxis) are a much cheaper alternative between towns. Negotiate the price beforehand and always pay with cash - typically $1-3 USD per ride.",
+      action: "Set Cash Reminder",
+      relatedStopId: "stop-6",
+    },
   ],
 };
 

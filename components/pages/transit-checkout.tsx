@@ -68,6 +68,7 @@ export function TransitCheckout() {
   const [podBooking, setPodBooking] = useState(false);
   const [podCount, setPodCount] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(false);
 
   const option = pendingBooking;
   const leg = selectedLeg;
@@ -98,8 +99,7 @@ export function TransitCheckout() {
     setTimeout(() => {
       updateLegBooking(leg.id, "booked");
       setIsProcessing(false);
-      setStep("confirmation");
-      showToast("Transport booked!", "success");
+      setShowAnimation(true);
     }, 2000);
   };
 
@@ -411,6 +411,83 @@ export function TransitCheckout() {
       </div>
     </div>
   );
+
+  // ---- Booking success animation ----
+  if (showAnimation) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center bg-background relative overflow-hidden">
+        {/* Animated bus driving across */}
+        <div className="relative w-full h-32 mb-6">
+          {/* Road line */}
+          <div className="absolute top-1/2 left-0 right-0 h-px bg-border" />
+          <div className="absolute top-1/2 left-0 right-0 flex items-center gap-3 mt-2">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} className="w-6 h-0.5 bg-muted-foreground/20 shrink-0" />
+            ))}
+          </div>
+
+          {/* Bus icon sliding across */}
+          <div
+            className="absolute top-1/2 -translate-y-1/2"
+            style={{
+              animation: "busSlide 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+            }}
+          >
+            <div className="w-16 h-16 rounded-2xl gradient-vibrant flex items-center justify-center shadow-xl">
+              <TransportIcon className="w-8 h-8 text-white" />
+            </div>
+          </div>
+
+          {/* Destination pin */}
+          <div className="absolute top-1/2 right-8 -translate-y-1/2">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+              <div className="w-3 h-3 rounded-full bg-primary" />
+            </div>
+          </div>
+        </div>
+
+        {/* Confirmation text - fades in after bus arrives */}
+        <div
+          className="text-center"
+          style={{
+            animation: "fadeInUp 0.5s ease-out 1.4s both",
+          }}
+        >
+          <div className="w-16 h-16 rounded-full bg-[#1B6B4A]/15 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="w-8 h-8 text-[#1B6B4A]" />
+          </div>
+          <h2 className="text-2xl font-serif text-foreground">Booking Confirmed!</h2>
+          <p className="text-muted-foreground mt-1">{fromStop?.city} to {toStop?.city}</p>
+        </div>
+
+        {/* Auto-advance after animation */}
+        <div
+          style={{ animation: "fadeInUp 0.3s ease-out 2.8s both" }}
+        >
+          <Button
+            onClick={() => { setShowAnimation(false); setStep("confirmation"); }}
+            className="mt-6 gradient-vibrant text-white font-semibold shadow-lg"
+          >
+            View Your Ticket
+          </Button>
+        </div>
+
+        {/* Keyframe styles */}
+        <style>{`
+          @keyframes busSlide {
+            0% { left: -80px; }
+            70% { left: calc(100% - 120px); }
+            80% { left: calc(100% - 130px); }
+            100% { left: calc(100% - 120px); }
+          }
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   const renderStepContent = () => {
     switch (step) {
