@@ -187,7 +187,7 @@ export function MyBookings() {
                   onClick={() => setSubPage(null)}
                   className="w-full py-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors"
                 >
-                  View all {pendingStops.length} pending destinations
+                  View all {pendingStops.length} destinations needing booking
                 </button>
               )}
             </div>
