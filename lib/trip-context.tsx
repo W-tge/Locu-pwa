@@ -96,7 +96,7 @@ export interface User {
 }
 
 type TabType = "journey" | "guide" | "social" | "wallet" | "menu";
-type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking";
+type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking" | "bookingDetails";
 
 interface TripContextType {
   trip: Trip;
@@ -110,6 +110,7 @@ interface TripContextType {
   setSubPage: (page: SubPageType) => void;
   updateStopBooking: (stopId: string, status: "booked" | "not-booked") => void;
   updateLegBooking: (legId: string, status: "booked" | "not-booked") => void;
+  updateStopDates: (stopId: string, startDate: string, endDate: string) => void;
   // User data
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
@@ -350,6 +351,18 @@ export function TripProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const updateStopDates = (stopId: string, startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const nights = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    setTrip(prev => ({
+      ...prev,
+      stops: prev.stops.map(s =>
+        s.id === stopId ? { ...s, startDate, endDate, nights } : s
+      ),
+    }));
+  };
+
   const addKarmaPoints = (points: number) => {
     setUserStats(prev => ({
       ...prev,
@@ -371,6 +384,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         setSubPage,
         updateStopBooking,
         updateLegBooking,
+        updateStopDates,
         userPreferences,
         setUserPreferences,
         userStats,

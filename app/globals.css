@@ -167,7 +167,7 @@
   }
   
   .gradient-vibrant {
-    background: linear-gradient(135deg, #FC2869 0%, #F59E0B 100%);
+    background: linear-gradient(135deg, #FC2869 0%, #FF6B9D 55%, #F59E0B 100%);
   }
 
   /* Paper noise texture overlay */

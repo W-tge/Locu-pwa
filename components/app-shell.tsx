@@ -23,6 +23,7 @@ import { TravelTimeline } from "./pages/travel-timeline";
 import { TripHistory } from "./pages/trip-history";
 import { HostelDetails } from "./pages/hostel-details";
 import { TransportBooking } from "./pages/transport-booking";
+import { BookingDetails } from "./pages/booking-details";
 
 export function AppShell() {
   const { activeTab, subPage, selectedStop, selectedLeg } = useTrip();
@@ -41,6 +42,7 @@ export function AppShell() {
       case "social": return <SocialPods />;
       case "hostelDetails": return <HostelDetails />;
       case "transportBooking": return <TransportBooking />;
+      case "bookingDetails": return <BookingDetails />;
       default: return null;
     }
   };
