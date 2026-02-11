@@ -61,7 +61,7 @@ export function JourneyView() {
         {mobileView === "map" && (
           <button
             onClick={() => setMobileView("itinerary")}
-            className="absolute bottom-20 left-4 z-20 glass-panel rounded-full px-4 py-2.5 paper-shadow flex items-center gap-2 active:scale-95 transition-transform"
+            className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 glass-panel rounded-full px-4 py-2.5 paper-shadow flex items-center gap-2 active:scale-95 transition-transform"
           >
             <List className="w-4 h-4 text-foreground" />
             <span className="text-xs font-semibold text-foreground">Itinerary</span>

@@ -331,9 +331,9 @@ export function TripMap() {
         </div>
       </div>
 
-      {/* Location badge & Emergency button - z-[15] */}
+      {/* Location badge - z-[15] */}
       <div className={cn(
-        "absolute top-4 left-4 z-[15] flex items-center gap-2 transition-all duration-200",
+        "absolute top-4 left-4 z-[15] transition-all duration-200",
         (shouldHideChrome || hasActiveOverlay) && "opacity-0 pointer-events-none"
       )}>
         <div className="bg-card/95 backdrop-blur-md rounded-full px-3 py-2 shadow-lg border border-border/50">
@@ -342,9 +342,6 @@ export function TripMap() {
             <span className="text-xs font-bold text-foreground">{trip.currentLocation}</span>
           </div>
         </div>
-        <button onClick={() => setSubPage("safety")} className="bg-[#DC2626] rounded-full px-3 py-2 shadow-lg hover:bg-[#DC2626]/90 transition-all" title="Emergency Info">
-          <Shield className="w-4 h-4 text-white" />
-        </button>
       </div>
 
       {/* Map controls - z-[15] */}
@@ -357,6 +354,9 @@ export function TripMap() {
         </button>
         <button onClick={handleRecenter} className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card transition-all">
           <Navigation className="w-5 h-5 text-primary" />
+        </button>
+        <button onClick={() => setSubPage("safety")} className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card transition-all" title="Emergency Info">
+          <Shield className="w-5 h-5 text-[#DC2626]" />
         </button>
         <button onClick={() => { setShowInsightModal(true); setShowStopPopup(null); setShowTransitPopup(null); }} className="p-3 gradient-vibrant rounded-xl shadow-xl hover:scale-105 transition-all" title="Share Travel Insight">
           <Lightbulb className="w-5 h-5 text-white" />
