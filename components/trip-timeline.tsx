@@ -76,7 +76,6 @@ function DestinationCard({
   onBookHostel: () => void;
 }) {
   const isBooked = stop.bookingStatus === "booked";
-  const isPending = stop.bookingStatus === "pending";
   const isActive = stop.status === "ACTIVE";
 
   return (
@@ -91,7 +90,7 @@ function DestinationCard({
           {/* Stop number circle */}
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 relative",
-            isBooked ? "bg-[#10B981]" : isPending ? "bg-[#FF6B9D]" : "bg-primary"
+            isBooked ? "bg-[#10B981]" : "bg-primary"
           )}>
             {stopIndex}
             {isActive && (
@@ -115,10 +114,9 @@ function DestinationCard({
               <Badge className={cn(
                 "shrink-0 font-semibold",
                 isBooked ? "bg-[#10B981] text-white" :
-                isPending ? "bg-[#FF6B9D] text-white" :
                 "bg-primary/10 text-primary border border-primary/30"
               )}>
-                {isBooked ? "Hostel Booked" : isPending ? "Pending" : "Needs Booking"}
+                {isBooked ? "Hostel Booked" : "Needs Booking"}
               </Badge>
             </div>
 
@@ -185,7 +183,6 @@ function TransitLegCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const isBooked = leg.bookingStatus === "booked";
-  const isPending = leg.bookingStatus === "pending";
   const Icon = getTransportIcon(leg.type);
 
   return (
@@ -197,9 +194,7 @@ function TransitLegCard({
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-            isBooked ? "bg-[#10B981]/20 text-[#10B981]" :
-            isPending ? "bg-[#FF6B9D]/20 text-[#FF6B9D]" :
-            "bg-primary/10 text-primary"
+            isBooked ? "bg-[#10B981]/20 text-[#10B981]" : "bg-primary/10 text-primary"
           )}>
             <Icon className="w-4 h-4" />
           </div>
@@ -209,11 +204,9 @@ function TransitLegCard({
               <span className="font-semibold text-sm">{fromCity} → {toCity}</span>
               <Badge className={cn(
                 "text-[10px] font-semibold",
-                isBooked ? "bg-[#10B981] text-white" :
-                isPending ? "bg-[#FF6B9D] text-white" :
-                "bg-primary text-white"
+                isBooked ? "bg-[#10B981] text-white" : "bg-primary text-white"
               )}>
-                {isBooked ? "Booked" : isPending ? "Pending" : "Needs Booking"}
+                {isBooked ? "Booked" : "Needs Booking"}
               </Badge>
             </div>
             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">

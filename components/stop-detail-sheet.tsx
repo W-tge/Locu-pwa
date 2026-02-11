@@ -66,6 +66,7 @@ export function StopDetailSheet() {
   const { showToast } = useLocuToast();
   const [showHostels, setShowHostels] = useState(false);
   const [isBooked, setIsBookedLocal] = useState(false);
+
   const dragRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
 
@@ -73,6 +74,7 @@ export function StopDetailSheet() {
     setSelectedStop(null);
     setShowHostels(false);
     setIsBookedLocal(false);
+
   }, [setSelectedStop]);
 
   // Drag-down to dismiss
@@ -91,7 +93,6 @@ export function StopDetailSheet() {
 
   const hostels = getHostelsForCity(selectedStop.city);
   const stopBooked = selectedStop.bookingStatus === "booked" || isBooked;
-  const isPending = selectedStop.bookingStatus === "pending";
   const stopIndex = getStopIndex(trip, selectedStop.id);
 
   const handleBookHostel = (hostel: HostelOption) => {
@@ -131,7 +132,7 @@ export function StopDetailSheet() {
             <div className="flex items-center gap-2">
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white",
-                stopBooked ? "bg-[#10B981]" : isPending ? "bg-[#F59E0B]" : "bg-primary"
+                stopBooked ? "bg-[#10B981]" : "bg-primary"
               )}>
                 {stopIndex}
               </div>
@@ -140,12 +141,10 @@ export function StopDetailSheet() {
                 variant="outline" 
                 className={cn(
                   "text-xs font-semibold ml-auto",
-                  stopBooked && "bg-[#10B981]/10 border-[#10B981] text-[#10B981]",
-                  isPending && "bg-[#F59E0B]/10 border-[#F59E0B] text-[#F59E0B]",
-                  !stopBooked && !isPending && "bg-primary/10 border-primary text-primary"
+                  stopBooked ? "bg-[#10B981]/10 border-[#10B981] text-[#10B981]" : "bg-primary/10 border-primary text-primary"
                 )}
               >
-                {stopBooked ? "Booked" : isPending ? "Pending" : "Needs Booking"}
+                {stopBooked ? "Booked" : "Needs Booking"}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1 ml-10">
@@ -300,10 +299,10 @@ export function StopDetailSheet() {
           {/* Action Footer */}
           <div className="p-4 border-t border-border bg-card">
             {!stopBooked ? (
-  <Button className="w-full gradient-vibrant text-white font-semibold shadow-lg hover:shadow-xl transition-all" onClick={() => setSubPage("hostelDetails")}>
-  <Bed className="w-4 h-4 mr-2" />
-  Explore & Book Hostels
-  </Button>
+              <Button className="w-full gradient-vibrant text-white font-semibold shadow-lg hover:shadow-xl transition-all" onClick={() => setSubPage("hostelDetails")}>
+                <Bed className="w-4 h-4 mr-2" />
+                Explore & Book Hostels
+              </Button>
             ) : (
               <Button variant="outline" className="w-full bg-transparent" onClick={handleDismiss}>
                 Done

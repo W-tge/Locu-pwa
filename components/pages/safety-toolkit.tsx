@@ -51,6 +51,41 @@ export function SafetyToolkit() {
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {/* Current Location Emergency Info - First for quick access */}
+        <section className="bg-[#FFFEF9] paper-texture rounded-2xl border-2 border-primary/30 p-4 paper-shadow">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-full gradient-vibrant flex items-center justify-center">
+              <Phone className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg text-foreground">Cusco, Peru</h3>
+              <p className="micro-label">Local Emergency Numbers</p>
+            </div>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between items-center py-1.5 border-b border-dashed border-[#DDD8CC]">
+              <span className="text-muted-foreground font-medium">Police</span>
+              <span className="font-mono font-bold text-foreground">105</span>
+            </div>
+            <div className="flex justify-between items-center py-1.5 border-b border-dashed border-[#DDD8CC]">
+              <span className="text-muted-foreground font-medium">Ambulance</span>
+              <span className="font-mono font-bold text-foreground">117</span>
+            </div>
+            <div className="flex justify-between items-center py-1.5 border-b border-dashed border-[#DDD8CC]">
+              <span className="text-muted-foreground font-medium">Fire</span>
+              <span className="font-mono font-bold text-foreground">116</span>
+            </div>
+            <div className="flex justify-between items-center py-1.5 border-b border-dashed border-[#DDD8CC]">
+              <span className="text-muted-foreground font-medium">Tourist Police</span>
+              <span className="font-mono font-bold text-foreground">(084) 235-123</span>
+            </div>
+            <div className="flex justify-between items-center py-1.5">
+              <span className="text-muted-foreground font-medium">Nearest Hospital</span>
+              <span className="font-mono font-bold text-foreground text-right">Hospital Regional Cusco<br /><span className="text-xs text-muted-foreground font-normal">0.8km away</span></span>
+            </div>
+          </div>
+        </section>
+
         {/* Emergency Contacts */}
         <section>
           <h2 className="text-lg font-bold text-foreground mb-3">Emergency Contacts</h2>
@@ -117,32 +152,7 @@ export function SafetyToolkit() {
           </div>
         </section>
 
-        {/* Current Location Emergency Info */}
-        <section className="bg-card rounded-2xl border border-primary/30 p-4">
-          <h3 className="font-bold text-foreground mb-3">Cusco, Peru - Emergency Info</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Police</span>
-              <span className="font-medium text-foreground">105</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Ambulance</span>
-              <span className="font-medium text-foreground">117</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Fire</span>
-              <span className="font-medium text-foreground">116</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Tourist Police</span>
-              <span className="font-medium text-foreground">(084) 235-123</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Nearest Hospital</span>
-              <span className="font-medium text-foreground text-right">Hospital Regional Cusco<br />0.8km away</span>
-            </div>
-          </div>
-        </section>
+
       </div>
     </div>
   );

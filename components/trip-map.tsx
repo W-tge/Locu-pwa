@@ -122,19 +122,36 @@ export function TripMap() {
         isActive = false,
         isSelected = false
       ) => {
+        // Scale marker based on current zoom level
+        const currentZoom = mapInstance.getZoom();
+        const scale = Math.max(0.7, Math.min(1.2, currentZoom / 7));
+        const baseFontSize = isSelected ? 10 : 9;
+        const fontSize = Math.round(baseFontSize * scale);
+        const hPad = Math.round(6 * scale);
+        const vPad = Math.round(4 * scale);
+        const borderW = isSelected ? 2 : 1.5;
+
         const pulseRing = isActive
-          ? `<div style="position:absolute;top:-8px;left:-8px;right:-8px;bottom:-8px;border:2px solid ${color};border-radius:8px;animation:pulse 2s ease-out infinite;opacity:0.5;"></div>`
+          ? `<div style="position:absolute;top:-5px;left:-5px;right:-5px;bottom:-5px;border:1.5px solid ${color};border-radius:6px;animation:pulse 2s ease-out infinite;opacity:0.5;"></div>`
           : "";
-        // Passport stamp aesthetic: double border, city name text, rounded rectangle
-        const padding = cityName.length > 10 ? "8px 10px" : "10px 14px";
-        const fontSize = cityName.length > 10 ? "10px" : "11px";
+
         return L.divIcon({
           className: "custom-marker",
-          html: `<div style="position:relative;cursor:pointer;display:inline-block;">${pulseRing}<div style="background:${color};border:3px double rgba(255,255,255,0.95);border-radius:8px;box-shadow:0 3px 12px rgba(139,119,90,0.25);display:inline-flex;align-items:center;justify-content:center;padding:${padding};font-weight:700;font-size:${fontSize};color:white;font-family:'IBM Plex Mono',monospace;letter-spacing:0.05em;text-transform:uppercase;transform:rotate(-2deg);mix-blend-mode:multiply;opacity:0.92;white-space:nowrap;">${cityName}</div></div>`,
+          html: `<div style="position:relative;cursor:pointer;display:inline-block;">${pulseRing}<div style="background:${color};border:${borderW}px double rgba(255,255,255,0.9);border-radius:5px;box-shadow:0 2px 8px rgba(139,119,90,0.2);display:inline-flex;align-items:center;justify-content:center;padding:${vPad}px ${hPad}px;font-weight:700;font-size:${fontSize}px;color:white;font-family:'IBM Plex Mono',monospace;letter-spacing:0.04em;text-transform:uppercase;transform:rotate(-1.5deg);white-space:nowrap;line-height:1;">${cityName}</div></div>`,
           iconSize: [0, 0],
-          iconAnchor: [0, 20],
+          iconAnchor: [0, 14],
         });
       };
+
+      // Re-render markers on zoom change for scaling
+      mapInstance.on("zoomend", () => {
+        markersRef.current.forEach(({ marker, stop }) => {
+          const isBooked = stop.bookingStatus === "booked";
+          const isActive = stop.status === "ACTIVE";
+          const color = isBooked ? "#10B981" : "#FC2869";
+          marker.setIcon(createIcon(color, stop.city, isActive, false));
+        });
+      });
 
       // Route polylines
       trip.transitLegs.forEach((leg) => {

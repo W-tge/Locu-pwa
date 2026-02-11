@@ -133,6 +133,7 @@ export function TransportBooking() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isBooked, setIsBooked] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
+  const [detailOption, setDetailOption] = useState<TransportOption | null>(null);
 
   const fromStop = selectedLeg ? trip.stops.find(s => s.id === selectedLeg.fromStopId) : null;
   const toStop = selectedLeg ? trip.stops.find(s => s.id === selectedLeg.toStopId) : null;
@@ -375,12 +376,12 @@ export function TransportBooking() {
                   onClick={() => setSelectedOption(option.id)} 
                   size="sm" 
                   variant={isSelected ? "default" : "outline"}
-                  className={cn("flex-1 text-xs font-semibold", isSelected && "bg-[#1B6B4A] hover:bg-[#1B6B4A]/90 text-white")}
+                  className={cn("flex-1 text-xs font-semibold", isSelected ? "gradient-vibrant text-white shadow-md" : "hover:border-primary/50")}
                 >
-                  {isSelected ? "Selected" : "Select"}
+                  {isSelected ? "Selected" : "Select This"}
                 </Button>
                 <Button 
-                  onClick={() => showToast(`More details: ${option.operator} ${option.routeCode}`, "info")} 
+                  onClick={() => setDetailOption(option)} 
                   size="sm" 
                   variant="outline"
                   className="flex-1 text-xs font-semibold"
@@ -399,7 +400,7 @@ export function TransportBooking() {
         <Button
           onClick={handleBook}
           disabled={!selectedOption || isBooking}
-          className="w-full h-12 bg-primary hover:bg-primary/90 text-lg font-semibold text-white"
+          className="w-full h-12 gradient-vibrant text-lg font-semibold text-white shadow-lg disabled:opacity-50"
         >
           {isBooking ? (
             <span className="flex items-center gap-2">
@@ -413,6 +414,115 @@ export function TransportBooking() {
           )}
         </Button>
       </div>
+
+      {/* See More Details Popup */}
+      {detailOption && (
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setDetailOption(null)} />
+          <div className="relative bg-[#FFFEF9] paper-texture rounded-t-2xl sm:rounded-2xl paper-shadow w-full sm:max-w-md max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300 sm:mx-4">
+            {/* Header */}
+            <div className="sticky top-0 z-10 glass-panel px-5 py-4 border-b border-black/5 rounded-t-2xl flex items-center justify-between">
+              <div>
+                <h3 className="font-serif text-lg text-foreground">{detailOption.operator}</h3>
+                <p className="text-xs text-muted-foreground font-mono">{detailOption.type} &middot; {detailOption.routeCode}</p>
+              </div>
+              <button onClick={() => setDetailOption(null)} className="p-2 hover:bg-muted rounded-lg transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-5">
+              {/* Route Info */}
+              <div className="flex items-center justify-between">
+                <div className="text-center">
+                  <p className="micro-label">Departure</p>
+                  <p className="text-2xl font-mono font-bold">{detailOption.departure}</p>
+                  <p className="text-xs text-muted-foreground">{fromStop?.city}</p>
+                </div>
+                <div className="flex flex-col items-center gap-1 flex-1 mx-4">
+                  <p className="text-xs text-muted-foreground font-mono">{detailOption.duration}</p>
+                  <div className="w-full h-px bg-border relative">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-foreground" />
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary" />
+                  </div>
+                  {(() => { const Icon = getModeIcon(detailOption.mode); return <Icon className="w-4 h-4 text-muted-foreground" />; })()}
+                </div>
+                <div className="text-center">
+                  <p className="micro-label">Arrival</p>
+                  <p className="text-2xl font-mono font-bold">{detailOption.arrival}</p>
+                  <p className="text-xs text-muted-foreground">{toStop?.city}</p>
+                </div>
+              </div>
+
+              {/* Ticket Details Grid */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                  <p className="micro-label">Platform</p>
+                  <p className="text-lg font-mono font-bold">{detailOption.platform}</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                  <p className="micro-label">Seat</p>
+                  <p className="text-lg font-mono font-bold">{detailOption.seat}</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                  <p className="micro-label">Price</p>
+                  <p className="text-lg font-mono font-bold text-primary">${detailOption.price}</p>
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div>
+                <p className="micro-label mb-2">Amenities</p>
+                <div className="flex flex-wrap gap-2">
+                  {detailOption.amenities.map(a => (
+                    <span key={a} className="px-3 py-1.5 rounded-lg bg-[#1B6B4A]/10 text-[#1B6B4A] text-xs font-semibold border border-[#1B6B4A]/20">{a}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tags */}
+              {detailOption.tags.length > 0 && (
+                <div>
+                  <p className="micro-label mb-2">Tags</p>
+                  <div className="flex flex-wrap gap-2">
+                    {detailOption.tags.map(tag => {
+                      const TagIcon = tag.icon;
+                      return (
+                        <span key={tag.label} className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border", tag.color, "border-current/20")}>
+                          <TagIcon className="w-3.5 h-3.5" />
+                          {tag.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Community verification */}
+              <div className="flex items-center gap-2 p-3 bg-[#FBBF24]/10 rounded-lg border border-[#FBBF24]/20">
+                <Users className="w-4 h-4 text-[#92710C]" />
+                <span className="text-xs font-medium text-[#92710C]">Verified by {detailOption.verifiedCount} travellers</span>
+              </div>
+
+              {/* Recommendation */}
+              {detailOption.isRecommended && detailOption.recommendReason && (
+                <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <Sparkles className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span className="text-xs text-primary font-medium">{detailOption.recommendReason}</span>
+                </div>
+              )}
+
+              {/* Action */}
+              <Button 
+                onClick={() => { setSelectedOption(detailOption.id); setDetailOption(null); }} 
+                className="w-full gradient-vibrant text-white font-semibold shadow-lg"
+              >
+                {selectedOption === detailOption.id ? "Already Selected" : "Select This Option"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -67,7 +67,7 @@ export interface Booking {
   location: string;
   date: string;
   price: number;
-  status: "confirmed" | "pending";
+  status: "confirmed" | "not-booked";
   image?: string;
 }
 
@@ -108,8 +108,8 @@ interface TripContextType {
   setSelectedLeg: (leg: TransitLeg | null) => void;
   setActiveTab: (tab: TabType) => void;
   setSubPage: (page: SubPageType) => void;
-  updateStopBooking: (stopId: string, status: "booked" | "pending" | "not-booked") => void;
-  updateLegBooking: (legId: string, status: "booked" | "pending" | "not-booked") => void;
+  updateStopBooking: (stopId: string, status: "booked" | "not-booked") => void;
+  updateLegBooking: (legId: string, status: "booked" | "not-booked") => void;
   // User data
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
@@ -264,7 +264,7 @@ const defaultBookings: Booking[] = [
     location: "Cusco, Peru",
     date: "Apr 1-5, 2024",
     price: 280,
-    status: "pending",
+    status: "not-booked",
   },
 ];
 
@@ -332,7 +332,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [alerts] = useState<Alert[]>(defaultAlerts);
   const [communityQuests] = useState<CommunityQuest[]>(defaultQuests);
 
-  const updateStopBooking = (stopId: string, status: "booked" | "pending" | "not-booked") => {
+  const updateStopBooking = (stopId: string, status: "booked" | "not-booked") => {
     setTrip(prev => ({
       ...prev,
       stops: prev.stops.map(s => 
@@ -341,7 +341,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const updateLegBooking = (legId: string, status: "booked" | "pending" | "not-booked") => {
+  const updateLegBooking = (legId: string, status: "booked" | "not-booked") => {
     setTrip(prev => ({
       ...prev,
       transitLegs: prev.transitLegs.map(l => 

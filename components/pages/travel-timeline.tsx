@@ -49,7 +49,6 @@ export function TravelTimeline() {
           if (!fromStop || !toStop) return null;
 
           const isBooked = leg.bookingStatus === "booked";
-          const isPending = leg.bookingStatus === "pending";
 
           // Calculate approximate date based on stop position
           const fromIndex = trip.stops.findIndex(s => s.id === leg.fromStopId);
@@ -67,9 +66,7 @@ export function TravelTimeline() {
                 {/* Transport icon */}
                 <div className={cn(
                   "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
-                  isBooked ? "bg-[#00D4AA]/10 text-[#00D4AA]" : 
-                  isPending ? "bg-[#FF6B9D]/10 text-[#FF6B9D]" : 
-                  "bg-primary/10 text-primary"
+                  isBooked ? "bg-[#00D4AA]/10 text-[#00D4AA]" : "bg-primary/10 text-primary"
                 )}>
                   {getTransportIcon(leg.type)}
                 </div>
@@ -101,11 +98,11 @@ export function TravelTimeline() {
                   </span>
                   <div className={cn(
                     "flex items-center gap-1 text-xs mt-1 justify-end",
-                    isBooked ? "text-[#00D4AA]" : isPending ? "text-[#FF6B9D]" : "text-primary"
+                    isBooked ? "text-[#00D4AA]" : "text-primary"
                   )}>
                     {isBooked && <CheckCircle2 className="w-3.5 h-3.5" />}
                     <span className={isBooked ? "" : "font-medium"}>
-                      {isBooked ? "confirmed" : isPending ? "pending" : "book now"}
+                      {isBooked ? "confirmed" : "book now"}
                     </span>
                   </div>
                 </div>

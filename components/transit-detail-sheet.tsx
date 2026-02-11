@@ -87,7 +87,6 @@ export function TransitDetailSheet() {
 
   const TransportIcon = getTransportIcon(selectedLeg.type);
   const isBooked = selectedLeg.bookingStatus === "booked";
-  const isPending = selectedLeg.bookingStatus === "pending";
   const transportOptions = selectedLeg.transportOptions || defaultTransportOptions;
 
   // Determine smart tags
@@ -127,9 +126,7 @@ export function TransitDetailSheet() {
             <div className="flex items-center gap-2">
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center",
-                isBooked ? "bg-[#10B981]/20 text-[#10B981]" : 
-                isPending ? "bg-[#F59E0B]/20 text-[#F59E0B]" : 
-                "bg-primary/20 text-primary"
+                isBooked ? "bg-[#10B981]/20 text-[#10B981]" : "bg-primary/20 text-primary"
               )}>
                 <TransportIcon className="w-4 h-4" />
               </div>
@@ -138,12 +135,10 @@ export function TransitDetailSheet() {
                 variant="outline" 
                 className={cn(
                   "text-xs font-semibold ml-auto",
-                  isBooked && "bg-[#10B981]/10 border-[#10B981] text-[#10B981]",
-                  isPending && "bg-[#F59E0B]/10 border-[#F59E0B] text-[#F59E0B]",
-                  !isBooked && !isPending && "bg-primary/10 border-primary text-primary"
+                  isBooked ? "bg-[#10B981]/10 border-[#10B981] text-[#10B981]" : "bg-primary/10 border-primary text-primary"
                 )}
               >
-                {isBooked ? "Booked" : isPending ? "Pending" : "Needs Booking"}
+                {isBooked ? "Booked" : "Needs Booking"}
               </Badge>
             </div>
             <div className="flex items-center gap-2 mt-1 ml-10">

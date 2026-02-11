@@ -46,7 +46,7 @@ const getTransportIcon = (type: string): React.ElementType => {
 // Status colors
 const statusColors = {
   booked: { badge: "bg-[#10B981] text-white", border: "border-l-[#10B981]", dot: "bg-[#10B981]", text: "text-[#10B981]" },
-  pending: { badge: "bg-[#F59E0B] text-white", border: "border-l-[#F59E0B]", dot: "bg-[#F59E0B]", text: "text-[#F59E0B]" },
+    pending: { badge: "bg-primary text-white", border: "border-l-primary", dot: "bg-primary", text: "text-primary" },
   "not-booked": { badge: "bg-primary text-white", border: "border-l-primary", dot: "bg-primary", text: "text-primary" },
 };
 
@@ -113,7 +113,7 @@ export function ItineraryPanel() {
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <Badge variant="outline" className="text-xs">{stats.total} stops</Badge>
           <Badge className={cn("text-xs", statusColors.booked.badge)}>{stats.booked} booked</Badge>
-          {stats.pending > 0 && <Badge className={cn("text-xs", statusColors.pending.badge)}>{stats.pending} pending</Badge>}
+          {stats.pending > 0 && <Badge className={cn("text-xs", statusColors.pending.badge)}>{stats.pending} to book</Badge>}
           {stats.notBooked > 0 && <Badge className={cn("text-xs", statusColors["not-booked"].badge)}>{stats.notBooked} to book</Badge>}
         </div>
       </div>
@@ -150,7 +150,7 @@ export function ItineraryPanel() {
                     </div>
                     <Badge className={cn("text-xs shrink-0", colors.badge)}>
                       {status === "booked" && <><CheckCircle2 className="w-3 h-3 mr-1" /> Hostel Booked</>}
-                      {status === "pending" && "Pending"}
+                      {status === "pending" && "Needs Booking"}
                       {status === "not-booked" && "Needs Booking"}
                     </Badge>
                   </div>
@@ -251,7 +251,7 @@ export function ItineraryPanel() {
                       )}
                     </div>
                     <Badge className={cn("text-xs shrink-0", colors.badge)}>
-                      {status === "booked" ? "Booked" : status === "pending" ? "Pending" : "Book"}
+                      {status === "booked" ? "Booked" : "Book"}
                     </Badge>
                   </button>
 
@@ -356,10 +356,11 @@ export function ItineraryPanel() {
                   {hasOptions && !isExpanded && (
                     <button
                       onClick={() => setExpandedTransit(leg.id)}
-                      className="flex items-center justify-center w-full mt-2 py-1.5 text-xs text-[#3B82F6] font-medium hover:bg-[#3B82F6]/5 rounded-lg transition-colors"
+                      className="flex items-center justify-center w-full mt-2 py-2 text-xs font-semibold text-white gradient-vibrant rounded-lg shadow-sm hover:shadow-md transition-all"
                     >
-                      View {leg.transportOptions!.length} transport options
-                      <ChevronRight className="w-3 h-3 ml-1" />
+                      <Bus className="w-3.5 h-3.5 mr-1.5" />
+                      View {leg.transportOptions!.length} Transport Options
+                      <ChevronRight className="w-3.5 h-3.5 ml-1" />
                     </button>
                   )}
                 </div>

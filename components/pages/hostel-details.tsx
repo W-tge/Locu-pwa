@@ -275,7 +275,7 @@ export function HostelDetails() {
                         <span className={cn(
                           "ml-auto text-xs font-bold px-2 py-0.5 rounded-full",
                           hostel.matchScore >= 90 ? "bg-[#10B981]/10 text-[#10B981]" :
-                          hostel.matchScore >= 80 ? "bg-[#3B82F6]/10 text-[#3B82F6]" : "bg-muted text-muted-foreground"
+                          hostel.matchScore >= 80 ? "bg-[#3B82F6]/10 text-[#3B82F6]" : "bg-[#F59E0B]/10 text-[#92710C]"
                         )}>
                           {hostel.matchScore}% match
                         </span>
@@ -303,7 +303,7 @@ export function HostelDetails() {
                       </span>
                     )}
                     {hostel.wifiSpeed && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20 text-xs font-semibold">
                         <Laptop className="w-3 h-3" /> {hostel.wifiSpeed}
                       </span>
                     )}
@@ -346,7 +346,7 @@ export function HostelDetails() {
                 {/* Amenities */}
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {hostel.amenities.map((amenity) => (
-                    <Badge key={amenity} variant="secondary" className="text-[10px] px-2 py-0.5 bg-muted">{amenity}</Badge>
+                    <Badge key={amenity} variant="secondary" className="text-[10px] px-2.5 py-1 bg-[#1B6B4A]/10 text-[#1B6B4A] border-[#1B6B4A]/20">{amenity}</Badge>
                   ))}
                 </div>
 

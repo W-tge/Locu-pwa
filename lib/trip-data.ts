@@ -178,7 +178,7 @@ export const demoTrip: Trip = {
       nights: 3,
       latitude: 17.1591,
       longitude: -89.0696,
-      bookingStatus: "pending",
+      bookingStatus: "not-booked",
       status: "PLANNED",
       weather: "28°C",
       tags: ["Mayan Ruins", "Cave Tubing", "Jungle"],
@@ -426,7 +426,7 @@ export const demoTrip: Trip = {
       duration: "10h",
       departureTime: "6:00 AM",
       departureDate: "2026-02-15",
-      bookingStatus: "pending",
+      bookingStatus: "not-booked",
       price: 45,
       currency: "USD",
       alert: {
@@ -756,7 +756,7 @@ export function getTripDuration(trip: Trip): number {
 
 export function getBookingStats(trip: Trip) {
   const booked = trip.stops.filter((s) => s.bookingStatus === "booked").length;
-  const pending = trip.stops.filter((s) => s.bookingStatus === "pending").length;
   const notBooked = trip.stops.filter((s) => s.bookingStatus === "not-booked").length;
-  return { booked, pending, notBooked, total: trip.stops.length };
+  // Keep pending field for backwards compatibility but always 0
+  return { booked, pending: notBooked, notBooked, total: trip.stops.length };
 }
