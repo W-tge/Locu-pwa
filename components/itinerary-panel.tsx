@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
 import { useLocuToast } from "@/components/locu-toast";
@@ -13,6 +13,7 @@ import {
   MapPin,
   Calendar,
   ChevronRight,
+  ChevronDown,
   Bus,
   Ship,
   Car,
@@ -33,6 +34,11 @@ import {
   Star,
 } from "lucide-react";
 
+// ── Shared card classes ──
+const CARD_BASE = "bg-card rounded-xl border border-border shadow-sm overflow-hidden";
+const CARD_INNER = "p-4";
+const TAG_BASE = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide";
+
 // Transport icon mapping
 const getTransportIcon = (type: string): React.ElementType => {
   const t = type?.toLowerCase() || "";
@@ -46,7 +52,6 @@ const getTransportIcon = (type: string): React.ElementType => {
 // Status colors
 const statusColors = {
   booked: { badge: "bg-[#10B981] text-white", border: "border-l-[#10B981]", dot: "bg-[#10B981]", text: "text-[#10B981]" },
-  
   "not-booked": { badge: "bg-primary text-white", border: "border-l-primary", dot: "bg-primary", text: "text-primary" },
 };
 
@@ -55,6 +60,27 @@ function formatDateRange(start: string, end: string): string {
   const e = new Date(end);
   const fmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
   return `${fmt.format(s)} - ${fmt.format(e)}`;
+}
+
+// ── Animated expand wrapper ──
+function AnimatedExpand({ open, children }: { open: boolean; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (ref.current) {
+      setHeight(ref.current.scrollHeight);
+    }
+  }, [open, children]);
+
+  return (
+    <div
+      className="overflow-hidden transition-all duration-300 ease-in-out"
+      style={{ maxHeight: open ? height : 0, opacity: open ? 1 : 0 }}
+    >
+      <div ref={ref}>{children}</div>
+    </div>
+  );
 }
 
 export function ItineraryPanel() {
@@ -111,16 +137,16 @@ export function ItineraryPanel() {
           {trip.description} &bull; {duration} days
         </p>
         <div className="flex items-center gap-2 mt-3 flex-wrap">
-          <Badge variant="outline" className="text-xs">{stats.total} stops</Badge>
-          <Badge className={cn("text-xs", statusColors.booked.badge)}>{stats.booked} booked</Badge>
-          {stats.notBooked > 0 && <Badge className={cn("text-xs", statusColors["not-booked"].badge)}>{stats.notBooked} to book</Badge>}
+          <Badge variant="outline" className="text-xs uppercase tracking-wide">{stats.total} Stops</Badge>
+          <Badge className={cn("text-xs uppercase tracking-wide", statusColors.booked.badge)}>{stats.booked} Booked</Badge>
+          {stats.notBooked > 0 && <Badge className={cn("text-xs uppercase tracking-wide", statusColors["not-booked"].badge)}>{stats.notBooked} To Book</Badge>}
         </div>
       </div>
 
       {/* Scrollable Timeline */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {timelineItems.map((item, i) => {
-          // ====== STOP CARD ======
+          // ════════ STOP CARD ════════
           if (item.type === "stop") {
             const stop = item.data as Stop;
             const status = stop.bookingStatus;
@@ -129,9 +155,9 @@ export function ItineraryPanel() {
             return (
               <div
                 key={`stop-${stop.id}`}
-                className={cn("bg-card rounded-xl border border-border shadow-sm overflow-hidden border-l-4", colors.border)}
+                className={cn(CARD_BASE, "border-l-4", colors.border)}
               >
-                <div className="p-4">
+                <div className={CARD_INNER}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
                       <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0", colors.dot)}>
@@ -143,19 +169,19 @@ export function ItineraryPanel() {
                           <Calendar className="w-3 h-3" />
                           <span>{formatDateRange(stop.startDate, stop.endDate)}</span>
                           <span>&bull;</span>
-                          <span>{stop.nights} days</span>
+                          <span>{stop.nights} Days</span>
                         </div>
                       </div>
                     </div>
-                    <Badge className={cn("text-xs shrink-0", colors.badge)}>
-  {status === "booked" && <><CheckCircle2 className="w-3 h-3 mr-1" /> Hostel Booked</>}
-  {status === "not-booked" && "Needs Booking"}
+                    <Badge className={cn("text-[10px] shrink-0 uppercase tracking-wide", colors.badge)}>
+                      {status === "booked" && <><CheckCircle2 className="w-3 h-3 mr-1" /> Booked</>}
+                      {status === "not-booked" && "Needs Booking"}
                     </Badge>
                   </div>
 
                   {/* Booked Hostel Card */}
                   {status === "booked" && stop.hostelName && (
-                    <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg border border-border/50">
                       <div className="flex gap-3">
                         {stop.hostelImage ? (
                           <Image src={stop.hostelImage || "/placeholder.svg"} alt={stop.hostelName} width={80} height={60} className="w-20 h-15 rounded-md object-cover" />
@@ -166,15 +192,15 @@ export function ItineraryPanel() {
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm text-foreground truncate">{stop.hostelName}</p>
-                          <p className="text-xs text-muted-foreground">{stop.nights} nights</p>
+                          <p className="text-xs text-muted-foreground">{stop.nights} Nights</p>
                           <p className="text-sm font-semibold text-[#10B981] mt-1">
                             ${stop.hostelPrice ? stop.hostelPrice * stop.nights : 0}
                           </p>
                           <button
-                            onClick={() => { setSelectedStop(stop); setSubPage("hostelDetails"); }}
-                            className="text-xs text-primary hover:underline mt-1"
+                            onClick={() => { setSelectedStop(stop); setSubPage("bookingDetails"); }}
+                            className="text-xs text-primary hover:underline mt-1 font-medium"
                           >
-                            Click to view details
+                            View Booking Details
                           </button>
                         </div>
                         <button
@@ -191,7 +217,7 @@ export function ItineraryPanel() {
                   {status !== "booked" && (
                     <Button
                       onClick={() => { setSelectedStop(stop); setSubPage("hostelDetails"); }}
-                      className="w-full mt-3 bg-primary hover:bg-primary/90 text-white"
+                      className="w-full mt-3 gradient-vibrant text-white font-semibold shadow-sm hover:shadow-md transition-shadow"
                     >
                       Explore & Book Hostels
                     </Button>
@@ -201,7 +227,7 @@ export function ItineraryPanel() {
             );
           }
 
-          // ====== TRANSIT CARD - matches reference image ======
+          // ════════ TRANSIT CARD ════════
           if (item.type === "transit") {
             const leg = item.data as TransitLeg;
             const status = leg.bookingStatus;
@@ -210,8 +236,6 @@ export function ItineraryPanel() {
             const toStop = getStopById(leg.toStopId);
             const isExpanded = expandedTransit === leg.id;
             const hasOptions = leg.transportOptions && leg.transportOptions.length > 0;
-
-            // Determine cheapest & fastest for smart tags
             const cheapestPrice = hasOptions ? Math.min(...leg.transportOptions!.map((o) => o.price)) : leg.price || 0;
             const fastestDuration = hasOptions
               ? leg.transportOptions!.reduce((min, o) => {
@@ -223,150 +247,161 @@ export function ItineraryPanel() {
             return (
               <div
                 key={`transit-${leg.id}`}
-                className="bg-[#EFF6FF] rounded-xl border border-[#BFDBFE] shadow-sm overflow-hidden"
+                className={cn(CARD_BASE, "border-l-4", status === "booked" ? "border-l-[#10B981]" : "border-l-[#3B82F6]")}
               >
-                <div className="p-4">
-                  {/* Header - matches reference: chevrons + route name */}
-                  <button
-                    onClick={() => setExpandedTransit(isExpanded ? null : leg.id)}
-                    className="flex items-center gap-2 w-full text-left"
-                  >
-                    <div className="flex items-center gap-0.5 text-[#3B82F6]">
-                      <ChevronRight className={cn("w-4 h-4 transition-transform", isExpanded && "rotate-90")} />
-                      <ChevronRight className={cn("w-4 h-4 -ml-2 transition-transform", isExpanded && "rotate-90")} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-foreground">
-                        {fromStop?.city || "Unknown"} to {toStop?.city || "Unknown"}
-                      </h3>
-                      {/* Status badge */}
-                      {status === "booked" ? (
-                        <span className="text-xs text-[#10B981] font-semibold flex items-center gap-1 mt-0.5">
-                          <CheckCircle2 className="w-3 h-3" /> Transport Booked
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground mt-0.5">Available Options:</span>
-                      )}
-                    </div>
-                    <Badge className={cn("text-xs shrink-0", colors.badge)}>
-                      {status === "booked" ? "Booked" : "Book"}
-                    </Badge>
-                  </button>
-
-                  {/* Transport Options - always show at least the primary one */}
-                  <div className={cn("mt-3 space-y-2", !isExpanded && hasOptions && "max-h-0 overflow-hidden", isExpanded && "max-h-[1000px]", !hasOptions && "mt-3")}>
-                    {hasOptions ? (
-                      leg.transportOptions!.map((option, oi) => {
-                        const isCheapest = option.price === cheapestPrice;
-                        const optDuration = parseInt(option.duration);
-                        const isFastest = optDuration === fastestDuration;
-                        const hasInsight = option.verifiedCount && option.verifiedCount > 15;
-                        const Icon = getTransportIcon(option.type || leg.type);
-
-                        return (
-                          <button
-                            key={option.id || oi}
-                            onClick={() => { setSelectedLeg(leg); setSubPage("transportBooking"); }}
-                            className={cn(
-                              "w-full p-3 bg-card rounded-xl border transition-all text-left",
-                              oi === 0 ? "border-primary/40 shadow-sm" : "border-border hover:border-primary/30"
-                            )}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex items-start gap-3">
-                                <Icon className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
-                                <div>
-                                  <p className="font-semibold text-foreground text-sm">{option.operator}</p>
-                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                                    <Clock className="w-3 h-3" />
-                                    <span>{option.duration}</span>
-                                    {option.departureTime && (
-                                      <span className="text-muted-foreground/60">departs {option.departureTime}</span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <span className="text-lg font-bold text-[#3B82F6] shrink-0">${option.price}</span>
-                            </div>
-
-                            {/* Insight badge + smart tags */}
-                            <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                              {oi === 0 && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
-                                  <Star className="w-2.5 h-2.5" /> Locu Pick
-                                </span>
-                              )}
-                              {isCheapest && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#10B981]/10 text-[#10B981] text-[10px] font-semibold">
-                                  <DollarSign className="w-2.5 h-2.5" /> Cheapest
-                                </span>
-                              )}
-                              {isFastest && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] text-[10px] font-semibold">
-                                  <Zap className="w-2.5 h-2.5" /> Fastest
-                                </span>
-                              )}
-                              {hasInsight && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FBBF24]/10 text-[#92710C] text-[10px] font-medium">
-                                  <Lightbulb className="w-2.5 h-2.5 text-[#FBBF24]" />
-                                  Insight from {option.verifiedCount} travellers
-                                </span>
-                              )}
-                              {option.seatsLeft && option.seatsLeft < 10 && (
-                                <span className="text-[10px] text-[#F59E0B] font-medium">{option.seatsLeft} seats left</span>
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })
-                    ) : (
-                      /* Single option fallback */
-                      <button
-                        onClick={() => { setSelectedLeg(leg); setSubPage("transportBooking"); }}
-                        className="w-full p-3 bg-card rounded-xl border border-border text-left hover:border-primary/30 transition-all"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-3">
-                            {(() => { const Icon = getTransportIcon(leg.type); return <Icon className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />; })()}
-                            <div>
-                              <p className="font-semibold text-foreground text-sm">{leg.operator || leg.mode || "Local Transport"}</p>
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                                <Clock className="w-3 h-3" />
-                                <span>{leg.duration}</span>
-                              </div>
-                            </div>
-                          </div>
-                          {leg.price && <span className="text-lg font-bold text-[#3B82F6] shrink-0">${leg.price}</span>}
+                <div className={CARD_INNER}>
+                  {/* Header row */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", status === "booked" ? "bg-[#10B981]" : "bg-[#3B82F6]")}>
+                        {(() => { const Icon = getTransportIcon(leg.type); return <Icon className="w-4 h-4 text-white" />; })()}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{fromStop?.city || "Origin"} to {toStop?.city || "Destination"}</h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{leg.duration}</span>
+                          {leg.price && <><span>&bull;</span><span className="font-semibold text-foreground">${leg.price}</span></>}
                         </div>
-                        {leg.communityTip && (
-                          <div className="flex items-center gap-1.5 mt-2">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FBBF24]/10 text-[#92710C] text-[10px] font-medium">
-                              <Lightbulb className="w-2.5 h-2.5 text-[#FBBF24]" />
-                              {leg.communityTip}
-                            </span>
-                          </div>
-                        )}
-                      </button>
-                    )}
+                      </div>
+                    </div>
+                    <Badge className={cn("text-[10px] shrink-0 uppercase tracking-wide", colors.badge)}>
+                      {status === "booked" ? <><CheckCircle2 className="w-3 h-3 mr-1" /> Booked</> : "To Book"}
+                    </Badge>
                   </div>
 
-                  {/* Show expand toggle if there are multiple options */}
-                  {hasOptions && !isExpanded && (
-                    <button
-                      onClick={() => setExpandedTransit(leg.id)}
-                      className="flex items-center justify-center w-full mt-2 py-2 text-xs font-semibold text-white gradient-vibrant rounded-lg shadow-sm hover:shadow-md transition-all"
+                  {/* Booked state summary */}
+                  {status === "booked" && (
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg border border-border/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-sm text-foreground">{leg.operator || "Transport"}</p>
+                          <p className="text-xs text-muted-foreground">{leg.mode || leg.type}</p>
+                        </div>
+                        <button
+                          onClick={() => { setSelectedLeg(leg); setSubPage("transitBookingDetails"); }}
+                          className="text-xs text-primary hover:underline font-medium"
+                        >
+                          View Booking Details
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Unbooked: transport options with animated expand */}
+                  {status !== "booked" && hasOptions && (
+                    <>
+                      <AnimatedExpand open={isExpanded}>
+                        <div className="mt-3 space-y-2">
+                          {leg.transportOptions!.map((option, oi) => {
+                            const isCheapest = option.price === cheapestPrice;
+                            const optDuration = parseInt(option.duration);
+                            const isFastest = optDuration === fastestDuration;
+                            const hasInsight = option.verifiedCount && option.verifiedCount > 15;
+                            const Icon = getTransportIcon(option.type || leg.type);
+
+                            return (
+                              <button
+                                key={option.id || oi}
+                                onClick={() => { setSelectedLeg(leg); setSubPage("transportBooking"); }}
+                                className={cn(
+                                  "w-full p-3 bg-muted/30 rounded-lg border transition-all text-left hover:bg-muted/60",
+                                  oi === 0 ? "border-[#3B82F6]/40 shadow-sm" : "border-border"
+                                )}
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex items-start gap-3">
+                                    <Icon className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
+                                    <div>
+                                      <p className="font-semibold text-foreground text-sm">{option.operator}</p>
+                                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                                        <Clock className="w-3 h-3" />
+                                        <span>{option.duration}</span>
+                                        {option.departureTime && (
+                                          <span className="text-muted-foreground/60">Departs {option.departureTime}</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <span className="text-lg font-bold text-[#3B82F6] shrink-0">${option.price}</span>
+                                </div>
+
+                                {/* Tags */}
+                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                  {oi === 0 && (
+                                    <span className={cn(TAG_BASE, "bg-primary/10 text-primary")}>
+                                      <Star className="w-2.5 h-2.5" /> Locu Pick
+                                    </span>
+                                  )}
+                                  {isCheapest && (
+                                    <span className={cn(TAG_BASE, "bg-[#10B981]/10 text-[#10B981]")}>
+                                      <DollarSign className="w-2.5 h-2.5" /> Cheapest
+                                    </span>
+                                  )}
+                                  {isFastest && (
+                                    <span className={cn(TAG_BASE, "bg-[#3B82F6]/10 text-[#3B82F6]")}>
+                                      <Zap className="w-2.5 h-2.5" /> Fastest
+                                    </span>
+                                  )}
+                                  {hasInsight && (
+                                    <span className={cn(TAG_BASE, "bg-[#FBBF24]/10 text-[#92710C] normal-case")}>
+                                      <Lightbulb className="w-2.5 h-2.5 text-[#FBBF24]" />
+                                      Insight From {option.verifiedCount} Travellers
+                                    </span>
+                                  )}
+                                  {option.seatsLeft && option.seatsLeft < 10 && (
+                                    <span className={cn(TAG_BASE, "bg-[#F59E0B]/10 text-[#F59E0B] normal-case")}>
+                                      {option.seatsLeft} Seats Left
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </AnimatedExpand>
+
+                      {/* Expand / collapse toggle */}
+                      <button
+                        onClick={() => setExpandedTransit(isExpanded ? null : leg.id)}
+                        className={cn(
+                          "flex items-center justify-center w-full mt-3 py-2.5 text-xs font-semibold rounded-lg transition-all",
+                          isExpanded
+                            ? "text-muted-foreground bg-muted/60 hover:bg-muted"
+                            : "text-white gradient-vibrant shadow-sm hover:shadow-md"
+                        )}
+                      >
+                        {isExpanded ? (
+                          <>
+                            <ChevronDown className="w-3.5 h-3.5 mr-1.5 rotate-180" />
+                            Collapse Options
+                          </>
+                        ) : (
+                          <>
+                            <Bus className="w-3.5 h-3.5 mr-1.5" />
+                            View {leg.transportOptions!.length} Transport Options
+                            <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                          </>
+                        )}
+                      </button>
+                    </>
+                  )}
+
+                  {/* Unbooked: single option fallback */}
+                  {status !== "booked" && !hasOptions && (
+                    <Button
+                      onClick={() => { setSelectedLeg(leg); setSubPage("transportBooking"); }}
+                      className="w-full mt-3 gradient-vibrant text-white font-semibold shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <Bus className="w-3.5 h-3.5 mr-1.5" />
-                      View {leg.transportOptions!.length} Transport Options
-                      <ChevronRight className="w-3.5 h-3.5 ml-1" />
-                    </button>
+                      Book Transport
+                    </Button>
                   )}
                 </div>
               </div>
             );
           }
 
-          // ====== INSIGHT CARD ======
+          // ════════ INSIGHT CARD ════════
           if (item.type === "insight") {
             const insight = item.data as Insight;
             const iconMap: Record<string, React.ElementType> = {
@@ -375,73 +410,88 @@ export function ItineraryPanel() {
             const InsightIcon = iconMap[insight.icon] || Lightbulb;
 
             return (
-              <div key={`insight-${insight.id}`} className="p-3 bg-[#FBBF24]/10 border border-[#FBBF24]/30 rounded-xl">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#FBBF24]/20 flex items-center justify-center shrink-0">
-                    <InsightIcon className="w-4 h-4 text-[#FBBF24]" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm text-foreground">{insight.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{insight.body}</p>
-                    {insight.action && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 mt-2 text-xs text-[#FBBF24] hover:bg-[#FBBF24]/10"
-                        onClick={() => {
-                          if (insight.action?.toLowerCase().includes("cash")) {
-                            showToast("Locu will remind you to take out cash ahead of time", "reminder");
-                          } else if (insight.actionUrl) {
-                            window.open(insight.actionUrl, "_blank");
-                          } else {
-                            showToast("Noted! We'll keep this in mind for your trip", "info");
-                          }
-                        }}
-                      >
-                        {insight.action}
-                      </Button>
-                    )}
+              <div key={`insight-${insight.id}`} className={cn(CARD_BASE, "border-l-4 border-l-[#FBBF24]")}>
+                <div className={CARD_INNER}>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#FBBF24]/20 flex items-center justify-center shrink-0">
+                      <InsightIcon className="w-4 h-4 text-[#FBBF24]" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={cn(TAG_BASE, "bg-[#FBBF24]/10 text-[#92710C]")}>
+                          <Lightbulb className="w-2.5 h-2.5 text-[#FBBF24]" /> Traveller Tip
+                        </span>
+                      </div>
+                      <p className="font-semibold text-sm text-foreground mt-2">{insight.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{insight.body}</p>
+                      {insight.action && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 mt-2 text-xs text-[#92710C] hover:bg-[#FBBF24]/10 font-semibold"
+                          onClick={() => {
+                            if (insight.action?.toLowerCase().includes("cash")) {
+                              showToast("Locu will remind you to take out cash ahead of time", "reminder");
+                            } else if (insight.actionUrl) {
+                              window.open(insight.actionUrl, "_blank");
+                            } else {
+                              showToast("Noted! We'll keep this in mind for your trip", "info");
+                            }
+                          }}
+                        >
+                          {insight.action}
+                          <ExternalLink className="w-3 h-3 ml-1" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             );
           }
 
-          // ====== ALERT CARD ======
+          // ════════ ALERT CARD ════════
           if (item.type === "alert") {
             const alert = item.data;
             const isUrgent = alert.style === "CRITICAL_INLINE_CARD";
             return (
               <div
                 key={`alert-${i}`}
-                className={cn("p-3 rounded-xl border", isUrgent ? "bg-destructive/10 border-destructive/30" : "bg-primary/10 border-primary/30")}
+                className={cn(CARD_BASE, "border-l-4", isUrgent ? "border-l-destructive" : "border-l-primary")}
               >
-                <div className="flex items-start gap-3">
-                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", isUrgent ? "bg-destructive/20" : "bg-primary/20")}>
-                    {isUrgent ? <AlertTriangle className="w-4 h-4 text-destructive" /> : <Users className="w-4 h-4 text-primary" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm text-foreground">{alert.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{alert.body}</p>
-                    {(alert.action || alert.podAction) && (
-                      <Button
-                        size="sm"
-                        className={cn("h-7 mt-2 text-xs text-white", isUrgent ? "bg-destructive hover:bg-destructive/90" : "bg-primary hover:bg-primary/90")}
-                        onClick={() => {
-                          const action = alert.action || alert.podAction || "";
-                          if (action.toLowerCase().includes("book")) {
-                            setSubPage("transportBooking");
-                          } else if (action.toLowerCase().includes("pod")) {
-                            setSubPage("social");
-                          } else {
-                            showToast(`Action: ${action}`, "info");
-                          }
-                        }}
-                      >
-                        {alert.action || alert.podAction}
-                        <ExternalLink className="w-3 h-3 ml-1" />
-                      </Button>
-                    )}
+                <div className={CARD_INNER}>
+                  <div className="flex items-start gap-3">
+                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", isUrgent ? "bg-destructive/20" : "bg-primary/20")}>
+                      {isUrgent ? <AlertTriangle className="w-4 h-4 text-destructive" /> : <Users className="w-4 h-4 text-primary" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={cn(TAG_BASE, isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}>
+                          {isUrgent ? <><AlertTriangle className="w-2.5 h-2.5" /> Urgent</> : <><Users className="w-2.5 h-2.5" /> Pod Alert</>}
+                        </span>
+                      </div>
+                      <p className="font-semibold text-sm text-foreground">{alert.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{alert.body}</p>
+                      {(alert.action || alert.podAction) && (
+                        <Button
+                          size="sm"
+                          className={cn("h-7 mt-2 text-xs text-white", isUrgent ? "bg-destructive hover:bg-destructive/90" : "bg-primary hover:bg-primary/90")}
+                          onClick={() => {
+                            const action = alert.action || alert.podAction || "";
+                            if (action.toLowerCase().includes("book")) {
+                              setSubPage("transportBooking");
+                            } else if (action.toLowerCase().includes("pod")) {
+                              setSubPage("social");
+                            } else {
+                              showToast(`Action: ${action}`, "info");
+                            }
+                          }}
+                        >
+                          {alert.action || alert.podAction}
+                          <ExternalLink className="w-3 h-3 ml-1" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
