@@ -170,44 +170,44 @@ export function TransportBooking() {
         </div>
       </header>
 
-      {/* Route Hero - Prominent origin/destination */}
-      <div className="shrink-0 bg-card paper-texture">
-        <div className="px-5 py-5">
-          <div className="flex items-stretch gap-4">
+      {/* Route Hero — Ticket stub style */}
+      <div className="shrink-0 bg-card paper-texture border-b border-border">
+        <div className="px-5 py-4">
+          {/* Origin / Destination row */}
+          <div className="flex items-center gap-3">
             {/* From */}
-            <div className="flex-1 text-center">
-              <div className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center mx-auto mb-2">
-                <div className="w-3 h-3 rounded-full bg-foreground" />
-              </div>
-              <p className="font-serif text-xl text-foreground leading-tight">{fromStop?.city || "Origin"}</p>
-              <p className="text-xs text-muted-foreground mt-1">{fromStop?.country || ""}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">From</p>
+              <p className="font-[var(--font-hand)] text-2xl text-foreground leading-tight truncate">{fromStop?.city || selectedLeg?.fromStopId || "Origin"}</p>
+              <p className="text-xs text-muted-foreground">{fromStop?.country || ""}</p>
             </div>
 
-            {/* Route line with transport icon */}
-            <div className="flex flex-col items-center justify-center gap-1 w-20">
-              <div className="flex-1 w-px border-l-2 border-dashed border-muted-foreground/30" />
+            {/* Route arrow with transport icon */}
+            <div className="flex flex-col items-center gap-1 shrink-0 px-2">
               <div className="w-10 h-10 rounded-full gradient-vibrant flex items-center justify-center shadow-md">
                 <Bus className="w-5 h-5 text-white" />
               </div>
-              <div className="flex-1 w-px border-l-2 border-dashed border-muted-foreground/30" />
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <div className="w-4 h-px bg-border" />
+                <ArrowRight className="w-3 h-3" />
+                <div className="w-4 h-px bg-border" />
+              </div>
             </div>
 
             {/* To */}
-            <div className="flex-1 text-center">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                <div className="w-3 h-3 rounded-full bg-primary" />
-              </div>
-              <p className="font-serif text-xl text-foreground leading-tight">{toStop?.city || "Destination"}</p>
-              <p className="text-xs text-muted-foreground mt-1">{toStop?.country || ""}</p>
+            <div className="flex-1 min-w-0 text-right">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">To</p>
+              <p className="font-[var(--font-hand)] text-2xl text-foreground leading-tight truncate">{toStop?.city || selectedLeg?.toStopId || "Destination"}</p>
+              <p className="text-xs text-muted-foreground">{toStop?.country || ""}</p>
             </div>
           </div>
 
           {/* Date + duration strip */}
-          <div className="flex items-center justify-center gap-4 mt-4 py-2 px-4 bg-muted/50 rounded-xl">
+          <div className="flex items-center justify-center gap-4 mt-3 py-2 px-4 bg-muted/40 rounded-lg border border-dashed border-border">
             {selectedLeg?.departureDate && (
               <div className="flex items-center gap-1.5 text-sm text-foreground">
                 <Calendar className="w-4 h-4 text-primary" />
-                <span className="font-medium">
+                <span className="font-mono font-medium text-xs">
                   {new Date(selectedLeg.departureDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                 </span>
               </div>
@@ -217,19 +217,17 @@ export function TransportBooking() {
                 <div className="w-px h-4 bg-border" />
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4" />
-                  <span>{selectedLeg.duration}</span>
+                  <span className="font-mono text-xs">{selectedLeg.duration}</span>
                 </div>
               </>
             )}
           </div>
         </div>
 
-        <div className="h-px bg-border mx-4" />
-
         {/* Section label */}
-        <div className="px-5 py-3 flex items-center justify-between">
-          <p className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">{mockTransportOptions.length} Options Available</p>
-          <p className="text-[10px] text-muted-foreground">Sorted by recommendation</p>
+        <div className="px-5 py-2.5 flex items-center justify-between border-t border-dashed border-border">
+          <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">{mockTransportOptions.length} Options Available</p>
+          <p className="text-[10px] text-muted-foreground">Sorted By Recommendation</p>
         </div>
       </div>
 

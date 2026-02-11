@@ -114,14 +114,14 @@ export function TransitCheckout() {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-foreground text-sm">{option.operator}</h3>
-            <p className="text-xs text-muted-foreground">Route {option.routeCode} - {option.serviceClass}</p>
+            <p className="text-xs text-muted-foreground">Route {option.routeCode || leg.route || "Direct"} - {option.type || leg.type || "Standard"}</p>
           </div>
           <span className="font-mono font-bold text-primary">${basePrice}</span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <div className="text-center">
             <p className="font-mono font-bold text-foreground">{option.departure}</p>
-            <p className="text-[10px] text-muted-foreground">{fromStop?.city}</p>
+            <p className="text-[10px] text-muted-foreground">{fromStop?.city || "Origin"}</p>
           </div>
           <div className="flex-1 relative px-3">
             <div className="border-t border-dashed border-border" />
@@ -131,7 +131,7 @@ export function TransitCheckout() {
           </div>
           <div className="text-center">
             <p className="font-mono font-bold text-foreground">{option.arrival}</p>
-            <p className="text-[10px] text-muted-foreground">{toStop?.city}</p>
+            <p className="text-[10px] text-muted-foreground">{toStop?.city || "Destination"}</p>
           </div>
         </div>
       </div>
@@ -347,7 +347,7 @@ export function TransitCheckout() {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-serif text-xl">{option.operator}</h3>
-              <p className="text-xs text-muted-foreground">Route {option.routeCode} - {option.serviceClass}</p>
+              <p className="text-xs text-muted-foreground">Route {option.routeCode || leg.route || "Direct"} - {option.type || leg.type || "Standard"}</p>
             </div>
           </div>
         </div>
@@ -361,7 +361,7 @@ export function TransitCheckout() {
             <div>
               <p className="micro-label">Depart</p>
               <p className="font-mono font-bold text-lg">{option.departure}</p>
-              <p className="text-[10px] text-muted-foreground">{fromStop?.city}</p>
+              <p className="text-[10px] text-muted-foreground">{fromStop?.city || "Origin"}</p>
             </div>
             <div>
               <p className="micro-label">Duration</p>
@@ -370,7 +370,7 @@ export function TransitCheckout() {
             <div>
               <p className="micro-label">Arrive</p>
               <p className="font-mono font-bold text-lg">{option.arrival}</p>
-              <p className="text-[10px] text-muted-foreground">{toStop?.city}</p>
+              <p className="text-[10px] text-muted-foreground">{toStop?.city || "Destination"}</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3 text-center mt-3 pt-3 border-t border-dashed border-border">
