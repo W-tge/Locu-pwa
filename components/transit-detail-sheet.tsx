@@ -296,7 +296,7 @@ export function TransitDetailSheet() {
           <div className="p-4 border-t border-border bg-card">
             {!isBooked ? (
               <Button 
-                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold" 
+                className="w-full gradient-vibrant text-white font-semibold shadow-lg" 
                 onClick={() => {
                   setSelectedLeg(null);
                   setSubPage("transportBooking");
@@ -306,8 +306,12 @@ export function TransitDetailSheet() {
                 View All & Book
               </Button>
             ) : (
-              <Button variant="outline" className="w-full bg-transparent" onClick={handleDismiss}>
-                Done
+              <Button 
+                className="w-full gradient-vibrant text-white font-semibold shadow-lg" 
+                onClick={() => setSubPage("transitBookingDetails")}
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                View Booking Details
               </Button>
             )}
           </div>

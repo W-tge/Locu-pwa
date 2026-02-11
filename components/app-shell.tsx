@@ -24,6 +24,7 @@ import { TripHistory } from "./pages/trip-history";
 import { HostelDetails } from "./pages/hostel-details";
 import { TransportBooking } from "./pages/transport-booking";
 import { BookingDetails } from "./pages/booking-details";
+import { TransitBookingDetails } from "./pages/transit-booking-details";
 
 export function AppShell() {
   const { activeTab, subPage, selectedStop, selectedLeg } = useTrip();
@@ -43,6 +44,7 @@ export function AppShell() {
       case "hostelDetails": return <HostelDetails />;
       case "transportBooking": return <TransportBooking />;
       case "bookingDetails": return <BookingDetails />;
+      case "transitBookingDetails": return <TransitBookingDetails />;
       default: return null;
     }
   };

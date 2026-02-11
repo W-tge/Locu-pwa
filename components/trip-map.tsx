@@ -52,7 +52,8 @@ export function TripMap() {
   const transitLabelsRef = useRef<Map<string, any>>(new Map());
 
   // Any popup or modal active on the map
-  const hasActiveOverlay = !!(showStopPopup || showTransitPopup || showInsightModal);
+  // Only showTransitPopup and showInsightModal count - stop popup is handled by StopDetailSheet
+  const hasActiveOverlay = !!(showTransitPopup || showInsightModal);
 
   // Close all map overlays
   const closeAllOverlays = useCallback(() => {
@@ -324,12 +325,8 @@ export function TripMap() {
             <span className="text-foreground">Booked</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-            <span className="text-foreground">Pending</span>
-          </div>
-          <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-foreground">Book</span>
+            <span className="text-foreground">To Book</span>
           </div>
         </div>
       </div>
@@ -357,6 +354,9 @@ export function TripMap() {
         </button>
         <button onClick={handleRecenter} className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card transition-all">
           <Navigation className="w-5 h-5 text-primary" />
+        </button>
+        <button onClick={() => setSubPage("safety")} className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card transition-all" title="Emergency Info">
+          <Shield className="w-5 h-5 text-[#DC2626]" />
         </button>
         <button onClick={handleZoomIn} className="p-3 bg-card/95 backdrop-blur-md rounded-xl shadow-xl border border-border/50 hover:bg-card transition-all">
           <ZoomIn className="w-5 h-5 text-foreground" />

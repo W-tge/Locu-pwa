@@ -46,7 +46,7 @@ const getTransportIcon = (type: string): React.ElementType => {
 // Status colors
 const statusColors = {
   booked: { badge: "bg-[#10B981] text-white", border: "border-l-[#10B981]", dot: "bg-[#10B981]", text: "text-[#10B981]" },
-    pending: { badge: "bg-primary text-white", border: "border-l-primary", dot: "bg-primary", text: "text-primary" },
+  
   "not-booked": { badge: "bg-primary text-white", border: "border-l-primary", dot: "bg-primary", text: "text-primary" },
 };
 
@@ -113,7 +113,6 @@ export function ItineraryPanel() {
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <Badge variant="outline" className="text-xs">{stats.total} stops</Badge>
           <Badge className={cn("text-xs", statusColors.booked.badge)}>{stats.booked} booked</Badge>
-          {stats.pending > 0 && <Badge className={cn("text-xs", statusColors.pending.badge)}>{stats.pending} to book</Badge>}
           {stats.notBooked > 0 && <Badge className={cn("text-xs", statusColors["not-booked"].badge)}>{stats.notBooked} to book</Badge>}
         </div>
       </div>
@@ -149,9 +148,8 @@ export function ItineraryPanel() {
                       </div>
                     </div>
                     <Badge className={cn("text-xs shrink-0", colors.badge)}>
-                      {status === "booked" && <><CheckCircle2 className="w-3 h-3 mr-1" /> Hostel Booked</>}
-                      {status === "pending" && "Needs Booking"}
-                      {status === "not-booked" && "Needs Booking"}
+  {status === "booked" && <><CheckCircle2 className="w-3 h-3 mr-1" /> Hostel Booked</>}
+  {status === "not-booked" && "Needs Booking"}
                     </Badge>
                   </div>
 
@@ -458,8 +456,7 @@ export function ItineraryPanel() {
       <div className="shrink-0 p-4 border-t border-border bg-card">
         <Button
           onClick={() => setSubPage("social")}
-          variant="outline"
-          className="w-full h-12 text-base font-medium bg-transparent"
+          className="w-full h-12 text-base font-semibold bg-[#0D9488] hover:bg-[#0D9488]/90 text-white shadow-lg"
         >
           <Users className="w-5 h-5 mr-2" />
           Open Travel Pod

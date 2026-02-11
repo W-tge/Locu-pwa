@@ -757,6 +757,5 @@ export function getTripDuration(trip: Trip): number {
 export function getBookingStats(trip: Trip) {
   const booked = trip.stops.filter((s) => s.bookingStatus === "booked").length;
   const notBooked = trip.stops.filter((s) => s.bookingStatus === "not-booked").length;
-  // Keep pending field for backwards compatibility but always 0
-  return { booked, pending: notBooked, notBooked, total: trip.stops.length };
+  return { booked, notBooked, total: trip.stops.length };
 }

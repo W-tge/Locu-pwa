@@ -96,7 +96,7 @@ export interface User {
 }
 
 type TabType = "journey" | "guide" | "social" | "wallet" | "menu";
-type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking" | "bookingDetails";
+type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking" | "bookingDetails" | "transitBookingDetails";
 
 interface TripContextType {
   trip: Trip;
