@@ -1,4 +1,4 @@
-export type BookingStatus = "booked" | "pending" | "not-booked";
+export type BookingStatus = "booked" | "not-booked";
 export type StopStatus = "ACTIVE" | "UPCOMING" | "PLANNED" | "DRAFT" | "FUTURE" | "COMPLETED";
 export type TransportType = "bus" | "boat" | "train" | "shuttle" | "ferry" | "jeep" | "colectivo";
 

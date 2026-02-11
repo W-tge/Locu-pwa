@@ -23,7 +23,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="bg-card border-t border-border" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+    <nav className="glass-panel border-t border-black/5" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const Icon = item.icon;

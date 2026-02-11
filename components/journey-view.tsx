@@ -1,57 +1,45 @@
 "use client";
 
-import React from "react"
-
-import { useState, useRef, useEffect } from "react";
+import React from "react";
+import { useState, useRef } from "react";
 import { useTrip } from "@/lib/trip-context";
 import { TripMap } from "./trip-map";
 import { ItineraryPanel } from "./itinerary-panel";
 import { cn } from "@/lib/utils";
-import { Map, List, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 export function JourneyView() {
   const { trip } = useTrip();
-  const [mobileView, setMobileView] = useState<"map" | "itinerary" | "split">("split");
-  const [mapHeight, setMapHeight] = useState(60); // Percentage of screen for map
+  const [mapHeight, setMapHeight] = useState(60);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Handle drag to resize map on mobile
   const handleDragStart = () => setIsDragging(true);
-  
+
   const handleDrag = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
-    
-    const container = containerRef.current;
-    const rect = container.getBoundingClientRect();
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
     const percentage = ((clientY - rect.top) / rect.height) * 100;
     setMapHeight(Math.min(80, Math.max(30, percentage)));
   };
 
   const handleDragEnd = () => setIsDragging(false);
-
-  // Quick actions for mobile
   const expandMap = () => setMapHeight(80);
   const expandItinerary = () => setMapHeight(30);
-  const resetSplit = () => setMapHeight(50);
 
   return (
-    <div className="flex flex-col lg:flex-row h-full bg-background">
-      {/* Desktop Layout: Left Itinerary + Right Map */}
-      
-      {/* Left Itinerary Panel - Desktop only */}
-      <div className="hidden lg:flex w-[420px] shrink-0 border-r border-border">
+    <div className="flex flex-col lg:flex-row h-full bg-background paper-texture">
+      {/* Desktop: Left Itinerary + Right Map */}
+      <div className="hidden lg:flex w-[420px] shrink-0 border-r border-black/5">
         <ItineraryPanel />
       </div>
-
-      {/* Right Map - Desktop */}
-      <div className="hidden lg:block flex-1">
+      <div className="hidden lg:block flex-1 relative">
         <TripMap />
       </div>
 
-      {/* Mobile Layout: Split view with draggable divider */}
-      <div 
+      {/* Mobile: Split view with draggable divider */}
+      <div
         ref={containerRef}
         className="lg:hidden flex-1 flex flex-col h-full overflow-hidden"
         onMouseMove={handleDrag}
@@ -61,17 +49,16 @@ export function JourneyView() {
         onTouchEnd={handleDragEnd}
       >
         {/* Map Section */}
-        <div 
+        <div
           className="shrink-0 relative transition-all duration-200"
           style={{ height: `${mapHeight}%` }}
         >
           <TripMap />
-          
-          {/* Quick expand map button */}
+
           {mapHeight < 70 && (
-            <button 
+            <button
               onClick={expandMap}
-              className="absolute bottom-2 right-2 z-[999] p-2 bg-card/95 backdrop-blur-md rounded-full shadow-lg border border-border/50"
+              className="absolute bottom-2 right-2 z-20 p-2 glass-panel rounded-full paper-shadow"
             >
               <ChevronUp className="w-4 h-4" />
             </button>
@@ -79,32 +66,33 @@ export function JourneyView() {
         </div>
 
         {/* Draggable Divider */}
-        <div 
+        <div
           className={cn(
-            "h-6 shrink-0 flex items-center justify-center cursor-ns-resize bg-card border-y border-border touch-none select-none",
-            isDragging && "bg-muted"
+            "h-6 shrink-0 flex items-center justify-center cursor-ns-resize glass-panel border-y border-black/5 touch-none select-none",
+            isDragging && "bg-[#F0EDE4]/90"
           )}
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
         >
           <div className="flex flex-col items-center gap-1">
             <div className="w-10 h-1 rounded-full bg-border" />
-            <span className="text-[10px] text-muted-foreground font-medium">Drag to resize</span>
+            <span className="text-[10px] text-muted-foreground font-medium">
+              Drag to resize
+            </span>
           </div>
         </div>
 
         {/* Itinerary Section */}
-        <div 
+        <div
           className="flex-1 overflow-hidden relative"
           style={{ height: `${100 - mapHeight - 3}%` }}
         >
           <ItineraryPanel />
-          
-          {/* Quick expand itinerary button */}
+
           {mapHeight > 40 && (
-            <button 
+            <button
               onClick={expandItinerary}
-              className="absolute top-2 right-2 z-[999] p-2 bg-card/95 backdrop-blur-md rounded-full shadow-lg border border-border/50"
+              className="absolute top-2 right-2 z-20 p-2 glass-panel rounded-full paper-shadow"
             >
               <ChevronDown className="w-4 h-4" />
             </button>

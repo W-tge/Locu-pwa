@@ -54,7 +54,7 @@ export function AppHeader() {
   ];
 
   return (
-    <header className="shrink-0 h-16 border-b border-border bg-card px-4 flex items-center gap-4">
+    <header className="shrink-0 h-16 border-b border-black/5 glass-panel px-4 flex items-center gap-4">
       {/* Logo */}
       <button 
         onClick={() => { setSubPage(null); setActiveTab("journey"); }}

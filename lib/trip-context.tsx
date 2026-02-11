@@ -29,7 +29,7 @@ export interface Achievement {
   description: string;
   points: number;
   icon: string;
-  color: "pink" | "green" | "mint" | "coral";
+  color: "pink" | "purple" | "mint" | "coral";
   unlockedAt?: Date;
 }
 
@@ -157,7 +157,7 @@ const defaultStats: UserStats = {
       description: "Traveled 1000+ km by bus",
       points: 200,
       icon: "bus",
-      color: "green",
+      color: "purple",
       unlockedAt: new Date("2024-03-20"),
     },
     {
@@ -166,8 +166,17 @@ const defaultStats: UserStats = {
       description: "Stayed in 10+ hostels",
       points: 100,
       icon: "home",
-      color: "coral",
+      color: "mint",
       unlockedAt: new Date("2024-03-22"),
+    },
+    {
+      id: "4",
+      title: "Budget Guru",
+      description: "Spent under $50/day for 2 weeks",
+      points: 125,
+      icon: "bus",
+      color: "coral",
+      unlockedAt: new Date("2024-03-25"),
     },
   ],
 };

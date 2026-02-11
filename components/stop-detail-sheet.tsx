@@ -109,12 +109,12 @@ export function StopDetailSheet() {
         onClick={handleDismiss}
       />
       
-      {/* Sheet - sits above backdrop but below bottom nav */}
+      {/* Sheet - paper-styled bottom menu, sits above backdrop but below bottom nav */}
       <div 
         className="fixed inset-x-0 bottom-16 lg:bottom-0 z-[61] animate-in slide-in-from-bottom duration-300"
         ref={dragRef}
       >
-        <div className="bg-card border-t border-border rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden flex flex-col">
+        <div className="bg-[#FFFEF9] paper-texture border-t-2 border-[#DDD8CC] rounded-t-3xl paper-shadow max-h-[70vh] overflow-hidden flex flex-col">
           {/* Minimize Bar - tap or drag to close */}
           <button
             className="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
@@ -277,7 +277,7 @@ export function StopDetailSheet() {
                         
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {hostel.amenities.map(a => (
-                            <span key={a} className="px-2 py-0.5 rounded-full bg-muted text-[10px] text-muted-foreground">{a}</span>
+                            <span key={a} className="px-2.5 py-1 rounded-full bg-[#1B6B4A]/10 text-[10px] font-semibold text-[#1B6B4A] border border-[#1B6B4A]/20">{a}</span>
                           ))}
                         </div>
                         
@@ -300,10 +300,10 @@ export function StopDetailSheet() {
           {/* Action Footer */}
           <div className="p-4 border-t border-border bg-card">
             {!stopBooked ? (
-              <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold" onClick={() => setSubPage("hostelDetails")}>
-                <Bed className="w-4 h-4 mr-2" />
-                Explore & Book Hostels
-              </Button>
+  <Button className="w-full gradient-vibrant text-white font-semibold shadow-lg hover:shadow-xl transition-all" onClick={() => setSubPage("hostelDetails")}>
+  <Bed className="w-4 h-4 mr-2" />
+  Explore & Book Hostels
+  </Button>
             ) : (
               <Button variant="outline" className="w-full bg-transparent" onClick={handleDismiss}>
                 Done

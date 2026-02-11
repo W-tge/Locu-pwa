@@ -33,6 +33,9 @@ interface TransportOption {
   arrival: string;
   duration: string;
   price: number;
+  routeCode: string;
+  platform: string;
+  seat: string;
   amenities: string[];
   seatsLeft: number;
   tags: { label: string; icon: any; color: string }[];
@@ -50,11 +53,14 @@ const mockTransportOptions: TransportOption[] = [
     departure: "07:00",
     arrival: "10:00",
     duration: "3h",
-    price: 18,
+    price: 8,
+    routeCode: "PLM-118",
+    platform: "B4",
+    seat: "22A",
     amenities: ["AC", "WiFi", "Toilet"],
     seatsLeft: 12,
     tags: [
-      { label: "Cheapest", icon: DollarSign, color: "bg-[#10B981]/10 text-[#10B981]" },
+      { label: "Cheapest", icon: DollarSign, color: "text-[#1B6B4A] bg-[#1B6B4A]/8" },
     ],
     verifiedCount: 47,
   },
@@ -66,12 +72,15 @@ const mockTransportOptions: TransportOption[] = [
     departure: "08:30",
     arrival: "11:00",
     duration: "2.5h",
-    price: 25,
+    price: 12,
+    routeCode: "CDS-402",
+    platform: "A2",
+    seat: "08B",
     amenities: ["AC", "WiFi", "Toilet", "Blanket", "Meal"],
     seatsLeft: 4,
     tags: [
-      { label: "Fastest", icon: Zap, color: "bg-[#3B82F6]/10 text-[#3B82F6]" },
-      { label: "Top Rated", icon: Star, color: "bg-[#F59E0B]/10 text-[#F59E0B]" },
+      { label: "Fastest", icon: Zap, color: "text-[#1B4A6B] bg-[#1B4A6B]/8" },
+      { label: "Top Rated", icon: Star, color: "text-[#8B6914] bg-[#8B6914]/8" },
     ],
     verifiedCount: 124,
     isRecommended: true,
@@ -85,11 +94,14 @@ const mockTransportOptions: TransportOption[] = [
     departure: "12:00",
     arrival: "15:30",
     duration: "3.5h",
-    price: 15,
+    price: 6,
+    routeCode: "TCB-210",
+    platform: "C1",
+    seat: "36A",
     amenities: ["AC"],
     seatsLeft: 20,
     tags: [
-      { label: "Budget", icon: DollarSign, color: "bg-[#10B981]/10 text-[#10B981]" },
+      { label: "Budget", icon: DollarSign, color: "text-[#1B6B4A] bg-[#1B6B4A]/8" },
     ],
     verifiedCount: 23,
   },
@@ -101,12 +113,15 @@ const mockTransportOptions: TransportOption[] = [
     departure: "22:00",
     arrival: "06:00",
     duration: "8h",
-    price: 45,
+    price: 18,
+    routeCode: "LDR-802",
+    platform: "A1",
+    seat: "04A",
     amenities: ["AC", "WiFi", "Toilet", "Full Recline", "Meal", "Blanket"],
     seatsLeft: 8,
     tags: [
-      { label: "Safest", icon: Shield, color: "bg-[#8B5CF6]/10 text-[#8B5CF6]" },
-      { label: "Night Bus", icon: Clock, color: "bg-muted text-muted-foreground" },
+      { label: "Safest", icon: Shield, color: "text-[#1B4A6B] bg-[#1B4A6B]/8" },
+      { label: "Night Bus", icon: Clock, color: "text-[#6B5814] bg-[#6B5814]/8" },
     ],
     verifiedCount: 89,
   },
@@ -142,11 +157,12 @@ export function TransportBooking() {
     }
   };
 
+  /* --- Booked confirmation (ticket stub) --- */
   if (isBooked) {
     const bookedOption = mockTransportOptions.find(o => o.id === selectedOption);
     return (
-      <div className="h-full flex flex-col bg-background">
-        <header className="bg-card border-b border-border px-4 py-4 flex items-center gap-4">
+      <div className="h-full flex flex-col bg-background paper-texture">
+        <header className="glass-panel border-b border-black/5 px-4 py-4 flex items-center gap-4">
           <button onClick={() => setSubPage(null)} className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -154,16 +170,40 @@ export function TransportBooking() {
         </header>
 
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#10B981]/20 flex items-center justify-center mb-4 animate-in zoom-in duration-300">
-            <CheckCircle2 className="w-10 h-10 text-[#10B981]" />
+          <div className="w-20 h-20 rounded-full bg-[#1B6B4A]/15 flex items-center justify-center mb-4 animate-in zoom-in duration-300">
+            <CheckCircle2 className="w-10 h-10 text-[#1B6B4A]" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Transport Booked!</h2>
-          <p className="text-muted-foreground mt-2">{fromStop?.city} → {toStop?.city}</p>
+          <h2 className="text-2xl font-serif text-foreground">Transport Booked</h2>
+          <p className="text-muted-foreground font-mono text-sm mt-2">{fromStop?.city} &rarr; {toStop?.city}</p>
           {bookedOption && (
-            <div className="mt-4 p-4 bg-card rounded-xl border border-border w-full max-w-xs">
-              <p className="font-bold">{bookedOption.operator}</p>
-              <p className="text-sm text-muted-foreground">{bookedOption.departure} · {bookedOption.duration}</p>
-              <p className="text-lg font-bold text-[#10B981] mt-2">${bookedOption.price}</p>
+            <div className="mt-6 bg-card rounded-xl paper-shadow overflow-hidden w-full max-w-xs">
+              {/* Ticket stub */}
+              <div className="p-4 border-b border-dashed border-border">
+                <p className="font-bold text-lg">{bookedOption.operator}</p>
+                <p className="micro-label mt-1">ROUTE {bookedOption.routeCode}</p>
+              </div>
+              <div className="p-4 grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <p className="micro-label">DEP. TIME</p>
+                  <p className="font-mono font-semibold text-lg">{bookedOption.departure}</p>
+                </div>
+                <div>
+                  <p className="micro-label">PLATFORM</p>
+                  <p className="font-mono font-semibold text-lg">{bookedOption.platform}</p>
+                </div>
+                <div>
+                  <p className="micro-label">SEAT</p>
+                  <p className="font-mono font-semibold text-lg">{bookedOption.seat}</p>
+                </div>
+              </div>
+              <div className="px-4 pb-4 flex justify-center">
+                {/* Dummy barcode */}
+                <div className="flex items-end gap-[2px] h-10 opacity-40">
+                  {Array.from({ length: 32 }).map((_, i) => (
+                    <div key={i} className="bg-foreground rounded-sm" style={{ width: i % 3 === 0 ? 3 : 1.5, height: `${40 + Math.sin(i) * 20}%` }} />
+                  ))}
+                </div>
+              </div>
             </div>
           )}
           <Button onClick={() => setSubPage(null)} className="mt-6 bg-primary hover:bg-primary/90 text-white">
@@ -174,10 +214,11 @@ export function TransportBooking() {
     );
   }
 
+  /* --- Main booking page --- */
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background paper-texture">
       {/* Header */}
-      <header className="shrink-0 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
+      <header className="shrink-0 glass-panel border-b border-black/5 px-4 py-3 flex items-center gap-3">
         <button onClick={() => setSubPage(null)} className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -188,43 +229,50 @@ export function TransportBooking() {
       </header>
 
       {/* Route Info */}
-      <div className="p-4 bg-muted/50 border-b border-border">
+      <div className="p-4 bg-card/60 border-b border-black/5">
         <div className="flex items-center justify-center gap-4">
           <div className="text-center">
-            <p className="font-bold text-lg">{fromStop?.city || "Origin"}</p>
-            <p className="text-xs text-muted-foreground">{fromStop?.country}</p>
+            <p className="font-serif text-xl">{fromStop?.city || "Origin"}</p>
+            <p className="micro-label mt-0.5">{fromStop?.country}</p>
           </div>
-          <div className="flex items-center gap-2 text-primary">
-            <div className="w-8 border-t-2 border-dashed border-primary" />
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="w-8 border-t-2 border-dashed border-muted-foreground/40" />
             <Bus className="w-5 h-5" />
-            <div className="w-8 border-t-2 border-dashed border-primary" />
+            <div className="w-8 border-t-2 border-dashed border-muted-foreground/40" />
           </div>
           <div className="text-center">
-            <p className="font-bold text-lg">{toStop?.city || "Destination"}</p>
-            <p className="text-xs text-muted-foreground">{toStop?.country}</p>
+            <p className="font-serif text-xl">{toStop?.city || "Destination"}</p>
+            <p className="micro-label mt-0.5">{toStop?.country}</p>
           </div>
         </div>
         {selectedLeg?.departureDate && (
-          <div className="flex items-center justify-center gap-2 mt-3 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 mt-3 font-mono text-sm text-muted-foreground">
             <Calendar className="w-4 h-4" />
             {new Date(selectedLeg.departureDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
           </div>
         )}
       </div>
 
-      {/* Transport Options */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {mockTransportOptions.map((option) => {
+      {/* Transport Options Section */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="bg-[#F0EDE4] border-y border-[#DDD8CC] px-4 py-3 sticky top-0 z-10">
+          <h2 className="font-serif text-lg text-foreground">Available Transport Options</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{mockTransportOptions.length} options • Compare prices & amenities</p>
+        </div>
+        
+        <div className="p-4 space-y-4">
+          {mockTransportOptions.map((option) => {
           const ModeIcon = getModeIcon(option.mode);
+          const isSelected = selectedOption === option.id;
+
           return (
-            <button
+            <div
               key={option.id}
-              onClick={() => setSelectedOption(option.id)}
               className={cn(
-                "w-full rounded-xl border text-left transition-all relative overflow-hidden",
-                selectedOption === option.id ? "border-primary shadow-md" : "border-border bg-card hover:border-primary/50",
-                option.isRecommended && selectedOption !== option.id && "border-primary/50"
+                "w-full rounded-xl text-left transition-all relative bg-card paper-shadow overflow-hidden",
+                isSelected && "ring-4 ring-[#1B6B4A] ring-offset-4 ring-offset-background",
               )}
+              onClick={() => setSelectedOption(option.id)}
             >
               {/* Locu Recommended Banner */}
               {option.isRecommended && (
@@ -232,7 +280,7 @@ export function TransportBooking() {
                   <div className="flex items-center gap-2 text-white">
                     <Image src="/locu-logo.png" alt="Locu" width={40} height={16} className="h-4 w-auto brightness-0 invert" />
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span className="text-xs font-bold">Recommended</span>
+                    <span className="text-xs font-bold tracking-wide">RECOMMENDED</span>
                   </div>
                   {option.recommendReason && (
                     <p className="text-[10px] text-white/90 mt-0.5">{option.recommendReason}</p>
@@ -240,94 +288,114 @@ export function TransportBooking() {
                 </div>
               )}
 
-              <div className="p-4">
-                <div className="flex items-start gap-3">
-                  {/* Mode Icon */}
-                  <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                    selectedOption === option.id ? "bg-primary/10" : "bg-muted"
-                  )}>
-                    <ModeIcon className={cn("w-5 h-5", selectedOption === option.id ? "text-primary" : "text-muted-foreground")} />
+              {/* Ticket body */}
+              <div className="flex">
+                {/* Main info */}
+                <div className="flex-1 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center",
+                      isSelected ? "bg-primary/10" : "bg-muted"
+                    )}>
+                      <ModeIcon className={cn("w-4 h-4", isSelected ? "text-primary" : "text-muted-foreground")} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-foreground leading-tight">{option.operator}</p>
+                      <p className="micro-label">{option.type}</p>
+                    </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-foreground">{option.operator}</p>
-                      <Badge variant="secondary" className="text-[10px]">{option.type}</Badge>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 mt-1.5 text-sm">
-                      <span className="font-semibold">{option.departure}</span>
-                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                      <span className="font-semibold">{option.arrival}</span>
-                      <span className="text-muted-foreground">({option.duration})</span>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {option.tags.map((tag) => (
-                        <span key={tag.label} className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold", tag.color)}>
-                          <tag.icon className="w-3 h-3" />
-                          {tag.label}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Amenities */}
-                    <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
-                      {option.amenities.slice(0, 4).map((a) => (
-                        <span key={a}>{a}</span>
-                      ))}
-                      {option.amenities.length > 4 && <span>+{option.amenities.length - 4}</span>}
-                    </div>
-
-                    {/* Verified */}
-                    <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
-                      <Star className="w-3 h-3 text-[#FBBF24] fill-[#FBBF24]" />
-                      Verified by {option.verifiedCount} travellers
-                    </p>
+                  {/* Times in monospace */}
+                  <div className="flex items-baseline gap-3 mt-3">
+                    <span className="font-mono font-semibold text-xl text-foreground">{option.departure}</span>
+                    <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                    <span className="font-mono font-semibold text-xl text-foreground">{option.arrival}</span>
+                    <span className="font-mono text-xs text-muted-foreground">({option.duration})</span>
                   </div>
 
-                  {/* Price */}
-                  <div className="text-right shrink-0">
-                    <p className="text-xl font-bold text-primary">${option.price}</p>
-                    {option.seatsLeft < 10 && (
-                      <p className="text-[10px] text-[#F59E0B] font-medium mt-0.5">{option.seatsLeft} left</p>
-                    )}
+                  {/* Stamped data fields */}
+                  <div className="flex gap-4 mt-3">
+                    <div>
+                      <p className="micro-label">ROUTE</p>
+                      <p className="font-mono font-medium text-sm">{option.routeCode}</p>
+                    </div>
+                    <div>
+                      <p className="micro-label">PLATFORM</p>
+                      <p className="font-mono font-medium text-sm">{option.platform}</p>
+                    </div>
+                    <div>
+                      <p className="micro-label">SEAT</p>
+                      <p className="font-mono font-medium text-sm">{option.seat}</p>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {option.tags.map((tag) => (
+                      <span key={tag.label} className={cn("stamp inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold", tag.color)}>
+                        <tag.icon className="w-3 h-3" />
+                        {tag.label}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Amenities + verified */}
+                  <div className="flex items-center gap-3 mt-2.5 text-[10px] text-muted-foreground">
+                    <span>{option.amenities.slice(0, 3).join(" / ")}{option.amenities.length > 3 ? ` +${option.amenities.length - 3}` : ""}</span>
+                    <span className="flex items-center gap-0.5">
+                      <Star className="w-2.5 h-2.5 text-[#8B6914] fill-[#8B6914]" />
+                      {option.verifiedCount} verified
+                    </span>
                   </div>
                 </div>
 
-                {/* Selection indicator */}
-                {selectedOption === option.id && (
-                  <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-white" />
+                {/* Ticket stub (right side with perforated edge) */}
+                <div className="relative flex flex-col items-center justify-center w-24 shrink-0 border-l border-dashed border-border">
+                  {/* Semi-circle cutouts */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-3 rounded-b-full bg-background" />
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-3 rounded-t-full bg-background" />
+
+                  <p className="text-2xl font-bold text-primary font-mono">${option.price}</p>
+                  {option.seatsLeft < 10 && (
+                    <p className="text-[10px] text-[#8B6914] font-medium mt-1">{option.seatsLeft} left</p>
+                  )}
+
+                  {/* Mini barcode */}
+                  <div className="flex items-end gap-[1px] h-6 mt-3 opacity-25">
+                    {Array.from({ length: 14 }).map((_, i) => (
+                      <div key={i} className="bg-foreground" style={{ width: 1.5, height: `${30 + Math.sin(i * 1.5) * 40}%` }} />
+                    ))}
                   </div>
-                )}
+                </div>
               </div>
-            </button>
+              
+              {/* Action buttons */}
+              <div className="flex gap-2 p-3 pt-0">
+                <Button 
+                  onClick={() => setSelectedOption(option.id)} 
+                  size="sm" 
+                  variant={isSelected ? "default" : "outline"}
+                  className={cn("flex-1 text-xs font-semibold", isSelected && "bg-[#1B6B4A] hover:bg-[#1B6B4A]/90 text-white")}
+                >
+                  {isSelected ? "Selected" : "Select"}
+                </Button>
+                <Button 
+                  onClick={() => showToast(`More details: ${option.operator} ${option.routeCode}`, "info")} 
+                  size="sm" 
+                  variant="outline"
+                  className="flex-1 text-xs font-semibold"
+                >
+                  See More Details
+                </Button>
+              </div>
+            </div>
           );
         })}
-
-        {/* Safety context */}
-        <div className="p-3 rounded-xl bg-[#10B981]/10 border border-[#10B981]/30 text-sm">
-          <p className="text-muted-foreground flex items-start gap-2">
-            <Shield className="w-4 h-4 text-[#10B981] shrink-0 mt-0.5" />
-            <span><span className="font-semibold text-[#10B981]">Route safety:</span> This is a well-travelled backpacker route. 89% of Locu users rated it as safe. Day services recommended for first-timers.</span>
-          </p>
-        </div>
-
-        {/* Pro tip */}
-        <div className="p-3 rounded-xl bg-[#FBBF24]/10 border border-[#FBBF24]/30 text-sm">
-          <p className="text-muted-foreground flex items-start gap-2">
-            <Star className="w-4 h-4 text-[#FBBF24] shrink-0 mt-0.5" />
-            <span><span className="font-semibold text-[#FBBF24]">Pro tip:</span> Night buses save accommodation costs! Cruz del Sur offers lie-flat seats on the overnight service.</span>
-          </p>
         </div>
       </div>
 
       {/* Booking Footer */}
-      <div className="shrink-0 p-4 border-t border-border bg-card">
+      <div className="shrink-0 p-4 border-t border-black/5 glass-panel">
         <Button
           onClick={handleBook}
           disabled={!selectedOption || isBooking}

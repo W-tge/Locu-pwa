@@ -118,19 +118,21 @@ export function TripMap() {
 
       const createIcon = (
         color: string,
-        number: number,
+        cityName: string,
         isActive = false,
         isSelected = false
       ) => {
-        const size = isSelected ? 36 : isActive ? 32 : 26;
         const pulseRing = isActive
-          ? `<div style="position:absolute;top:-6px;left:-6px;width:${size + 12}px;height:${size + 12}px;border:3px solid ${color};border-radius:50%;animation:pulse 2s ease-out infinite;opacity:0.7;"></div>`
+          ? `<div style="position:absolute;top:-8px;left:-8px;right:-8px;bottom:-8px;border:2px solid ${color};border-radius:8px;animation:pulse 2s ease-out infinite;opacity:0.5;"></div>`
           : "";
+        // Passport stamp aesthetic: double border, city name text, rounded rectangle
+        const padding = cityName.length > 10 ? "8px 10px" : "10px 14px";
+        const fontSize = cityName.length > 10 ? "10px" : "11px";
         return L.divIcon({
           className: "custom-marker",
-          html: `<div style="position:relative;cursor:pointer;">${pulseRing}<div style="width:${size}px;height:${size}px;background:${color};border:3px solid white;border-radius:50%;box-shadow:0 4px 16px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${size > 30 ? 14 : 12}px;color:white;font-family:system-ui,-apple-system,sans-serif;">${number}</div></div>`,
-          iconSize: [size, size],
-          iconAnchor: [size / 2, size / 2],
+          html: `<div style="position:relative;cursor:pointer;display:inline-block;">${pulseRing}<div style="background:${color};border:3px double rgba(255,255,255,0.95);border-radius:8px;box-shadow:0 3px 12px rgba(139,119,90,0.25);display:inline-flex;align-items:center;justify-content:center;padding:${padding};font-weight:700;font-size:${fontSize};color:white;font-family:'IBM Plex Mono',monospace;letter-spacing:0.05em;text-transform:uppercase;transform:rotate(-2deg);mix-blend-mode:multiply;opacity:0.92;white-space:nowrap;">${cityName}</div></div>`,
+          iconSize: [0, 0],
+          iconAnchor: [0, 20],
         });
       };
 
@@ -141,8 +143,7 @@ export function TripMap() {
         if (!fromStop || !toStop) return;
 
         const isBooked = leg.bookingStatus === "booked";
-        const isPending = leg.bookingStatus === "pending";
-        const color = isBooked ? "#10B981" : isPending ? "#F59E0B" : "#FC2869";
+        const color = isBooked ? "#10B981" : "#FC2869";
 
         const polyline = L.polyline(
           [[fromStop.latitude, fromStop.longitude], [toStop.latitude, toStop.longitude]] as [number, number][],
@@ -185,11 +186,10 @@ export function TripMap() {
       trip.stops.forEach((stop, index) => {
         const isActive = stop.status === "ACTIVE";
         const isBooked = stop.bookingStatus === "booked";
-        const isPending = stop.bookingStatus === "pending";
-        const color = isBooked ? "#10B981" : isPending ? "#F59E0B" : "#FC2869";
+        const color = isBooked ? "#10B981" : "#FC2869";
 
         const marker = L.marker([stop.latitude, stop.longitude], {
-          icon: createIcon(color, index + 1, isActive),
+          icon: createIcon(color, stop.city, isActive),
           zIndexOffset: isActive ? 1000 : index,
         }).addTo(mapInstance);
 
@@ -234,11 +234,10 @@ export function TripMap() {
     if (!map) return;
     markersRef.current.forEach(({ marker, stop, createIcon, index }) => {
       const isSelected = selectedStop?.id === stop.id;
-      const isActive = stop.status === "ACTIVE";
-      const isBooked = stop.bookingStatus === "booked";
-      const isPending = stop.bookingStatus === "pending";
-      const color = isBooked ? "#10B981" : isPending ? "#F59E0B" : "#FC2869";
-      marker.setIcon(createIcon(color, index, isActive, isSelected));
+  const isActive = stop.status === "ACTIVE";
+  const isBooked = stop.bookingStatus === "booked";
+  const color = isBooked ? "#10B981" : "#FC2869";
+  marker.setIcon(createIcon(color, stop.city, isActive, isSelected));
       if (isSelected) map.setView([stop.latitude, stop.longitude], map.getZoom(), { animate: true });
     });
   }, [selectedStop, map]);
@@ -354,7 +353,7 @@ export function TripMap() {
       <button
         onClick={() => { setShowInsightModal(true); setShowStopPopup(null); setShowTransitPopup(null); }}
         className={cn(
-          "absolute bottom-4 right-4 z-[20] bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:scale-105",
+          "absolute bottom-4 right-4 z-[20] gradient-vibrant text-white px-3 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:scale-105 hover:shadow-xl",
           (shouldHideChrome || hasActiveOverlay) && "opacity-0 pointer-events-none"
         )}
       >
@@ -363,105 +362,7 @@ export function TripMap() {
       </button>
 
       {/* ===== POPUP OVERLAYS (z-[30]) ===== */}
-
-      {/* Destination Popup */}
-      {popupStop && !shouldHideChrome && (
-        <div className="absolute inset-0 z-[30]" onClick={closeAllOverlays}>
-          <div className="absolute inset-0 bg-black/10" />
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div
-              className="relative bg-card rounded-2xl shadow-2xl border border-border w-full max-w-[320px] max-h-[65vh] overflow-y-auto animate-in fade-in slide-in-from-bottom-4 duration-300"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Minimizer bar - tapping this closes the popup */}
-              <button
-                onClick={closeAllOverlays}
-                className="sticky top-0 z-10 w-full flex justify-center pt-3 pb-2 bg-card rounded-t-2xl"
-              >
-                <div className="w-10 h-1 rounded-full bg-border hover:bg-muted-foreground transition-colors" />
-              </button>
-
-              {/* Header with image if booked */}
-              {popupStop.bookingStatus === "booked" && popupStop.hostelImage && (
-                <div className="relative h-28 w-full">
-                  <Image src={popupStop.hostelImage || "/placeholder.svg"} alt={popupStop.hostelName || "Hostel"} fill className="object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                </div>
-              )}
-
-              <div className="p-5 pt-1">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground">{popupStop.city}</h3>
-                    <p className="text-sm text-muted-foreground">{popupStop.country}</p>
-                  </div>
-                  <span className={cn(
-                    "px-2.5 py-1 rounded-full text-xs font-semibold shrink-0",
-                    popupStop.bookingStatus === "booked" ? "bg-[#10B981]/10 text-[#10B981]" :
-                    popupStop.bookingStatus === "pending" ? "bg-[#F59E0B]/10 text-[#F59E0B]" : "bg-primary/10 text-primary"
-                  )}>
-                    {popupStop.bookingStatus === "booked" ? "Booked" :
-                     popupStop.bookingStatus === "pending" ? "Pending" : "Book Now"}
-                  </span>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-bold text-primary">{getStopIndex(trip, popupStop.id)}</span>
-                    </div>
-                    <span>Stop #{getStopIndex(trip, popupStop.id)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>{popupStop.nights} nights</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground col-span-2">
-                    <Clock className="w-4 h-4" />
-                    <span>{formatDateRange(popupStop.startDate, popupStop.endDate)}</span>
-                  </div>
-                  {popupStop.weather && (
-                    <div className="flex items-center gap-2 text-muted-foreground col-span-2">
-                      <Cloud className="w-4 h-4" />
-                      <span>{popupStop.weather}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Booked hostel preview */}
-                {popupStop.bookingStatus === "booked" && popupStop.hostelName && (
-                  <div className="mt-4 p-3 rounded-xl bg-[#10B981]/5 border border-[#10B981]/20">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Check className="w-4 h-4 text-[#10B981]" />
-                      <span className="text-sm font-semibold text-[#10B981]">Accommodation Booked</span>
-                    </div>
-                    <p className="text-sm font-medium text-foreground">{popupStop.hostelName}</p>
-                    {popupStop.hostelPrice && (
-                      <p className="text-xs text-muted-foreground">${popupStop.hostelPrice}/night</p>
-                    )}
-                  </div>
-                )}
-
-                <Button
-                  onClick={() => {
-                    closeAllOverlays();
-                    setSubPage("hostelDetails");
-                  }}
-                  className={cn(
-                    "w-full mt-4 font-semibold text-white",
-                    popupStop.bookingStatus === "booked"
-                      ? "bg-[#10B981] hover:bg-[#10B981]/90"
-                      : "bg-primary hover:bg-primary/90"
-                  )}
-                >
-                  {popupStop.bookingStatus === "booked" ? "View Booking" : "Explore & Book Hostels"}
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Note: Stop popup removed - using StopDetailSheet component instead for paper-styled bottom menu */}
 
       {/* Transit Popup */}
       {popupLeg && popupLegFrom && popupLegTo && !shouldHideChrome && (
@@ -618,7 +519,7 @@ export function TripMap() {
                       value={insightCategory}
                       onChange={(e) => setInsightCategory(e.target.value)}
                       className="w-full h-10 px-3 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
-                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 4 4 4 4-4'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23888' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'%3E%3Cpath d='m2 4 4 4 4-4'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                     >
                       <option value="" disabled>Select insight type</option>
                       <option value="tip">Travel Tip</option>
@@ -636,7 +537,7 @@ export function TripMap() {
                       value={insightLocation}
                       onChange={(e) => setInsightLocation(e.target.value)}
                       className="w-full h-10 px-3 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
-                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 4 4 4 4-4'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23888' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'%3E%3Cpath d='m2 4 4 4 4-4'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                     >
                       <option value="" disabled>Select location</option>
                       {trip.stops.map((stop) => (

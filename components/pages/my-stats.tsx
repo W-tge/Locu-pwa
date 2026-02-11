@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React from "react";
 import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
 import { Button } from "@/components/ui/button";
@@ -16,26 +16,30 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const achievementColors = {
-  pink: "from-primary to-[#FF6B9D]",
-  purple: "from-[#10B981] to-[#34D399]",
-  mint: "from-[#10B981] to-primary",
-  coral: "from-[#FF6B9D] to-primary",
+/* Ink stamp colours */
+const stampInkColors: Record<string, { text: string; border: string }> = {
+  pink:   { text: "text-[#8B1A2B]", border: "border-[#8B1A2B]" },   /* Deep Red */
+  purple: { text: "text-[#0D3B52]", border: "border-[#0D3B52]" },   /* Navy Blue */
+  mint:   { text: "text-[#1B5E3B]", border: "border-[#1B5E3B]" },   /* Forest Green */
+  coral:  { text: "text-[#8B1A2B]", border: "border-[#8B1A2B]" },   /* Deep Red */
 };
 
+/* Deterministic rotation per achievement for that "imperfect stamp" look */
+const stampRotations = [-2, 1.5, -1, 2.5, -1.5, 0.8];
+
 const achievementIcons: Record<string, React.ReactNode> = {
-  mountain: <Mountain className="w-5 h-5" />,
-  bus: <Bus className="w-5 h-5" />,
-  home: <Home className="w-5 h-5" />,
+  mountain: <Mountain className="w-6 h-6" />,
+  bus:      <Bus className="w-6 h-6" />,
+  home:     <Home className="w-6 h-6" />,
 };
 
 export function MyStats() {
   const { userStats, setSubPage } = useTrip();
 
   return (
-    <div className="h-full flex flex-col bg-muted/30">
+    <div className="h-full flex flex-col bg-background paper-texture">
       {/* Header */}
-      <header className="bg-card border-b border-border px-4 py-4 flex items-center gap-4">
+      <header className="glass-panel border-b border-black/5 px-4 py-4 flex items-center gap-4">
         <button
           onClick={() => setSubPage(null)}
           className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors"
@@ -44,86 +48,75 @@ export function MyStats() {
         </button>
         <div className="flex items-center gap-2">
           <Image src="/locu-logo.png" alt="Locu" width={60} height={24} className="h-6 w-auto" />
-          <h1 className="text-xl font-bold">My Stats</h1>
+          <h1 className="text-xl font-serif">My Stats</h1>
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Stats grid */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        {/* Stats grid -- paper cards with monospace data */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card rounded-2xl p-4 border border-border flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-              <MapPin className="w-6 h-6 text-primary" />
+          {[
+            { icon: MapPin, value: userStats.countriesVisited, label: "COUNTRIES" },
+            { icon: Calendar, value: userStats.daysTraveled, label: "DAYS ON ROAD" },
+            { icon: DollarSign, value: `$${userStats.totalSpent.toLocaleString()}`, label: "TOTAL SPENT" },
+            { icon: Bus, value: userStats.journeysTaken, label: "JOURNEYS" },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-card rounded-xl p-4 paper-shadow flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
+                <stat.icon className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <span className="text-2xl font-mono font-bold text-foreground">{stat.value}</span>
+              <span className="micro-label mt-1">{stat.label}</span>
             </div>
-            <span className="text-3xl font-bold text-foreground">{userStats.countriesVisited}</span>
-            <span className="text-sm text-muted-foreground">Countries Visited</span>
-          </div>
-          <div className="bg-card rounded-2xl p-4 border border-border flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-              <Calendar className="w-6 h-6 text-primary" />
-            </div>
-            <span className="text-3xl font-bold text-foreground">{userStats.daysTraveled}</span>
-            <span className="text-sm text-muted-foreground">Days Traveled</span>
-          </div>
-          <div className="bg-card rounded-2xl p-4 border border-border flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-              <DollarSign className="w-6 h-6 text-primary" />
-            </div>
-            <span className="text-3xl font-bold text-foreground">${userStats.totalSpent.toLocaleString()}</span>
-            <span className="text-sm text-muted-foreground">Total Spent</span>
-          </div>
-          <div className="bg-card rounded-2xl p-4 border border-border flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-              <Bus className="w-6 h-6 text-primary" />
-            </div>
-            <span className="text-3xl font-bold text-foreground">{userStats.journeysTaken}</span>
-            <span className="text-sm text-muted-foreground">Journeys Taken</span>
-          </div>
+          ))}
         </div>
 
-        {/* Achievements section */}
-        <div className="bg-card rounded-2xl border border-border p-4">
-          <h2 className="text-lg font-bold text-foreground mb-4">Recent Achievements</h2>
-          <div className="space-y-3">
-            {userStats.achievements.map((achievement) => (
-              <div
-                key={achievement.id}
-                className={cn(
-                  "rounded-xl p-4 bg-gradient-to-r text-white",
-                  achievementColors[achievement.color]
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center shrink-0">
-                    {achievementIcons[achievement.icon] || <Award className="w-5 h-5" />}
+        {/* Passport Stamps (Achievements) */}
+        <div className="bg-card rounded-xl paper-shadow p-5">
+          <h2 className="micro-label text-sm mb-5">PASSPORT STAMPS</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            {userStats.achievements.map((achievement, i) => {
+              const ink = stampInkColors[achievement.color] || stampInkColors.pink;
+              const rotation = stampRotations[i % stampRotations.length];
+
+              return (
+                <div
+                  key={achievement.id}
+                  className={cn(
+                    "stamp rounded-lg p-4 flex flex-col items-center text-center",
+                    ink.text, ink.border,
+                  )}
+                  style={{
+                    transform: `rotate(${rotation}deg)`,
+                    mixBlendMode: "multiply",
+                  }}
+                >
+                  <div className="w-12 h-12 rounded-full border-2 border-current flex items-center justify-center mb-2 opacity-80">
+                    {achievementIcons[achievement.icon] || <Award className="w-6 h-6" />}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-white">{achievement.title}</h3>
-                    <p className="text-sm text-white/80">{achievement.description}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white/60" />
-                      <span className="text-sm text-white/80">+{achievement.points} points</span>
-                    </div>
-                  </div>
+                  <h3 className="font-bold text-sm leading-tight">{achievement.title}</h3>
+                  <p className="text-[10px] opacity-70 mt-1 leading-tight">{achievement.description}</p>
+                  <span className="micro-label mt-2 text-current opacity-60">+{achievement.points} PTS</span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Level progress */}
-        <div className="bg-card rounded-2xl border border-border p-4">
+        <div className="bg-card rounded-xl paper-shadow p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-foreground">Explorer Level 8</h3>
-            <span className="text-sm text-muted-foreground">{userStats.karmaPoints} / 3,500 pts</span>
+            <h3 className="font-serif text-lg text-foreground">Explorer Level 8</h3>
+            <span className="font-mono text-sm text-muted-foreground">{userStats.karmaPoints} / 3,500</span>
           </div>
-          <div className="h-3 bg-muted rounded-full overflow-hidden">
+          <div className="h-2.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary to-[#FF6B9D] rounded-full transition-all"
+              className="h-full bg-primary rounded-full transition-all"
               style={{ width: `${(userStats.karmaPoints / 3500) * 100}%` }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="micro-label mt-2">
             {3500 - userStats.karmaPoints} points until Level 9
           </p>
         </div>
