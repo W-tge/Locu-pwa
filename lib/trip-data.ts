@@ -1,4 +1,4 @@
-export type BookingStatus = "booked" | "pending" | "not-booked";
+export type BookingStatus = "booked" | "not-booked";
 export type StopStatus = "ACTIVE" | "UPCOMING" | "PLANNED" | "DRAFT" | "FUTURE" | "COMPLETED";
 export type TransportType = "bus" | "boat" | "train" | "shuttle" | "ferry" | "jeep" | "colectivo";
 
@@ -178,7 +178,7 @@ export const demoTrip: Trip = {
       nights: 3,
       latitude: 17.1591,
       longitude: -89.0696,
-      bookingStatus: "pending",
+      bookingStatus: "not-booked",
       status: "PLANNED",
       weather: "28°C",
       tags: ["Mayan Ruins", "Cave Tubing", "Jungle"],
@@ -426,7 +426,7 @@ export const demoTrip: Trip = {
       duration: "10h",
       departureTime: "6:00 AM",
       departureDate: "2026-02-15",
-      bookingStatus: "pending",
+      bookingStatus: "not-booked",
       price: 45,
       currency: "USD",
       alert: {
@@ -707,6 +707,15 @@ export const demoTrip: Trip = {
       body: "Nicaragua is the cheapest country in Central America. Stock up on souvenirs here!",
       relatedStopId: "stop-5",
     },
+    {
+      id: "insight-5",
+      type: "tip",
+      icon: "dollar",
+      title: "Bike Taxis: The Cheap Local Alternative",
+      body: "Travellers report local bike taxis (mototaxis) are a much cheaper alternative between towns. Negotiate the price beforehand and always pay with cash - typically $1-3 USD per ride.",
+      action: "Set Cash Reminder",
+      relatedStopId: "stop-6",
+    },
   ],
 };
 
@@ -756,7 +765,6 @@ export function getTripDuration(trip: Trip): number {
 
 export function getBookingStats(trip: Trip) {
   const booked = trip.stops.filter((s) => s.bookingStatus === "booked").length;
-  const pending = trip.stops.filter((s) => s.bookingStatus === "pending").length;
   const notBooked = trip.stops.filter((s) => s.bookingStatus === "not-booked").length;
-  return { booked, pending, notBooked, total: trip.stops.length };
+  return { booked, notBooked, total: trip.stops.length };
 }

@@ -23,6 +23,11 @@ import { TravelTimeline } from "./pages/travel-timeline";
 import { TripHistory } from "./pages/trip-history";
 import { HostelDetails } from "./pages/hostel-details";
 import { TransportBooking } from "./pages/transport-booking";
+import { BookingDetails } from "./pages/booking-details";
+import { TransitBookingDetails } from "./pages/transit-booking-details";
+import { ModifyBooking } from "./pages/modify-booking";
+import { HostelCheckout } from "./pages/hostel-checkout";
+import { TransitCheckout } from "./pages/transit-checkout";
 
 export function AppShell() {
   const { activeTab, subPage, selectedStop, selectedLeg } = useTrip();
@@ -41,6 +46,11 @@ export function AppShell() {
       case "social": return <SocialPods />;
       case "hostelDetails": return <HostelDetails />;
       case "transportBooking": return <TransportBooking />;
+      case "bookingDetails": return <BookingDetails />;
+      case "transitBookingDetails": return <TransitBookingDetails />;
+      case "modifyBooking": return <ModifyBooking />;
+      case "hostelCheckout": return <HostelCheckout />;
+      case "transitCheckout": return <TransitCheckout />;
       default: return null;
     }
   };
@@ -69,13 +79,13 @@ export function AppShell() {
         )}
       </main>
 
-      {/* Bottom Navigation - ALWAYS visible, fixed to the bottom with highest z-index.
+      {/* Bottom Navigation - ALWAYS visible on all screen sizes, fixed to the bottom with highest z-index.
           z-[70] ensures it is above all map overlays, popups, sheets, and subpages. */}
-      <div className="lg:hidden fixed inset-x-0 bottom-0 z-[70]">
+      <div className="fixed inset-x-0 bottom-0 z-[70]">
         <BottomNav />
       </div>
       {/* Spacer for the fixed bottom nav so main content is not hidden behind it */}
-      <div className="lg:hidden shrink-0 h-16" />
+      <div className="shrink-0 h-16" />
 
       {/* Detail Sheets - only show when no subpage is active */}
       {!subPage && selectedStop && <StopDetailSheet />}

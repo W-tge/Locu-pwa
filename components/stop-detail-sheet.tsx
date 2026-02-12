@@ -15,14 +15,17 @@ import {
   CheckCircle2,
   ExternalLink,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Cloud,
   Wifi,
   Coffee,
   Users,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 
 interface HostelOption {
   id: string;
@@ -61,11 +64,134 @@ function getHostelsForCity(city: string): HostelOption[] {
   return mockHostels[city] || mockHostels["default"];
 }
 
+// ---- Inline Mini Calendar ----
+function MiniCalendar({ selectedStart, selectedEnd, onSelect, onClose }: {
+  selectedStart: Date;
+  selectedEnd: Date;
+  onSelect: (start: Date, end: Date) => void;
+  onClose: () => void;
+}) {
+  const [viewMonth, setViewMonth] = useState(new Date(selectedStart.getFullYear(), selectedStart.getMonth(), 1));
+  const [pickingEnd, setPickingEnd] = useState(false);
+  const [tempStart, setTempStart] = useState(selectedStart);
+  const [tempEnd, setTempEnd] = useState(selectedEnd);
+
+  const monthName = viewMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
+  const firstDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1).getDay();
+
+  const days = useMemo(() => {
+    const arr: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) arr.push(null);
+    for (let d = 1; d <= daysInMonth; d++) arr.push(d);
+    return arr;
+  }, [firstDay, daysInMonth]);
+
+  const handleDayClick = (day: number) => {
+    const clicked = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    if (!pickingEnd) {
+      setTempStart(clicked);
+      setPickingEnd(true);
+    } else {
+      const newEnd = clicked > tempStart ? clicked : tempStart;
+      const newStart = clicked > tempStart ? tempStart : clicked;
+      setTempStart(newStart);
+      setTempEnd(newEnd);
+      setPickingEnd(false);
+      onSelect(newStart, newEnd);
+    }
+  };
+
+  const isInRange = (day: number) => {
+    const d = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    return d >= tempStart && d <= tempEnd;
+  };
+
+  const isStart = (day: number) => {
+    const d = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    return d.toDateString() === tempStart.toDateString();
+  };
+
+  const isEnd = (day: number) => {
+    const d = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    return d.toDateString() === tempEnd.toDateString();
+  };
+
+  const isPast = (day: number) => {
+    const d = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return d < today;
+  };
+
+  return (
+    <div className="rounded-xl border-2 border-primary/20 bg-card paper-shadow p-3 animate-in fade-in slide-in-from-top-2 duration-200">
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1))} className="p-1 hover:bg-muted rounded-md">
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <span className="text-sm font-serif font-semibold">{monthName}</span>
+        <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1))} className="p-1 hover:bg-muted rounded-md">
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      <p className="text-[10px] text-center text-muted-foreground mb-2 font-medium">
+        {pickingEnd ? "Now select your check-out date" : "Select your check-in date"}
+      </p>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-0.5 mb-1">
+        {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => (
+          <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground py-1">{d}</div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div className="grid grid-cols-7 gap-0.5">
+        {days.map((day, i) => {
+          if (day === null) return <div key={`e-${i}`} />;
+          const past = isPast(day);
+          const inRange = isInRange(day);
+          const start = isStart(day);
+          const end = isEnd(day);
+
+          return (
+            <button
+              key={day}
+              disabled={past}
+              onClick={() => handleDayClick(day)}
+              className={cn(
+                "h-8 text-xs rounded-md transition-all font-medium",
+                past && "text-muted-foreground/30 cursor-not-allowed",
+                !past && !inRange && "hover:bg-primary/10 text-foreground",
+                inRange && !start && !end && "bg-primary/10 text-primary",
+                (start || end) && "bg-primary text-white font-bold"
+              )}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between pt-2 border-t border-border">
+        <div className="text-xs text-muted-foreground">
+          {Math.max(1, Math.round((tempEnd.getTime() - tempStart.getTime()) / (1000 * 60 * 60 * 24)))} nights selected
+        </div>
+        <button onClick={onClose} className="text-xs font-semibold text-primary hover:underline">Done</button>
+      </div>
+    </div>
+  );
+}
+
 export function StopDetailSheet() {
-  const { trip, selectedStop, setSelectedStop, updateStopBooking, setSubPage } = useTrip();
+  const { trip, selectedStop, setSelectedStop, updateStopBooking, updateStopDates, setSubPage } = useTrip();
   const { showToast } = useLocuToast();
   const [showHostels, setShowHostels] = useState(false);
   const [isBooked, setIsBookedLocal] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+
   const dragRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
 
@@ -73,9 +199,9 @@ export function StopDetailSheet() {
     setSelectedStop(null);
     setShowHostels(false);
     setIsBookedLocal(false);
+    setShowCalendar(false);
   }, [setSelectedStop]);
 
-  // Drag-down to dismiss
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     startY.current = e.touches[0].clientY;
   }, []);
@@ -91,7 +217,6 @@ export function StopDetailSheet() {
 
   const hostels = getHostelsForCity(selectedStop.city);
   const stopBooked = selectedStop.bookingStatus === "booked" || isBooked;
-  const isPending = selectedStop.bookingStatus === "pending";
   const stopIndex = getStopIndex(trip, selectedStop.id);
 
   const handleBookHostel = (hostel: HostelOption) => {
@@ -101,21 +226,31 @@ export function StopDetailSheet() {
     showToast(`${hostel.name} booked for ${selectedStop.city}!`, "success");
   };
 
+  const handleDateSelect = (start: Date, end: Date) => {
+    const startStr = start.toISOString().split("T")[0];
+    const endStr = end.toISOString().split("T")[0];
+    updateStopDates(selectedStop.id, startStr, endStr);
+    showToast(`Dates updated for ${selectedStop.city}`, "success");
+  };
+
+  const nights = selectedStop.nights || (() => {
+    const s = new Date(selectedStop.startDate);
+    const e = new Date(selectedStop.endDate);
+    return Math.max(1, Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)));
+  })();
+
   return (
     <>
-      {/* Backdrop - click to dismiss */}
-      <div 
-        className="fixed inset-0 z-[60] bg-black/20" 
-        onClick={handleDismiss}
-      />
-      
-      {/* Sheet - sits above backdrop but below bottom nav */}
-      <div 
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-[60] bg-black/20" onClick={handleDismiss} />
+
+      {/* Sheet */}
+      <div
         className="fixed inset-x-0 bottom-16 lg:bottom-0 z-[61] animate-in slide-in-from-bottom duration-300"
         ref={dragRef}
       >
-        <div className="bg-card border-t border-border rounded-t-3xl shadow-2xl max-h-[70vh] overflow-hidden flex flex-col">
-          {/* Minimize Bar - tap or drag to close */}
+        <div className="bg-[#FFFEF9] paper-texture border-t-2 border-[#DDD8CC] rounded-t-3xl paper-shadow max-h-[70vh] overflow-hidden flex flex-col">
+          {/* Minimize Bar */}
           <button
             className="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
             onClick={handleDismiss}
@@ -126,12 +261,12 @@ export function StopDetailSheet() {
             <div className="w-10 h-1.5 rounded-full bg-muted-foreground/40 hover:bg-muted-foreground/60 transition-colors" />
           </button>
           
-          {/* Header - no X button, minimize bar handles close */}
+          {/* Header */}
           <div className="px-4 pb-3 border-b border-border">
             <div className="flex items-center gap-2">
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white",
-                stopBooked ? "bg-[#10B981]" : isPending ? "bg-[#F59E0B]" : "bg-primary"
+                stopBooked ? "bg-[#10B981]" : "bg-primary"
               )}>
                 {stopIndex}
               </div>
@@ -140,12 +275,10 @@ export function StopDetailSheet() {
                 variant="outline" 
                 className={cn(
                   "text-xs font-semibold ml-auto",
-                  stopBooked && "bg-[#10B981]/10 border-[#10B981] text-[#10B981]",
-                  isPending && "bg-[#F59E0B]/10 border-[#F59E0B] text-[#F59E0B]",
-                  !stopBooked && !isPending && "bg-primary/10 border-primary text-primary"
+                  stopBooked ? "bg-[#10B981]/10 border-[#10B981] text-[#10B981]" : "bg-primary/10 border-primary text-primary"
                 )}
               >
-                {stopBooked ? "Booked" : isPending ? "Pending" : "Needs Booking"}
+                {stopBooked ? "Booked" : "Needs Booking"}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1 ml-10">
@@ -163,27 +296,49 @@ export function StopDetailSheet() {
           
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {/* Date & Duration */}
+            {/* Date & Duration - Interactive Buttons */}
             <div className="flex gap-3">
-              <div className="flex-1 rounded-xl bg-muted/50 p-3">
+              <button
+                onClick={() => setShowCalendar(!showCalendar)}
+                className={cn(
+                  "flex-1 rounded-xl p-3 text-left transition-all border-2",
+                  showCalendar
+                    ? "border-primary bg-primary/5"
+                    : "border-transparent bg-muted/50 hover:border-primary/30"
+                )}
+              >
                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
                   <Calendar className="w-3.5 h-3.5" />
-                  Dates
+                  <span className="micro-label">Dates</span>
+                  <span className="ml-auto text-[10px] text-primary font-semibold">
+                    {showCalendar ? "Close" : "Edit"}
+                  </span>
                 </div>
                 <p className="font-semibold text-foreground mt-1 text-sm">
                   {formatDateRange(selectedStop.startDate, selectedStop.endDate)}
                 </p>
-              </div>
+              </button>
+              <div className="w-px bg-border" />
               <div className="flex-1 rounded-xl bg-muted/50 p-3">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
                   <Bed className="w-3.5 h-3.5" />
-                  Duration
+                  <span className="micro-label">Duration</span>
                 </div>
                 <p className="font-semibold text-foreground mt-1 text-sm">
-                  {selectedStop.durationDays} {selectedStop.durationDays === 1 ? "night" : "nights"}
+                  {nights} {nights === 1 ? "night" : "nights"}
                 </p>
               </div>
             </div>
+
+            {/* Calendar Picker */}
+            {showCalendar && (
+              <MiniCalendar
+                selectedStart={new Date(selectedStop.startDate)}
+                selectedEnd={new Date(selectedStop.endDate)}
+                onSelect={handleDateSelect}
+                onClose={() => setShowCalendar(false)}
+              />
+            )}
 
             {/* Booked Hostel Info */}
             {stopBooked && selectedStop.hostelName && (
@@ -208,10 +363,11 @@ export function StopDetailSheet() {
                       <p className="text-sm text-primary font-bold">${selectedStop.hostelPrice}/night</p>
                     )}
                     <button 
-                      className="text-xs text-primary hover:underline mt-1"
-                      onClick={() => setSubPage("hostelDetails")}
+                      className="text-xs font-semibold text-primary hover:underline mt-1 flex items-center gap-1"
+                      onClick={() => setSubPage("bookingDetails")}
                     >
-                      View details
+                      View Booking Details
+                      <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -277,7 +433,7 @@ export function StopDetailSheet() {
                         
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {hostel.amenities.map(a => (
-                            <span key={a} className="px-2 py-0.5 rounded-full bg-muted text-[10px] text-muted-foreground">{a}</span>
+                            <span key={a} className="px-2.5 py-1 rounded-full bg-[#1B6B4A]/10 text-[10px] font-semibold text-[#1B6B4A] border border-[#1B6B4A]/20">{a}</span>
                           ))}
                         </div>
                         
@@ -300,13 +456,22 @@ export function StopDetailSheet() {
           {/* Action Footer */}
           <div className="p-4 border-t border-border bg-card">
             {!stopBooked ? (
-              <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold" onClick={() => setSubPage("hostelDetails")}>
+              <Button 
+                className="w-full text-white font-semibold shadow-lg hover:shadow-xl transition-all" 
+                style={{ background: "linear-gradient(135deg, #FC2869 0%, #FF6B9D 60%, #F59E0B 100%)" }}
+                onClick={() => setSubPage("hostelDetails")}
+              >
                 <Bed className="w-4 h-4 mr-2" />
                 Explore & Book Hostels
               </Button>
             ) : (
-              <Button variant="outline" className="w-full bg-transparent" onClick={handleDismiss}>
-                Done
+              <Button 
+                className="w-full text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                style={{ background: "linear-gradient(135deg, #FC2869 0%, #FF6B9D 60%, #F59E0B 100%)" }}
+                onClick={() => setSubPage("bookingDetails")}
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                View Booking Details
               </Button>
             )}
           </div>

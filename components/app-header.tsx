@@ -54,7 +54,7 @@ export function AppHeader() {
   ];
 
   return (
-    <header className="shrink-0 h-16 border-b border-border bg-card px-4 flex items-center gap-4">
+    <header className="shrink-0 h-16 border-b border-black/5 glass-panel px-4 flex items-center gap-4">
       {/* Logo */}
       <button 
         onClick={() => { setSubPage(null); setActiveTab("journey"); }}
@@ -105,7 +105,7 @@ export function AppHeader() {
             <ChevronDown className="w-4 h-4 text-muted-foreground hidden sm:block" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" sideOffset={8} className="w-56 z-[100]">
           {/* User Info */}
           <div className="px-3 py-2">
             <p className="text-sm font-medium">{user.name}</p>

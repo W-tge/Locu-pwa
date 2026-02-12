@@ -21,6 +21,10 @@ import {
   Shield,
   Star,
   Sparkles,
+  Bike,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +37,9 @@ interface TransportOption {
   arrival: string;
   duration: string;
   price: number;
+  routeCode: string;
+  platform: string;
+  seat: string;
   amenities: string[];
   seatsLeft: number;
   tags: { label: string; icon: any; color: string }[];
@@ -50,11 +57,14 @@ const mockTransportOptions: TransportOption[] = [
     departure: "07:00",
     arrival: "10:00",
     duration: "3h",
-    price: 18,
+    price: 8,
+    routeCode: "PLM-118",
+    platform: "B4",
+    seat: "22A",
     amenities: ["AC", "WiFi", "Toilet"],
     seatsLeft: 12,
     tags: [
-      { label: "Cheapest", icon: DollarSign, color: "bg-[#10B981]/10 text-[#10B981]" },
+      { label: "Cheapest", icon: DollarSign, color: "text-[#1B6B4A] bg-[#1B6B4A]/8" },
     ],
     verifiedCount: 47,
   },
@@ -66,12 +76,15 @@ const mockTransportOptions: TransportOption[] = [
     departure: "08:30",
     arrival: "11:00",
     duration: "2.5h",
-    price: 25,
+    price: 12,
+    routeCode: "CDS-402",
+    platform: "A2",
+    seat: "08B",
     amenities: ["AC", "WiFi", "Toilet", "Blanket", "Meal"],
     seatsLeft: 4,
     tags: [
-      { label: "Fastest", icon: Zap, color: "bg-[#3B82F6]/10 text-[#3B82F6]" },
-      { label: "Top Rated", icon: Star, color: "bg-[#F59E0B]/10 text-[#F59E0B]" },
+      { label: "Fastest", icon: Zap, color: "text-[#1B4A6B] bg-[#1B4A6B]/8" },
+      { label: "Top Rated", icon: Star, color: "text-[#8B6914] bg-[#8B6914]/8" },
     ],
     verifiedCount: 124,
     isRecommended: true,
@@ -85,11 +98,14 @@ const mockTransportOptions: TransportOption[] = [
     departure: "12:00",
     arrival: "15:30",
     duration: "3.5h",
-    price: 15,
+    price: 6,
+    routeCode: "TCB-210",
+    platform: "C1",
+    seat: "36A",
     amenities: ["AC"],
     seatsLeft: 20,
     tags: [
-      { label: "Budget", icon: DollarSign, color: "bg-[#10B981]/10 text-[#10B981]" },
+      { label: "Budget", icon: DollarSign, color: "text-[#1B6B4A] bg-[#1B6B4A]/8" },
     ],
     verifiedCount: 23,
   },
@@ -101,23 +117,26 @@ const mockTransportOptions: TransportOption[] = [
     departure: "22:00",
     arrival: "06:00",
     duration: "8h",
-    price: 45,
+    price: 18,
+    routeCode: "LDR-802",
+    platform: "A1",
+    seat: "04A",
     amenities: ["AC", "WiFi", "Toilet", "Full Recline", "Meal", "Blanket"],
     seatsLeft: 8,
     tags: [
-      { label: "Safest", icon: Shield, color: "bg-[#8B5CF6]/10 text-[#8B5CF6]" },
-      { label: "Night Bus", icon: Clock, color: "bg-muted text-muted-foreground" },
+      { label: "Safest", icon: Shield, color: "text-[#1B4A6B] bg-[#1B4A6B]/8" },
+      { label: "Night Bus", icon: Clock, color: "text-[#6B5814] bg-[#6B5814]/8" },
     ],
     verifiedCount: 89,
   },
 ];
 
 export function TransportBooking() {
-  const { setSubPage, updateLegBooking, selectedLeg, trip } = useTrip();
+  const { setSubPage, selectedLeg, trip, setPendingBooking } = useTrip();
   const { showToast } = useLocuToast();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [isBooked, setIsBooked] = useState(false);
-  const [isBooking, setIsBooking] = useState(false);
+  const [expandedOption, setExpandedOption] = useState<string | null>(null);
+  const [bookingId, setBookingId] = useState<string | null>(null);
 
   const fromStop = selectedLeg ? trip.stops.find(s => s.id === selectedLeg.fromStopId) : null;
   const toStop = selectedLeg ? trip.stops.find(s => s.id === selectedLeg.toStopId) : null;
@@ -130,220 +149,273 @@ export function TransportBooking() {
     }
   };
 
-  const handleBook = () => {
-    if (selectedOption && selectedLeg) {
-      setIsBooking(true);
-      setTimeout(() => {
-        updateLegBooking(selectedLeg.id, "booked");
-        setIsBooked(true);
-        setIsBooking(false);
-        showToast("Transport booked successfully!", "success");
-      }, 1500);
-    }
+  const handleBookOption = (option: TransportOption) => {
+    setBookingId(option.id);
+    setTimeout(() => {
+      setPendingBooking(option);
+      setSubPage("transitCheckout");
+      setBookingId(null);
+    }, 600);
   };
-
-  if (isBooked) {
-    const bookedOption = mockTransportOptions.find(o => o.id === selectedOption);
-    return (
-      <div className="h-full flex flex-col bg-background">
-        <header className="bg-card border-b border-border px-4 py-4 flex items-center gap-4">
-          <button onClick={() => setSubPage(null)} className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="text-lg font-bold">Booking Confirmed</h1>
-        </header>
-
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#10B981]/20 flex items-center justify-center mb-4 animate-in zoom-in duration-300">
-            <CheckCircle2 className="w-10 h-10 text-[#10B981]" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground">Transport Booked!</h2>
-          <p className="text-muted-foreground mt-2">{fromStop?.city} → {toStop?.city}</p>
-          {bookedOption && (
-            <div className="mt-4 p-4 bg-card rounded-xl border border-border w-full max-w-xs">
-              <p className="font-bold">{bookedOption.operator}</p>
-              <p className="text-sm text-muted-foreground">{bookedOption.departure} · {bookedOption.duration}</p>
-              <p className="text-lg font-bold text-[#10B981] mt-2">${bookedOption.price}</p>
-            </div>
-          )}
-          <Button onClick={() => setSubPage(null)} className="mt-6 bg-primary hover:bg-primary/90 text-white">
-            Back to Journey
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <header className="shrink-0 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
+      <header className="shrink-0 glass-panel border-b border-black/5 px-4 py-3 flex items-center gap-3">
         <button onClick={() => setSubPage(null)} className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2">
-          <Image src="/locu-logo.png" alt="Locu" width={60} height={24} className="h-6 w-auto" />
-          <span className="text-lg font-bold">Transport Options</span>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg font-bold text-foreground">Transport Options</h1>
         </div>
       </header>
 
-      {/* Route Info */}
-      <div className="p-4 bg-muted/50 border-b border-border">
-        <div className="flex items-center justify-center gap-4">
-          <div className="text-center">
-            <p className="font-bold text-lg">{fromStop?.city || "Origin"}</p>
-            <p className="text-xs text-muted-foreground">{fromStop?.country}</p>
+      {/* Route Hero — Ticket stub style */}
+      <div className="shrink-0 bg-card paper-texture border-b border-border">
+        <div className="px-5 py-4">
+          {/* Origin / Destination row */}
+          <div className="flex items-center gap-3">
+            {/* From */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">From</p>
+              <p className="font-[var(--font-hand)] text-2xl text-foreground leading-tight truncate">{fromStop?.city || selectedLeg?.fromStopId || "Origin"}</p>
+              <p className="text-xs text-muted-foreground">{fromStop?.country || ""}</p>
+            </div>
+
+            {/* Route arrow with transport icon */}
+            <div className="flex flex-col items-center gap-1 shrink-0 px-2">
+              <div className="w-10 h-10 rounded-full gradient-vibrant flex items-center justify-center shadow-md">
+                <Bus className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <div className="w-4 h-px bg-border" />
+                <ArrowRight className="w-3 h-3" />
+                <div className="w-4 h-px bg-border" />
+              </div>
+            </div>
+
+            {/* To */}
+            <div className="flex-1 min-w-0 text-right">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">To</p>
+              <p className="font-[var(--font-hand)] text-2xl text-foreground leading-tight truncate">{toStop?.city || selectedLeg?.toStopId || "Destination"}</p>
+              <p className="text-xs text-muted-foreground">{toStop?.country || ""}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-primary">
-            <div className="w-8 border-t-2 border-dashed border-primary" />
-            <Bus className="w-5 h-5" />
-            <div className="w-8 border-t-2 border-dashed border-primary" />
-          </div>
-          <div className="text-center">
-            <p className="font-bold text-lg">{toStop?.city || "Destination"}</p>
-            <p className="text-xs text-muted-foreground">{toStop?.country}</p>
+
+          {/* Date + duration strip */}
+          <div className="flex items-center justify-center gap-4 mt-3 py-2 px-4 bg-muted/40 rounded-lg border border-dashed border-border">
+            {selectedLeg?.departureDate && (
+              <div className="flex items-center gap-1.5 text-sm text-foreground">
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="font-mono font-medium text-xs">
+                  {new Date(selectedLeg.departureDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                </span>
+              </div>
+            )}
+            {selectedLeg?.duration && (
+              <>
+                <div className="w-px h-4 bg-border" />
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-mono text-xs">{selectedLeg.duration}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
-        {selectedLeg?.departureDate && (
-          <div className="flex items-center justify-center gap-2 mt-3 text-sm text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            {new Date(selectedLeg.departureDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-          </div>
-        )}
+
+        {/* Section label */}
+        <div className="px-5 py-2.5 flex items-center justify-between border-t border-dashed border-border">
+          <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">{mockTransportOptions.length} Options Available</p>
+          <p className="text-[10px] text-muted-foreground">Sorted By Recommendation</p>
+        </div>
       </div>
 
-      {/* Transport Options */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      {/* Transport Options List */}
+      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+
         {mockTransportOptions.map((option) => {
           const ModeIcon = getModeIcon(option.mode);
+          const isSelected = selectedOption === option.id;
+          const isExpanded = expandedOption === option.id;
+          const isBookingThis = bookingId === option.id;
+
           return (
-            <button
+            <div
               key={option.id}
               onClick={() => setSelectedOption(option.id)}
               className={cn(
-                "w-full rounded-xl border text-left transition-all relative overflow-hidden",
-                selectedOption === option.id ? "border-primary shadow-md" : "border-border bg-card hover:border-primary/50",
-                option.isRecommended && selectedOption !== option.id && "border-primary/50"
+                "rounded-xl transition-all duration-200 cursor-pointer overflow-hidden",
+                isSelected
+                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
+                  : "border border-border shadow-sm hover:border-primary/40 hover:shadow-md"
               )}
             >
-              {/* Locu Recommended Banner */}
+              {/* Recommended banner */}
               {option.isRecommended && (
-                <div className="bg-gradient-to-r from-primary to-[#FF6B9D] px-4 py-2">
-                  <div className="flex items-center gap-2 text-white">
-                    <Image src="/locu-logo.png" alt="Locu" width={40} height={16} className="h-4 w-auto brightness-0 invert" />
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span className="text-xs font-bold">Recommended</span>
-                  </div>
-                  {option.recommendReason && (
-                    <p className="text-[10px] text-white/90 mt-0.5">{option.recommendReason}</p>
-                  )}
+                <div className="bg-gradient-to-r from-primary to-[#FF6B9D] px-4 py-1.5 flex items-center gap-2">
+                  <Sparkles className="w-3 h-3 text-white" />
+                  <span className="text-[10px] font-bold text-white tracking-wider uppercase">Locu Recommended</span>
                 </div>
               )}
 
-              <div className="p-4">
-                <div className="flex items-start gap-3">
-                  {/* Mode Icon */}
-                  <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                    selectedOption === option.id ? "bg-primary/10" : "bg-muted"
-                  )}>
-                    <ModeIcon className={cn("w-5 h-5", selectedOption === option.id ? "text-primary" : "text-muted-foreground")} />
+              <div className="bg-card">
+                {/* Main content row */}
+                <div className="p-4 pb-3">
+                  <div className="flex items-start gap-3">
+                    {/* Icon */}
+                    <div className={cn(
+                      "w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                      isSelected ? "bg-primary/10" : "bg-muted"
+                    )}>
+                      <ModeIcon className={cn("w-5 h-5 transition-colors", isSelected ? "text-primary" : "text-muted-foreground")} />
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-foreground">{option.operator}</h3>
+                        <span className="text-xs text-muted-foreground">{option.type}</span>
+                      </div>
+
+                      {/* Time row */}
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="font-mono font-bold text-lg text-foreground">{option.departure}</span>
+                        <div className="flex items-center gap-1 flex-1">
+                          <div className="h-px flex-1 bg-border" />
+                          <span className="text-[10px] text-muted-foreground font-mono px-1">{option.duration}</span>
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+                        <span className="font-mono font-bold text-lg text-foreground">{option.arrival}</span>
+                      </div>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        {option.tags.map((tag) => (
+                          <span key={tag.label} className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold", tag.color)}>
+                            <tag.icon className="w-3 h-3" />
+                            {tag.label}
+                          </span>
+                        ))}
+                        {option.seatsLeft < 10 && (
+                          <span className="text-[10px] text-[#B45309] font-medium">{option.seatsLeft} seats left</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Price column */}
+                    <div className="text-right shrink-0">
+                      <p className="text-2xl font-bold text-primary font-mono">${option.price}</p>
+                      <p className="text-[10px] text-muted-foreground">per person</p>
+                    </div>
                   </div>
+                </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-foreground">{option.operator}</p>
-                      <Badge variant="secondary" className="text-[10px]">{option.type}</Badge>
+                {/* Expandable details */}
+                <div className={cn(
+                  "overflow-hidden transition-all duration-200",
+                  isExpanded ? "max-h-60" : "max-h-0"
+                )}>
+                  <div className="px-4 pb-3 pt-0 border-t border-dashed border-border mx-4">
+                    <div className="grid grid-cols-3 gap-3 mt-3 text-center">
+                      <div className="bg-muted/50 rounded-lg p-2">
+                        <p className="micro-label">Route</p>
+                        <p className="font-mono font-semibold text-sm">{option.routeCode}</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-2">
+                        <p className="micro-label">Platform</p>
+                        <p className="font-mono font-semibold text-sm">{option.platform}</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-2">
+                        <p className="micro-label">Seat</p>
+                        <p className="font-mono font-semibold text-sm">{option.seat}</p>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center gap-3 mt-1.5 text-sm">
-                      <span className="font-semibold">{option.departure}</span>
-                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                      <span className="font-semibold">{option.arrival}</span>
-                      <span className="text-muted-foreground">({option.duration})</span>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {option.tags.map((tag) => (
-                        <span key={tag.label} className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold", tag.color)}>
-                          <tag.icon className="w-3 h-3" />
-                          {tag.label}
-                        </span>
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {option.amenities.map(a => (
+                        <span key={a} className="px-2 py-1 rounded-md bg-[#1B6B4A]/8 text-[#1B6B4A] text-[10px] font-semibold">{a}</span>
                       ))}
                     </div>
-
-                    {/* Amenities */}
                     <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
-                      {option.amenities.slice(0, 4).map((a) => (
-                        <span key={a}>{a}</span>
-                      ))}
-                      {option.amenities.length > 4 && <span>+{option.amenities.length - 4}</span>}
+                      <Star className="w-3 h-3 text-[#8B6914] fill-[#8B6914]" />
+                      <span>Verified by {option.verifiedCount} travellers</span>
                     </div>
-
-                    {/* Verified */}
-                    <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
-                      <Star className="w-3 h-3 text-[#FBBF24] fill-[#FBBF24]" />
-                      Verified by {option.verifiedCount} travellers
-                    </p>
-                  </div>
-
-                  {/* Price */}
-                  <div className="text-right shrink-0">
-                    <p className="text-xl font-bold text-primary">${option.price}</p>
-                    {option.seatsLeft < 10 && (
-                      <p className="text-[10px] text-[#F59E0B] font-medium mt-0.5">{option.seatsLeft} left</p>
+                    {option.recommendReason && (
+                      <div className="flex items-start gap-1.5 mt-2 p-2 bg-primary/5 rounded-lg">
+                        <Sparkles className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+                        <p className="text-[10px] text-primary font-medium">{option.recommendReason}</p>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Selection indicator */}
-                {selectedOption === option.id && (
-                  <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-white" />
-                  </div>
+                {/* Footer: details toggle + Book button */}
+                <div className="flex items-center gap-2 px-4 pb-3">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setExpandedOption(isExpanded ? null : option.id); }}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors py-1.5 px-2 rounded-lg hover:bg-muted"
+                  >
+                    {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    {isExpanded ? "Less" : "Details"}
+                  </button>
+                  <div className="flex-1" />
+                  <Button
+                    onClick={(e) => { e.stopPropagation(); handleBookOption(option); }}
+                    disabled={isBookingThis}
+                    size="sm"
+                    className={cn(
+                      "font-semibold text-sm px-5 shadow-sm transition-all",
+                      isBookingThis
+                        ? "bg-muted text-muted-foreground"
+                        : "gradient-vibrant text-white hover:shadow-md"
+                    )}
+                  >
+                    {isBookingThis ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      </span>
+                    ) : (
+                      <>Book ${option.price}</>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Selection indicator bar */}
+                {isSelected && (
+                  <div className="h-1 gradient-vibrant" />
                 )}
               </div>
-            </button>
+            </div>
           );
         })}
 
-        {/* Safety context */}
-        <div className="p-3 rounded-xl bg-[#10B981]/10 border border-[#10B981]/30 text-sm">
-          <p className="text-muted-foreground flex items-start gap-2">
-            <Shield className="w-4 h-4 text-[#10B981] shrink-0 mt-0.5" />
-            <span><span className="font-semibold text-[#10B981]">Route safety:</span> This is a well-travelled backpacker route. 89% of Locu users rated it as safe. Day services recommended for first-timers.</span>
-          </p>
+        {/* Bike taxi tip card */}
+        <div className="rounded-xl bg-[#FEFCE8] border border-[#FDE68A] p-4 mt-2">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#FEF3C7] flex items-center justify-center shrink-0">
+              <Bike className="w-5 h-5 text-[#92710C]" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5">
+                <Lightbulb className="w-3.5 h-3.5 text-[#D97706]" />
+                <p className="font-semibold text-sm text-[#92710C]">Local Tip</p>
+              </div>
+              <p className="text-xs text-[#92710C]/80 mt-1 leading-relaxed">
+                Travellers report local bike taxis (mototaxis) are a much cheaper alternative for shorter hops between towns. Always negotiate the price beforehand and pay with cash.
+              </p>
+              <div className="flex items-center gap-4 mt-2 text-[10px] font-medium text-[#92710C]/60">
+                <span className="flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  Reported by 83 travellers
+                </span>
+                <span className="flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" />
+                  Typically $1-3 USD
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Pro tip */}
-        <div className="p-3 rounded-xl bg-[#FBBF24]/10 border border-[#FBBF24]/30 text-sm">
-          <p className="text-muted-foreground flex items-start gap-2">
-            <Star className="w-4 h-4 text-[#FBBF24] shrink-0 mt-0.5" />
-            <span><span className="font-semibold text-[#FBBF24]">Pro tip:</span> Night buses save accommodation costs! Cruz del Sur offers lie-flat seats on the overnight service.</span>
-          </p>
-        </div>
-      </div>
-
-      {/* Booking Footer */}
-      <div className="shrink-0 p-4 border-t border-border bg-card">
-        <Button
-          onClick={handleBook}
-          disabled={!selectedOption || isBooking}
-          className="w-full h-12 bg-primary hover:bg-primary/90 text-lg font-semibold text-white"
-        >
-          {isBooking ? (
-            <span className="flex items-center gap-2">
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Booking...
-            </span>
-          ) : selectedOption ? (
-            `Book for $${mockTransportOptions.find(o => o.id === selectedOption)?.price}`
-          ) : (
-            "Select an option"
-          )}
-        </Button>
       </div>
     </div>
   );

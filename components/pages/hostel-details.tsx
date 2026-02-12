@@ -131,12 +131,10 @@ const mockHostels: Hostel[] = [
 ];
 
 export function HostelDetails() {
-  const { setSubPage, updateStopBooking, selectedStop } = useTrip();
+  const { setSubPage, updateStopBooking, selectedStop, setPendingBooking } = useTrip();
   const { showToast } = useLocuToast();
   const [savedHostels, setSavedHostels] = useState<string[]>([]);
   const [bookingHostel, setBookingHostel] = useState<string | null>(null);
-  const [isBooked, setIsBooked] = useState(false);
-  const [bookedHostel, setBookedHostel] = useState<Hostel | null>(null);
   const [expandedHostel, setExpandedHostel] = useState<string | null>(null);
 
   const cityName = selectedStop?.city || "Medellin";
@@ -152,21 +150,20 @@ export function HostelDetails() {
   const handleBook = (hostel: Hostel) => {
     setBookingHostel(hostel.id);
     setTimeout(() => {
-      if (selectedStop) updateStopBooking(selectedStop.id, "booked");
-      setBookedHostel(hostel);
-      setIsBooked(true);
-      showToast(`Booked ${hostel.name}!`, "success");
-    }, 1500);
+      setPendingBooking(hostel);
+      setSubPage("hostelCheckout");
+      setBookingHostel(null);
+    }, 800);
   };
 
   const handleBookForPod = (hostel: Hostel) => {
     setBookingHostel(hostel.id);
-    showToast("Reserving beds for 10 min while your Pod confirms...", "reminder", 3000);
+    showToast("Opening checkout with Pod booking...", "reminder", 2000);
     setTimeout(() => {
-      if (selectedStop) updateStopBooking(selectedStop.id, "booked");
-      setBookedHostel(hostel);
-      setIsBooked(true);
-    }, 2000);
+      setPendingBooking({ ...hostel, podDefault: true });
+      setSubPage("hostelCheckout");
+      setBookingHostel(null);
+    }, 800);
   };
 
   const getAvailabilityInfo = (a: string) => {
@@ -177,32 +174,6 @@ export function HostelDetails() {
       default: return { text: "Check availability", color: "text-muted-foreground bg-muted" };
     }
   };
-
-  if (isBooked && bookedHostel) {
-    return (
-      <div className="h-full flex flex-col bg-background">
-        <header className="bg-card border-b border-border px-4 py-4 flex items-center gap-4">
-          <button onClick={() => setSubPage(null)} className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="text-lg font-bold">Booking Confirmed</h1>
-        </header>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#10B981]/20 flex items-center justify-center mb-4 animate-in zoom-in duration-300">
-            <CheckCircle2 className="w-10 h-10 text-[#10B981]" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground">{"You're all set!"}</h2>
-          <p className="text-muted-foreground mt-2">
-            Your stay at <span className="font-semibold text-foreground">{bookedHostel.name}</span> is confirmed.
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">{nights} nights &middot; ${bookedHostel.price * nights} total</p>
-          <Button onClick={() => setSubPage(null)} className="mt-6 bg-primary hover:bg-primary/90 text-white">
-            Back to Journey
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -275,7 +246,7 @@ export function HostelDetails() {
                         <span className={cn(
                           "ml-auto text-xs font-bold px-2 py-0.5 rounded-full",
                           hostel.matchScore >= 90 ? "bg-[#10B981]/10 text-[#10B981]" :
-                          hostel.matchScore >= 80 ? "bg-[#3B82F6]/10 text-[#3B82F6]" : "bg-muted text-muted-foreground"
+                          hostel.matchScore >= 80 ? "bg-[#3B82F6]/10 text-[#3B82F6]" : "bg-[#F59E0B]/10 text-[#92710C]"
                         )}>
                           {hostel.matchScore}% match
                         </span>
@@ -303,7 +274,7 @@ export function HostelDetails() {
                       </span>
                     )}
                     {hostel.wifiSpeed && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20 text-xs font-semibold">
                         <Laptop className="w-3 h-3" /> {hostel.wifiSpeed}
                       </span>
                     )}
@@ -346,7 +317,7 @@ export function HostelDetails() {
                 {/* Amenities */}
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {hostel.amenities.map((amenity) => (
-                    <Badge key={amenity} variant="secondary" className="text-[10px] px-2 py-0.5 bg-muted">{amenity}</Badge>
+                    <Badge key={amenity} variant="secondary" className="text-[10px] px-2.5 py-1 bg-[#1B6B4A]/10 text-[#1B6B4A] border-[#1B6B4A]/20">{amenity}</Badge>
                   ))}
                 </div>
 

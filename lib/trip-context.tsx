@@ -29,7 +29,7 @@ export interface Achievement {
   description: string;
   points: number;
   icon: string;
-  color: "pink" | "green" | "mint" | "coral";
+  color: "pink" | "purple" | "mint" | "coral";
   unlockedAt?: Date;
 }
 
@@ -67,7 +67,7 @@ export interface Booking {
   location: string;
   date: string;
   price: number;
-  status: "confirmed" | "pending";
+  status: "confirmed" | "not-booked";
   image?: string;
 }
 
@@ -96,7 +96,7 @@ export interface User {
 }
 
 type TabType = "journey" | "guide" | "social" | "wallet" | "menu";
-type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking";
+type SubPageType = null | "bookings" | "timeline" | "savedHostels" | "savedPlaces" | "stats" | "tripHistory" | "preferences" | "safety" | "intelHub" | "social" | "hostelDetails" | "transportBooking" | "bookingDetails" | "transitBookingDetails" | "modifyBooking" | "hostelCheckout" | "transitCheckout";
 
 interface TripContextType {
   trip: Trip;
@@ -108,8 +108,11 @@ interface TripContextType {
   setSelectedLeg: (leg: TransitLeg | null) => void;
   setActiveTab: (tab: TabType) => void;
   setSubPage: (page: SubPageType) => void;
-  updateStopBooking: (stopId: string, status: "booked" | "pending" | "not-booked") => void;
-  updateLegBooking: (legId: string, status: "booked" | "pending" | "not-booked") => void;
+  updateStopBooking: (stopId: string, status: "booked" | "not-booked") => void;
+  updateLegBooking: (legId: string, status: "booked" | "not-booked") => void;
+  updateStopDates: (stopId: string, startDate: string, endDate: string) => void;
+  pendingBooking: any;
+  setPendingBooking: (data: any) => void;
   // User data
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
@@ -157,7 +160,7 @@ const defaultStats: UserStats = {
       description: "Traveled 1000+ km by bus",
       points: 200,
       icon: "bus",
-      color: "green",
+      color: "purple",
       unlockedAt: new Date("2024-03-20"),
     },
     {
@@ -166,8 +169,17 @@ const defaultStats: UserStats = {
       description: "Stayed in 10+ hostels",
       points: 100,
       icon: "home",
-      color: "coral",
+      color: "mint",
       unlockedAt: new Date("2024-03-22"),
+    },
+    {
+      id: "4",
+      title: "Budget Guru",
+      description: "Spent under $50/day for 2 weeks",
+      points: 125,
+      icon: "bus",
+      color: "coral",
+      unlockedAt: new Date("2024-03-25"),
     },
   ],
 };
@@ -255,7 +267,7 @@ const defaultBookings: Booking[] = [
     location: "Cusco, Peru",
     date: "Apr 1-5, 2024",
     price: 280,
-    status: "pending",
+    status: "not-booked",
   },
 ];
 
@@ -315,6 +327,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [selectedLeg, setSelectedLeg] = useState<TransitLeg | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("journey");
   const [subPage, setSubPage] = useState<SubPageType>(null);
+  const [pendingBooking, setPendingBooking] = useState<any>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>(defaultPreferences);
   const [userStats, setUserStats] = useState<UserStats>(defaultStats);
   const [savedHostels] = useState<SavedHostel[]>(defaultSavedHostels);
@@ -323,7 +336,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [alerts] = useState<Alert[]>(defaultAlerts);
   const [communityQuests] = useState<CommunityQuest[]>(defaultQuests);
 
-  const updateStopBooking = (stopId: string, status: "booked" | "pending" | "not-booked") => {
+  const updateStopBooking = (stopId: string, status: "booked" | "not-booked") => {
     setTrip(prev => ({
       ...prev,
       stops: prev.stops.map(s => 
@@ -332,11 +345,23 @@ export function TripProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const updateLegBooking = (legId: string, status: "booked" | "pending" | "not-booked") => {
+  const updateLegBooking = (legId: string, status: "booked" | "not-booked") => {
     setTrip(prev => ({
       ...prev,
       transitLegs: prev.transitLegs.map(l => 
         l.id === legId ? { ...l, bookingStatus: status } : l
+      ),
+    }));
+  };
+
+  const updateStopDates = (stopId: string, startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const nights = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    setTrip(prev => ({
+      ...prev,
+      stops: prev.stops.map(s =>
+        s.id === stopId ? { ...s, startDate, endDate, nights } : s
       ),
     }));
   };
@@ -362,6 +387,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
         setSubPage,
         updateStopBooking,
         updateLegBooking,
+        updateStopDates,
+        pendingBooking,
+        setPendingBooking,
         userPreferences,
         setUserPreferences,
         userStats,
