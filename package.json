@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "aws-amplify": "^6.0.0",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
@@ -64,6 +65,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@aws-amplify/backend": "^1.0.0",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",

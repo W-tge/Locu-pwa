@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTrip } from "@/lib/trip-context";
 import { useLocuToast } from "@/components/locu-toast";
 import { cn } from "@/lib/utils";
@@ -43,10 +44,17 @@ export function TransitBookingDetails() {
   const { showToast } = useLocuToast();
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
+  useEffect(() => {
+    if (!selectedLeg) setSubPage("bookings");
+  }, [selectedLeg, setSubPage]);
+
   if (!selectedLeg) {
     return (
-      <div className="h-full flex items-center justify-center text-muted-foreground">
-        <p>No transit booking selected.</p>
+      <div className="h-full flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-sm">Taking you back to bookings…</p>
+        </div>
       </div>
     );
   }
@@ -67,7 +75,7 @@ export function TransitBookingDetails() {
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
       <div className="shrink-0 p-4 border-b border-border flex items-center gap-3">
-        <Button size="icon" variant="ghost" onClick={() => { setSubPage(null); setSelectedLeg(null); }}>
+        <Button size="icon" variant="ghost" onClick={() => { setSubPage("bookings"); setSelectedLeg(null); }}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1">

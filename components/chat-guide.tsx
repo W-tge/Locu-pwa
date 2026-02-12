@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTrip } from "@/lib/trip-context";
+import { addDaysToDate } from "@/lib/trip-data";
 import { cn } from "@/lib/utils";
 import { 
   Send, 
@@ -109,6 +110,14 @@ function getResponse(input: string): Message {
 }
 
 export function ChatGuide() {
+  const {
+    trip,
+    setSubPage,
+    setSelectedStop,
+    setSelectedLeg,
+    updateStopDates,
+    setActiveTab,
+  } = useTrip();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -122,6 +131,88 @@ export function ChatGuide() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const findStopByCity = useCallback(
+    (city: string) => trip.stops.find((s) => s.city.toLowerCase() === city.toLowerCase()),
+    [trip.stops]
+  );
+
+  const findLegByRoute = useCallback(
+    (fromCity: string, toCity: string) =>
+      trip.transitLegs.find((leg) => {
+        const from = trip.stops.find((s) => s.id === leg.fromStopId);
+        const to = trip.stops.find((s) => s.id === leg.toStopId);
+        return from?.city.toLowerCase() === fromCity.toLowerCase() && to?.city.toLowerCase() === toCity.toLowerCase();
+      }),
+    [trip.transitLegs, trip.stops]
+  );
+
+  const handleActionClick = useCallback(
+    async (action: { label: string; action: string }) => {
+      const userMsg: Message = { id: Date.now().toString(), role: "user", content: action.label };
+      setMessages((prev) => [...prev, userMsg]);
+      setIsTyping(true);
+
+      let reply = "";
+      const actionId = action.action;
+
+      if (actionId.startsWith("extend_")) {
+        const nights = parseInt(actionId.replace("extend_", ""), 10) || 3;
+        const stop = findStopByCity("Medellin");
+        if (stop) {
+          const newEnd = addDaysToDate(stop.endDate, nights);
+          updateStopDates(stop.id, stop.startDate, newEnd);
+          reply = `Done! I've extended your stay in Medellin by ${nights} nights. Your itinerary and all downstream dates have been updated.`;
+        } else {
+          reply = `I couldn't find Medellin on your trip. Try selecting a stop on your journey to extend.`;
+        }
+      } else if (actionId.startsWith("add_")) {
+        const nights = actionId.replace("add_", "");
+        reply = `Guanajuato for ${nights} nights is a great choice! For now you can add it manually from your itinerary. Full "add stop" is coming soon.`;
+      } else {
+        reply = "Done! Let me know if you need anything else.";
+      }
+
+      await new Promise((r) => setTimeout(r, 600));
+      const assistantMsg: Message = { id: (Date.now() + 1).toString(), role: "assistant", content: reply };
+      setMessages((prev) => [...prev, assistantMsg]);
+      setIsTyping(false);
+    },
+    [findStopByCity, updateStopDates]
+  );
+
+  const handleSuggestionClick = useCallback(
+    (suggestion: string) => {
+      const lower = suggestion.toLowerCase();
+      if (lower.includes("book selina") || lower.includes("book a hostel in medellin")) {
+        const stop = findStopByCity("Medellin");
+        if (stop) {
+          setSelectedStop(stop);
+          setSubPage("hostelDetails");
+        }
+      } else if (lower.includes("book a hostel in antigua")) {
+        const stop = findStopByCity("Antigua");
+        if (stop) {
+          setSelectedStop(stop);
+          setSubPage("hostelDetails");
+        }
+      } else if (lower.includes("what's not booked") || lower.includes("unbooked")) {
+        setActiveTab("journey");
+        setSubPage("bookings");
+      } else if (lower.includes("show my full itinerary") || lower.includes("full itinerary")) {
+        setActiveTab("journey");
+        setSubPage("timeline");
+      } else if (lower.includes("modify") || lower.includes("change my booking")) {
+        const booked = trip.stops.find((s) => s.bookingStatus === "booked") || trip.stops[0];
+        if (booked) {
+          setSelectedStop(booked);
+          setSubPage("bookingDetails");
+        }
+      }
+      handleSend(suggestion);
+    },
+    [findStopByCity, setSelectedStop, setSubPage, setActiveTab, trip.stops]
+  );
 
   const handleSend = async (text?: string) => {
     const messageText = text || input;
@@ -143,10 +234,6 @@ export function ChatGuide() {
     const response = getResponse(messageText);
     setMessages(prev => [...prev, response]);
     setIsTyping(false);
-  };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    handleSend(suggestion);
   };
 
   return (
@@ -179,7 +266,7 @@ export function ChatGuide() {
             )}>
               <p className="text-sm whitespace-pre-line">{message.content}</p>
               
-              {/* Action Buttons */}
+              {/* Action Buttons - perform trip actions when action id is present */}
               {message.actions && message.actions.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {message.actions.map((action, i) => (
@@ -188,7 +275,7 @@ export function ChatGuide() {
                       size="sm" 
                       variant="secondary"
                       className="text-xs"
-                      onClick={() => handleSend(action.label)}
+                      onClick={() => (action.action ? handleActionClick(action) : handleSend(action.label))}
                     >
                       {action.label}
                     </Button>

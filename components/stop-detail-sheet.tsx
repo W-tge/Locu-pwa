@@ -26,6 +26,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState, useRef, useCallback, useMemo } from "react";
+import { useHostelsForCity } from "@/lib/api/hooks";
+import type { HostelOptionDto } from "@/lib/api/types";
 
 interface HostelOption {
   id: string;
@@ -60,7 +62,23 @@ const mockHostels: Record<string, HostelOption[]> = {
   ],
 };
 
-function getHostelsForCity(city: string): HostelOption[] {
+function mapDtoToHostelOption(d: HostelOptionDto): HostelOption {
+  return {
+    id: d.id,
+    name: d.name,
+    image: d.image,
+    rating: d.rating,
+    reviews: d.reviews,
+    price: d.price,
+    currency: d.currency ?? "USD",
+    roomType: d.roomType,
+    amenities: d.amenities ?? [],
+    distance: d.distance,
+    availability: d.availability,
+  };
+}
+
+function getHostelsForCityFallback(city: string): HostelOption[] {
   return mockHostels[city] || mockHostels["default"];
 }
 
@@ -186,7 +204,7 @@ function MiniCalendar({ selectedStart, selectedEnd, onSelect, onClose }: {
 }
 
 export function StopDetailSheet() {
-  const { trip, selectedStop, setSelectedStop, updateStopBooking, updateStopDates, setSubPage } = useTrip();
+  const { trip, selectedStop, setSelectedStop, updateStopBooking, updateStopDates, setSubPage, setPendingBooking } = useTrip();
   const { showToast } = useLocuToast();
   const [showHostels, setShowHostels] = useState(false);
   const [isBooked, setIsBookedLocal] = useState(false);
@@ -213,17 +231,28 @@ export function StopDetailSheet() {
     }
   }, [handleDismiss]);
 
+  const city = selectedStop?.city ?? "";
+  const checkIn = selectedStop?.startDate ?? "";
+  const checkOut = selectedStop?.endDate ?? "";
+  const fallback = useMemo(
+    () => getHostelsForCityFallback(city) as unknown as import("@/lib/api/types").HostelOptionDto[],
+    [city]
+  );
+  const { hostels: apiHostels } = useHostelsForCity(city, checkIn, checkOut, fallback);
+  const hostels: HostelOption[] =
+    apiHostels.length > 0
+      ? apiHostels.map(mapDtoToHostelOption)
+      : getHostelsForCityFallback(city);
+
   if (!selectedStop) return null;
 
-  const hostels = getHostelsForCity(selectedStop.city);
   const stopBooked = selectedStop.bookingStatus === "booked" || isBooked;
   const stopIndex = getStopIndex(trip, selectedStop.id);
 
   const handleBookHostel = (hostel: HostelOption) => {
-    updateStopBooking(selectedStop.id, "booked");
-    setIsBookedLocal(true);
+    setPendingBooking(hostel);
     setShowHostels(false);
-    showToast(`${hostel.name} booked for ${selectedStop.city}!`, "success");
+    setSubPage("hostelCheckout");
   };
 
   const handleDateSelect = (start: Date, end: Date) => {
@@ -374,19 +403,32 @@ export function StopDetailSheet() {
               </div>
             )}
 
-            {/* Hostel Options - expandable */}
+            {/* Quick Look at Hostels - expandable preview */}
             {!stopBooked && (
-              <div>
+              <div className="space-y-3">
                 <button
                   onClick={() => setShowHostels(!showHostels)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors"
+                  className={cn(
+                    "w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all",
+                    showHostels
+                      ? "border-primary bg-primary/5 shadow-md"
+                      : "border-border bg-card/80 hover:border-primary/40 hover:bg-muted/40"
+                  )}
                 >
-                  <span className="font-semibold text-sm">Browse Hostels ({hostels.length})</span>
-                  <ChevronDown className={cn("w-4 h-4 transition-transform", showHostels && "rotate-180")} />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Bed className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <span className="font-bold text-sm text-foreground">Quick Look at Hostels</span>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{hostels.length} options in {selectedStop.city}</p>
+                    </div>
+                  </div>
+                  <ChevronDown className={cn("w-5 h-5 text-muted-foreground transition-transform shrink-0", showHostels && "rotate-180")} />
                 </button>
                 
                 {showHostels && (
-                  <div className="mt-2 space-y-2">
+                  <div className="space-y-2 pl-1">
                     {hostels.map((hostel, i) => (
                       <div key={hostel.id} className={cn(
                         "rounded-xl border p-3",
@@ -442,8 +484,8 @@ export function StopDetailSheet() {
                           size="sm"
                           onClick={() => handleBookHostel(hostel)}
                         >
-                          Book Now
-                          <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                          Book this one
+                          <ChevronRight className="w-3.5 h-3.5 ml-1" />
                         </Button>
                       </div>
                     ))}
@@ -462,7 +504,7 @@ export function StopDetailSheet() {
                 onClick={() => setSubPage("hostelDetails")}
               >
                 <Bed className="w-4 h-4 mr-2" />
-                Explore & Book Hostels
+                Book Hostels
               </Button>
             ) : (
               <Button 

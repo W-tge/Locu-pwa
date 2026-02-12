@@ -5,6 +5,8 @@ import { useTrip } from "@/lib/trip-context";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useLocuToast } from "@/components/locu-toast";
+import { answerQuest as answerQuestApi } from "@/lib/api/traveller-insights";
+import { isApiConfigured } from "@/lib/api/config";
 import {
   ArrowLeft,
   AlertTriangle,
@@ -12,6 +14,7 @@ import {
   Lightbulb,
   ExternalLink,
   Gift,
+  MessageCirclePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,10 +24,22 @@ export function IntelHub() {
   const [answeredQuests, setAnsweredQuests] = useState<string[]>([]);
   const [karmaToast, setKarmaToast] = useState<{ points: number } | null>(null);
 
-  const handleAnswerQuest = (questId: string, points: number) => {
-    addKarmaPoints(points);
+  const handleAnswerQuest = async (questId: string, points: number) => {
+    if (isApiConfigured()) {
+      try {
+        const res = await answerQuestApi({ questId });
+        const awarded = res?.pointsAwarded ?? points;
+        addKarmaPoints(awarded);
+        setKarmaToast({ points: awarded });
+      } catch {
+        addKarmaPoints(points);
+        setKarmaToast({ points });
+      }
+    } else {
+      addKarmaPoints(points);
+      setKarmaToast({ points });
+    }
     setAnsweredQuests(prev => [...prev, questId]);
-    setKarmaToast({ points });
     setTimeout(() => setKarmaToast(null), 2000);
   };
 
@@ -138,6 +153,27 @@ export function IntelHub() {
             })}
           </div>
         </section>
+
+        {/* Waze-style: contribute local knowledge */}
+        {isApiConfigured() && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <MessageCirclePlus className="w-4 h-4 text-primary" />
+              <h2 className="font-bold text-foreground">Contribute</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Share alerts or tips for the route to build our traveller insights dataset.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full border-primary text-primary hover:bg-primary/10"
+              onClick={() => showToast("Report alert / Share tip will open a form (wire to submitAlert or submitRecommendation API).", "info")}
+            >
+              Report alert or share a tip
+            </Button>
+          </section>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
 import { useLocuToast } from "@/components/locu-toast";
+import { useTransportOptions } from "@/lib/api/hooks";
+import type { TransportOptionDto } from "@/lib/api/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -46,6 +48,32 @@ interface TransportOption {
   verifiedCount: number;
   isRecommended?: boolean;
   recommendReason?: string;
+}
+
+function mapDtoToTransportOption(d: TransportOptionDto): TransportOption {
+  const tags: { label: string; icon: any; color: string }[] = [];
+  if (d.isRecommended) tags.push({ label: "Recommended", icon: Sparkles, color: "text-primary bg-primary/10" });
+  if ((d.seatsLeft ?? 99) < 10) tags.push({ label: `${d.seatsLeft} left`, icon: Users, color: "text-[#B45309] bg-[#B45309]/10" });
+  if (!tags.length) tags.push({ label: "Available", icon: CheckCircle2, color: "text-[#1B6B4A] bg-[#1B6B4A]/8" });
+  return {
+    id: d.id,
+    operator: d.operator,
+    type: d.type,
+    mode: d.mode === "flight" ? "bus" : d.mode,
+    departure: d.departure,
+    arrival: d.arrival,
+    duration: d.duration,
+    price: d.price,
+    routeCode: d.routeCode ?? "-",
+    platform: d.platform ?? "-",
+    seat: "-",
+    amenities: d.amenities ?? [],
+    seatsLeft: d.seatsLeft ?? 99,
+    tags,
+    verifiedCount: d.verifiedCount ?? 0,
+    isRecommended: d.isRecommended,
+    recommendReason: d.recommendReason,
+  };
 }
 
 const mockTransportOptions: TransportOption[] = [
@@ -141,6 +169,40 @@ export function TransportBooking() {
   const fromStop = selectedLeg ? trip.stops.find(s => s.id === selectedLeg.fromStopId) : null;
   const toStop = selectedLeg ? trip.stops.find(s => s.id === selectedLeg.toStopId) : null;
 
+  const originId = fromStop?.id ?? "";
+  const originName = fromStop?.city ?? selectedLeg?.fromStopId ?? "";
+  const destinationId = toStop?.id ?? "";
+  const destinationName = toStop?.city ?? selectedLeg?.toStopId ?? "";
+  const travelDate = selectedLeg?.departureDate ?? new Date().toISOString().split("T")[0] ?? "";
+  const { options: apiOptions } = useTransportOptions(
+    originId,
+    originName,
+    destinationId,
+    destinationName,
+    travelDate,
+    []
+  );
+  const transportOptions = useMemo(
+    () => (apiOptions.length > 0 ? apiOptions.map(mapDtoToTransportOption) : mockTransportOptions),
+    [apiOptions]
+  );
+
+  // Only allow this page when a leg is selected; otherwise return to journey
+  useEffect(() => {
+    if (!selectedLeg) setSubPage(null);
+  }, [selectedLeg, setSubPage]);
+
+  if (!selectedLeg) {
+    return (
+      <div className="h-full flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-sm">Taking you back to journey…</p>
+        </div>
+      </div>
+    );
+  }
+
   const getModeIcon = (mode: string) => {
     switch (mode) {
       case "train": return Train;
@@ -226,7 +288,7 @@ export function TransportBooking() {
 
         {/* Section label */}
         <div className="px-5 py-2.5 flex items-center justify-between border-t border-dashed border-border">
-          <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">{mockTransportOptions.length} Options Available</p>
+          <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">{transportOptions.length} Options Available</p>
           <p className="text-[10px] text-muted-foreground">Sorted By Recommendation</p>
         </div>
       </div>
@@ -234,7 +296,7 @@ export function TransportBooking() {
       {/* Transport Options List */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
 
-        {mockTransportOptions.map((option) => {
+        {transportOptions.map((option) => {
           const ModeIcon = getModeIcon(option.mode);
           const isSelected = selectedOption === option.id;
           const isExpanded = expandedOption === option.id;

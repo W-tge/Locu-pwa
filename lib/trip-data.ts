@@ -737,6 +737,75 @@ export function getTransitLeg(
   );
 }
 
+/** Add days to an ISO date string (YYYY-MM-DD), returns YYYY-MM-DD */
+export function addDaysToDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr + "T12:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0];
+}
+
+/**
+ * Update one stop's dates and cascade to all downstream stops and transit legs.
+ * Keeps the provisional trip plan consistent: changing a stop shifts everything after it.
+ */
+export function applyStopDateChangeWithCascade(
+  trip: Trip,
+  stopId: string,
+  newStartDate: string,
+  newEndDate: string
+): Trip {
+  const idx = trip.stops.findIndex((s) => s.id === stopId);
+  if (idx < 0) {
+    return {
+      ...trip,
+      stops: trip.stops.map((s) =>
+        s.id === stopId ? { ...s, startDate: newStartDate, endDate: newEndDate, nights: 1 } : s
+      ),
+    };
+  }
+  const start = new Date(newStartDate + "T12:00:00");
+  const end = new Date(newEndDate + "T12:00:00");
+  const nights = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+  const oldEnd = new Date(trip.stops[idx].endDate + "T12:00:00");
+  const deltaDays = Math.round((end.getTime() - oldEnd.getTime()) / (1000 * 60 * 60 * 24));
+
+  const shiftedStopIds = new Set(
+    deltaDays !== 0 ? trip.stops.slice(idx).map((s) => s.id) : []
+  );
+
+  const stops = trip.stops.map((s, i) => {
+    if (s.id === stopId) {
+      return { ...s, startDate: newStartDate, endDate: newEndDate, nights };
+    }
+    if (deltaDays !== 0 && i > idx) {
+      return {
+        ...s,
+        startDate: addDaysToDate(s.startDate, deltaDays),
+        endDate: addDaysToDate(s.endDate, deltaDays),
+      };
+    }
+    return s;
+  });
+
+  const transitLegs = trip.transitLegs.map((leg) => {
+    if (!leg.departureDate || !shiftedStopIds.has(leg.fromStopId)) return leg;
+    return {
+      ...leg,
+      departureDate: addDaysToDate(leg.departureDate, deltaDays),
+    };
+  });
+
+  const firstStart = stops[0]?.startDate ?? trip.startDate;
+  const lastEnd = stops[stops.length - 1]?.endDate ?? trip.endDate;
+  return {
+    ...trip,
+    startDate: firstStart,
+    endDate: lastEnd,
+    stops,
+    transitLegs,
+  };
+}
+
 export function formatDateRange(start: string, end: string): string {
   const startDate = new Date(start);
   const endDate = new Date(end);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTrip } from "@/lib/trip-context";
 import { useLocuToast } from "@/components/locu-toast";
 import { cn } from "@/lib/utils";
@@ -75,12 +75,24 @@ export function TransitCheckout() {
   const fromStop = leg ? trip.stops.find((s) => s.id === leg.fromStopId) : null;
   const toStop = leg ? trip.stops.find((s) => s.id === leg.toStopId) : null;
 
+  // Keep flow valid: never show "no booking" error — redirect to the right step
+  useEffect(() => {
+    if (leg && !option) {
+      setSubPage("transportBooking");
+      return;
+    }
+    if (!leg) {
+      setPendingBooking(null);
+      setSubPage(null);
+    }
+  }, [leg, option, setSubPage, setPendingBooking]);
+
   if (!leg || !option) {
     return (
-      <div className="h-full flex items-center justify-center text-muted-foreground p-8 text-center">
-        <div>
-          <p className="font-semibold text-foreground mb-2">No transit booking in progress</p>
-          <Button onClick={() => setSubPage(null)} variant="outline" className="bg-transparent">Back to Journey</Button>
+      <div className="h-full flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-sm">Taking you back…</p>
         </div>
       </div>
     );

@@ -1,7 +1,10 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { demoTrip, type Trip, type Stop, type TransitLeg } from "./trip-data";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { demoTrip, applyStopDateChangeWithCascade, type Trip, type Stop, type TransitLeg } from "./trip-data";
+import { isApiConfigured } from "./api/config";
+import * as travellerInsightsApi from "./api/traveller-insights";
+import * as bookingsApi from "./api/bookings";
 
 // User preferences type
 export interface UserPreferences {
@@ -332,9 +335,52 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [userStats, setUserStats] = useState<UserStats>(defaultStats);
   const [savedHostels] = useState<SavedHostel[]>(defaultSavedHostels);
   const [savedPlaces] = useState<SavedPlace[]>(defaultSavedPlaces);
-  const [bookings] = useState<Booking[]>(defaultBookings);
-  const [alerts] = useState<Alert[]>(defaultAlerts);
-  const [communityQuests] = useState<CommunityQuest[]>(defaultQuests);
+  const [bookings, setBookings] = useState<Booking[]>(defaultBookings);
+  const [alerts, setAlerts] = useState<Alert[]>(defaultAlerts);
+  const [communityQuests, setCommunityQuests] = useState<CommunityQuest[]>(defaultQuests);
+
+  // Integrate with APIs when configured: traveller insights (alerts, quests) and bookings
+  useEffect(() => {
+    if (!isApiConfigured()) return;
+    travellerInsightsApi.listAlerts({}).then((list) => {
+      if (list.length)
+        setAlerts(
+          list.map((dto) => ({
+            id: dto.id,
+            type: dto.type as Alert["type"],
+            title: dto.title,
+            description: dto.description,
+            action: dto.action,
+          }))
+        );
+    }).catch(() => {});
+    travellerInsightsApi.listCommunityQuests({}).then((list) => {
+      if (list.length)
+        setCommunityQuests(
+          list.map((dto) => ({
+            id: dto.id,
+            question: dto.question,
+            description: dto.description,
+            points: dto.points,
+          }))
+        );
+    }).catch(() => {});
+    bookingsApi.listBookings({}).then((list) => {
+      if (list.length)
+        setBookings(
+          list.map((dto) => ({
+            id: dto.id,
+            type: dto.type,
+            name: dto.name,
+            location: dto.location,
+            date: dto.date,
+            price: dto.price,
+            status: (dto.status === "cancelled" ? "confirmed" : dto.status) as Booking["status"],
+            image: dto.image,
+          }))
+        );
+    }).catch(() => {});
+  }, []);
 
   const updateStopBooking = (stopId: string, status: "booked" | "not-booked") => {
     setTrip(prev => ({
@@ -355,15 +401,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   };
 
   const updateStopDates = (stopId: string, startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const nights = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
-    setTrip(prev => ({
-      ...prev,
-      stops: prev.stops.map(s =>
-        s.id === stopId ? { ...s, startDate, endDate, nights } : s
-      ),
-    }));
+    setTrip(prev => applyStopDateChangeWithCascade(prev, stopId, startDate, endDate));
   };
 
   const addKarmaPoints = (points: number) => {

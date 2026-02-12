@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { useTrip } from "@/lib/trip-context";
 import { useLocuToast } from "@/components/locu-toast";
+import { useHostelsForCity } from "@/lib/api/hooks";
+import type { HostelOptionDto } from "@/lib/api/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -130,6 +131,30 @@ const mockHostels: Hostel[] = [
   },
 ];
 
+function mapDtoToHostel(d: HostelOptionDto): Hostel {
+  return {
+    id: d.id,
+    name: d.name,
+    image: d.image,
+    rating: d.rating,
+    reviews: d.reviews,
+    price: d.price,
+    distance: d.distance,
+    amenities: d.amenities ?? [],
+    description: d.description ?? "",
+    isRecommended: d.isRecommended,
+    recommendReason: d.recommendReason,
+    tags: [],
+    availability: d.availability,
+    matchScore: d.matchScore,
+    tripFit: d.tripFit,
+    checkinNote: d.checkinNote,
+    podRooms: d.podRooms,
+    wifiSpeed: d.wifiSpeed,
+    securityNote: d.securityNote,
+  };
+}
+
 export function HostelDetails() {
   const { setSubPage, updateStopBooking, selectedStop, setPendingBooking } = useTrip();
   const { showToast } = useLocuToast();
@@ -139,6 +164,14 @@ export function HostelDetails() {
 
   const cityName = selectedStop?.city || "Medellin";
   const nights = selectedStop?.nights || 5;
+  const checkIn = selectedStop?.startDate ?? new Date().toISOString().split("T")[0];
+  const checkOut = selectedStop?.endDate ?? new Date(Date.now() + nights * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const fallback = useMemo(() => mockHostels as unknown as HostelOptionDto[], []);
+  const { hostels: apiHostels } = useHostelsForCity(cityName, checkIn, checkOut, fallback);
+  const hostels: Hostel[] = useMemo(
+    () => (apiHostels.length > 0 ? apiHostels.map(mapDtoToHostel) : mockHostels),
+    [apiHostels]
+  );
 
   const toggleSave = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -191,10 +224,10 @@ export function HostelDetails() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Smart info banner */}
         <div className="bg-muted/50 rounded-xl p-3 text-sm text-muted-foreground">
-          Showing {mockHostels.length} hostels for <span className="font-semibold text-foreground">{nights} nights</span> &middot; Sorted by your preferences
+          Showing {hostels.length} hostels for <span className="font-semibold text-foreground">{nights} nights</span> &middot; Sorted by your preferences
         </div>
 
-        {mockHostels.map((hostel) => {
+        {hostels.map((hostel) => {
           const isExpanded = expandedHostel === hostel.id;
 
           return (
