@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTrip } from "@/lib/trip-context";
+import type { ActivePersona } from "@/lib/trip-context";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,7 +19,14 @@ import {
   DollarSign,
   Bed,
   Globe,
+  User,
 } from "lucide-react";
+
+const PERSONA_OPTIONS: { value: ActivePersona; label: string; desc: string }[] = [
+  { value: "chloe", label: "Chloe – The Planner", desc: "Safety first, full itinerary, how-to guides" },
+  { value: "leo", label: "Leo – Spontaneous Explorer", desc: "Tonight's availability, book last minute" },
+  { value: "anya", label: "Anya – Digital Nomad", desc: "Wi‑Fi speeds, coworking, monthly rates" },
+];
 
 export function MyPreferences() {
   const { userPreferences, setUserPreferences, setSubPage } = useTrip();
@@ -70,6 +78,35 @@ export function MyPreferences() {
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Travel style / Persona */}
+        <div className="bg-card rounded-2xl border border-border p-4">
+          <div className="flex items-center gap-2 text-primary mb-4">
+            <User className="w-5 h-5" />
+            <h2 className="font-bold text-foreground">Travel style</h2>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">Persona</label>
+            <Select
+              value={localPrefs.activePersona}
+              onValueChange={(v) => setLocalPrefs(prev => ({ ...prev, activePersona: v as ActivePersona }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PERSONA_OPTIONS.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              {PERSONA_OPTIONS.find((p) => p.value === localPrefs.activePersona)?.desc}
+            </p>
+          </div>
+        </div>
+
         {/* Budget Preferences */}
         <div className="bg-card rounded-2xl border border-border p-4">
           <div className="flex items-center gap-2 text-primary mb-4">
